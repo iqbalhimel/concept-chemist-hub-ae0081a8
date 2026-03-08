@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, GripVertical, Pin } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -31,12 +31,14 @@ const SortableNoticeCard = ({
   onSave,
   onDelete,
   onTogglePin,
+  inputRef,
 }: {
   notice: Notice;
   onUpdateLocal: (id: string, updates: Record<string, any>) => void;
   onSave: (n: Notice) => void;
   onDelete: (id: string) => void;
   onTogglePin: (n: Notice) => void;
+  inputRef?: React.RefObject<HTMLInputElement>;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: notice.id });
@@ -64,6 +66,7 @@ const SortableNoticeCard = ({
           <GripVertical size={18} />
         </button>
         <Input
+          ref={inputRef}
           value={notice.title}
           onChange={(e) => onUpdateLocal(notice.id, { title: e.target.value })}
           placeholder="Title"
@@ -139,6 +142,11 @@ const SortableNoticeCard = ({
 const AdminNotices = () => {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [orderDirty, setOrderDirty] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
+  const [newNoticeId, setNewNoticeId] = useState<string | null>(null);
+  const newTitleRef = useRef<HTMLInputElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -148,6 +156,29 @@ const AdminNotices = () => {
     fetchNotices();
   }, []);
 
+  // Warn before leaving with unsaved order
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (orderDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [orderDirty]);
+
+  // Focus & scroll to new notice
+  useEffect(() => {
+    if (newNoticeId) {
+      topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(() => {
+        newTitleRef.current?.focus();
+        setNewNoticeId(null);
+      }, 100);
+    }
+  }, [newNoticeId]);
+
   const fetchNotices = async () => {
     const { data } = await supabase
       .from("notices")
@@ -155,25 +186,33 @@ const AdminNotices = () => {
       .order("sort_order", { ascending: true });
     setNotices(data || []);
     setLoading(false);
+    setOrderDirty(false);
   };
 
   const addNotice = async () => {
-    const maxOrder =
-      notices.length > 0
-        ? Math.max(...notices.map((n) => n.sort_order)) + 1
-        : 0;
-    const { error } = await supabase.from("notices").insert({
-      title: "New Notice",
-      description: "",
-      date: new Date().toISOString().split("T")[0],
-      sort_order: maxOrder,
-    });
-    if (error) {
-      toast.error(error.message);
+    // Insert with sort_order 0, shift others up
+    const { data, error } = await supabase
+      .from("notices")
+      .insert({
+        title: "New Notice",
+        description: "",
+        date: new Date().toISOString().split("T")[0],
+        sort_order: 0,
+      })
+      .select()
+      .single();
+    if (error || !data) {
+      toast.error(error?.message || "Failed to add notice");
       return;
     }
+    // Shift existing sort_orders
+    const updated = notices.map((n, i) => ({ ...n, sort_order: i + 1 }));
+    for (const u of updated) {
+      await supabase.from("notices").update({ sort_order: u.sort_order }).eq("id", u.id);
+    }
+    setNotices([data, ...updated]);
+    setNewNoticeId(data.id);
     toast.success("Notice added");
-    fetchNotices();
   };
 
   const updateNotice = async (n: Notice) => {
@@ -223,36 +262,58 @@ const AdminNotices = () => {
     );
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
     const oldIndex = notices.findIndex((n) => n.id === active.id);
     const newIndex = notices.findIndex((n) => n.id === over.id);
-    const reordered = arrayMove(notices, oldIndex, newIndex);
-    setNotices(reordered);
+    setNotices(arrayMove(notices, oldIndex, newIndex));
+    setOrderDirty(true);
+  };
 
-    const updates = reordered.map((n, i) => ({ id: n.id, sort_order: i }));
-    for (const u of updates) {
+  const saveOrder = useCallback(async () => {
+    setSavingOrder(true);
+    for (let i = 0; i < notices.length; i++) {
       await supabase
         .from("notices")
-        .update({ sort_order: u.sort_order })
-        .eq("id", u.id);
+        .update({ sort_order: i })
+        .eq("id", notices[i].id);
     }
-    toast.success("Order updated");
-  };
+    setOrderDirty(false);
+    setSavingOrder(false);
+    toast.success("Order saved");
+  }, [notices]);
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 relative">
+      <div ref={topRef} className="flex items-center justify-between sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2 -mt-2">
         <h2 className="font-display text-2xl font-bold text-foreground">
           Notices
         </h2>
-        <Button onClick={addNotice} size="sm">
-          <Plus size={14} className="mr-1" /> Add Notice
-        </Button>
+        <div className="flex items-center gap-2">
+          {orderDirty && (
+            <>
+              <span className="text-xs text-amber-500 flex items-center gap-1">
+                <AlertTriangle size={12} /> Order changed
+              </span>
+              <Button
+                size="sm"
+                onClick={saveOrder}
+                disabled={savingOrder}
+                className="animate-in fade-in"
+              >
+                <Save size={14} className="mr-1" />
+                {savingOrder ? "Saving…" : "Save Order"}
+              </Button>
+            </>
+          )}
+          <Button onClick={addNotice} size="sm">
+            <Plus size={14} className="mr-1" /> Add Notice
+          </Button>
+        </div>
       </div>
       <DndContext
         sensors={sensors}
@@ -271,6 +332,7 @@ const AdminNotices = () => {
               onSave={updateNotice}
               onDelete={deleteNotice}
               onTogglePin={togglePin}
+              inputRef={n.id === newNoticeId ? newTitleRef : undefined}
             />
           ))}
         </SortableContext>
