@@ -32,7 +32,11 @@ const StatsSection = () => {
     });
   }, []);
 
-  if (items.length === 0) return null;
+  if (!items || items.length === 0) {
+    console.log('StatsSection: No items to display');
+    return null;
+  }
+  console.log('StatsSection rendering with items:', items.length);
 
   return (
     <section id="student-success" className="section-padding section-gradient">
