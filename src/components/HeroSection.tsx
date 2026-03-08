@@ -32,7 +32,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10"
+              className="text-base md:text-xl text-muted-foreground max-w-2xl mb-6 md:mb-10"
             >
               Concept-based learning for SSC and HSC students with multimedia teaching.
               Making science easy, engaging, and accessible.
