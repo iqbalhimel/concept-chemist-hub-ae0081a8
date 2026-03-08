@@ -218,11 +218,24 @@ const AdminStudyMaterials = () => {
             <Progress value={(bulkProgress.current / bulkProgress.total) * 100} className="h-2 max-w-xs mx-auto" />
           </div>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-3">
             <FileUp size={24} className="mx-auto text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
               Drag & drop multiple PDFs here to bulk create study materials
             </p>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xs text-muted-foreground">Category:</span>
+              <Select value={bulkCategory} onValueChange={setBulkCategory}>
+                <SelectTrigger className="w-44 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Physics", "Chemistry", "Mathematics", "Biology", "Question Bank", "Model Tests", "Uncategorized"].map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <p className="text-xs text-muted-foreground/60">
               Each PDF becomes a new entry with auto-detected title, size & pages
             </p>
