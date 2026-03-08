@@ -144,7 +144,7 @@ const BlogPost = () => {
         </div>
       )}
 
-      <article className="pt-24 pb-16">
+      <article id="main-content" className="pt-24 pb-16">
         {post.featured_image && (
           <div className="w-full max-h-[400px] overflow-hidden mb-8">
             <img
