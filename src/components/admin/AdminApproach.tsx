@@ -125,19 +125,7 @@ const AdminApproach = () => {
           <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2 w-full max-w-full overflow-hidden">
               {paginated.map(item => (
-                <SortableRow key={item.id} id={item.id}>
-                  <div className="glass-card p-2.5 sm:p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <p className="font-medium text-foreground truncate text-sm sm:text-base">{item.title_en || "Untitled"}</p>
-                      <p className="text-xs sm:text-sm text-muted-foreground truncate">{item.description_en?.slice(0, 60)}...</p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-                      <Switch checked={item.is_active} onCheckedChange={v => toggleActive(item.id, v)} />
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEdit(item)}><Pencil size={14} /></Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></Button>
-                    </div>
-                  </div>
-                </SortableRow>
+                <SortableCard key={item.id} item={item} toggleActive={toggleActive} startEdit={startEdit} handleDelete={handleDelete} />
               ))}
             </div>
           </SortableContext>
