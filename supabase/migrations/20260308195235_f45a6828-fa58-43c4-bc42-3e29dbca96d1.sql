@@ -1,0 +1,1 @@
+ALTER TABLE public.blog_posts ADD COLUMN IF NOT EXISTS sort_order integer NOT NULL DEFAULT 0;
