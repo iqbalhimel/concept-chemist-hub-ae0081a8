@@ -14,7 +14,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 interface Approach { id: string; title_en: string; title_bn: string; description_en: string; description_bn: string; icon: string; sort_order: number; is_active: boolean; }
 const empty: Omit<Approach, "id"> = { title_en: "", title_bn: "", description_en: "", description_bn: "", icon: "Lightbulb", sort_order: 0, is_active: true };
-const iconOptions = ["Lightbulb", "Target", "MonitorPlay", "Heart", "BookOpen", "Users", "Star", "Award"];
+const iconOptions = ["Lightbulb", "Target", "MonitorPlay", "Heart", "BookOpen", "Users", "Star", "Award"] as const;
 
 const SortableCard = ({ item, toggleActive, startEdit, handleDelete }: {
   item: Approach; toggleActive: (id: string, v: boolean) => void; startEdit: (item: Approach) => void; handleDelete: (id: string) => void;
