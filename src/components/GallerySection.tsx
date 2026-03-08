@@ -22,7 +22,7 @@ const GallerySection = () => {
       const { data } = await supabase
         .from("gallery")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("sort_order", { ascending: true });
       if (data && data.length > 0) {
         setPhotos(data);
       }
