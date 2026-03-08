@@ -303,7 +303,7 @@ const AdminStudyMaterials = () => {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-2xl font-bold text-foreground">Study Materials</h2>
+        <h2 className="font-display text-2xl font-bold text-foreground">Study Materials <span className="text-base font-normal text-muted-foreground">({items.length})</span></h2>
         <div className="flex gap-2">
           <Button onClick={() => setShowCatManager(v => !v)} size="sm" variant="outline">
             <Tags size={14} className="mr-1" /> Categories
