@@ -126,12 +126,11 @@ const AdminGallery = () => {
     const newItems: GalleryItem[] = [];
     for (let idx = 0; idx < files.length; idx++) {
       const file = files[idx];
-      const { blob, wasCompressed } = await compressImage(file);
-      const ext = wasCompressed ? "jpg" : file.name.split(".").pop();
-      const path = `gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { blob, wasCompressed, extension, contentType } = await compressImage(file);
+      const path = `gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
 
       const { error: uploadError } = await supabase.storage.from("media").upload(path, blob, {
-        contentType: wasCompressed ? "image/jpeg" : file.type,
+        contentType,
       });
       if (uploadError) { toast.error("Upload failed: " + uploadError.message); continue; }
 

@@ -48,7 +48,12 @@ const GallerySection = () => {
           const spanClass = photo.span === "wide" ? "col-span-2" : photo.span === "tall" ? "row-span-2" : photo.span === "large" ? "col-span-2 row-span-2" : "";
           return (
             <div key={photo.id} className={`relative rounded-xl overflow-hidden cursor-pointer group ${spanClass}`} onClick={() => setLightbox(photo.image_url)}>
-              <img src={photo.image_url} alt={photo.alt || photo.label || "Gallery image"} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+              <OptimizedImage
+                src={photo.image_url}
+                alt={photo.alt || photo.label || "Gallery image"}
+                widths={[400, 800, 1200]}
+                className="absolute inset-0 w-full h-full"
+              />
               <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-background/60 backdrop-blur-sm">
                 <span className="text-sm font-medium text-foreground">{photo.label}</span>
               </div>
