@@ -9,6 +9,7 @@ import {
   ExternalLink, CalendarClock, Search,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
   DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent,
 } from "@dnd-kit/core";
