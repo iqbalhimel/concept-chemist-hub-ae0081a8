@@ -168,9 +168,10 @@ const AdminSiteSettings = () => {
     const uploadKey = `${sectionKey}_${fieldName}`;
     setUploading(uploadKey);
     try {
-      let fileToUpload = file;
+      let fileToUpload: File | Blob = file;
       if (file.type.startsWith("image/") && file.size > 200 * 1024) {
-        fileToUpload = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
+        const { blob } = await compressImage(file, 1200, 1200, 0.8);
+        fileToUpload = blob;
       }
       const ext = file.name.split(".").pop();
       const path = `settings/${sectionKey}-${fieldName}-${Date.now()}.${ext}`;
