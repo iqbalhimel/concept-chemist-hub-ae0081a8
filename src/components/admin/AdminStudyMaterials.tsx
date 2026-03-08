@@ -337,7 +337,51 @@ const AdminStudyMaterials = () => {
 
           <div className="grid gap-2 sm:grid-cols-2">
             <Input value={item.title} onChange={e => updateLocal(item.id, "title", e.target.value)} placeholder="Title" />
-            <Input value={item.category} onChange={e => updateLocal(item.id, "category", e.target.value)} placeholder="Category" />
+            <div className="space-y-1">
+              <Select
+                value={allCategories.includes(item.category) ? item.category : "__custom__"}
+                onValueChange={v => {
+                  if (v === "__custom__") {
+                    setShowCustomCatFor(item.id);
+                    setCustomCatInput(item.category);
+                  } else {
+                    updateLocal(item.id, "category", v);
+                    setShowCustomCatFor(null);
+                  }
+                }}
+              >
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allCategories.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                  <SelectItem value="__custom__">+ Custom category…</SelectItem>
+                </SelectContent>
+              </Select>
+              {showCustomCatFor === item.id && (
+                <form
+                  className="flex gap-1"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    if (customCatInput.trim()) {
+                      updateLocal(item.id, "category", customCatInput.trim());
+                      setShowCustomCatFor(null);
+                    }
+                  }}
+                >
+                  <Input
+                    className="h-8 text-xs"
+                    placeholder="New category"
+                    value={customCatInput}
+                    onChange={e => setCustomCatInput(e.target.value)}
+                    autoFocus
+                  />
+                  <Button type="submit" size="sm" variant="outline" className="h-8 text-xs">Add</Button>
+                </form>
+              )}
+            </div>
             <Input value={item.file_url || ""} onChange={e => updateLocal(item.id, "file_url", e.target.value)} placeholder="File URL (auto-filled on upload)" />
             <Input value={item.file_size || ""} onChange={e => updateLocal(item.id, "file_size", e.target.value)} placeholder="File Size (auto-detected)" />
             <Input type="number" value={item.pages || ""} onChange={e => updateLocal(item.id, "pages", e.target.value ? parseInt(e.target.value) : null)} placeholder="Pages (auto-detected)" />
