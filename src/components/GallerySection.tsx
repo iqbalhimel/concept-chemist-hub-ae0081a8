@@ -1,5 +1,5 @@
-import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { X, ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -12,21 +12,13 @@ type GalleryItem = {
   sort_order: number;
 };
 
-const fallbackPhotos: GalleryItem[] = [
-  { id: "f1", image_url: "", alt: "Interactive teaching session", label: "Interactive Learning", span: "col-span-2", sort_order: 0 },
-  { id: "f2", image_url: "", alt: "Science lab experiment", label: "Lab Experiments", span: "col-span-1", sort_order: 1 },
-  { id: "f3", image_url: "", alt: "Students in classroom", label: "Classroom Session", span: "col-span-1", sort_order: 2 },
-];
-
 const GallerySection = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [photos, setPhotos] = useState<GalleryItem[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchGallery = async () => {
       const { data } = await supabase
         .from("gallery")
         .select("*")
@@ -36,22 +28,16 @@ const GallerySection = () => {
       }
       setLoaded(true);
     };
-    fetch();
+    fetchGallery();
   }, []);
 
-  // Don't render section if loaded and no photos and no fallbacks to show
-  const displayPhotos = photos.length > 0 ? photos : [];
-  
+  const displayPhotos = photos.filter(p => p.image_url && p.image_url.trim() !== "");
+
   if (loaded && displayPhotos.length === 0) {
     return (
       <section id="gallery" className="section-padding">
-        <div className="container mx-auto" ref={ref}>
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
             <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
               Inside the Classroom
             </span>
@@ -61,7 +47,7 @@ const GallerySection = () => {
             <p className="text-muted-foreground max-w-xl mx-auto">
               Photos coming soon! Check back later for a glimpse into our interactive learning environment.
             </p>
-          </motion.div>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 max-w-5xl mx-auto auto-rows-[200px] md:auto-rows-[240px]">
             {[1, 2, 3].map((i) => (
               <div key={i} className={`${i === 1 ? "col-span-2" : ""} relative rounded-xl overflow-hidden bg-muted/30 border border-border/50 flex items-center justify-center`}>
@@ -76,22 +62,11 @@ const GallerySection = () => {
 
   if (!loaded) return null;
 
-  const getSpanClass = (span: string | null, index: number) => {
-    if (span && span !== "normal") return span;
-    const patterns = ["col-span-2", "col-span-1", "col-span-1 row-span-2", "col-span-1"];
-    return patterns[index % patterns.length];
-  };
-
   return (
     <>
       <section id="gallery" className="section-padding">
-        <div className="container mx-auto" ref={ref}>
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
             <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
               Inside the Classroom
             </span>
@@ -101,15 +76,12 @@ const GallerySection = () => {
             <p className="text-muted-foreground max-w-xl mx-auto">
               A glimpse into our interactive and engaging learning environment
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 max-w-5xl mx-auto">
-            {displayPhotos.map((photo, i) => (
-              <motion.div
+            {displayPhotos.map((photo) => (
+              <div
                 key={photo.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={inView ? { opacity: 1, scale: 1 } : {}}
-                transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
                 className="relative rounded-xl overflow-hidden cursor-pointer group"
                 style={{ minHeight: "250px" }}
                 onClick={() => setLightbox(photo.image_url)}
@@ -117,14 +89,13 @@ const GallerySection = () => {
                 <img
                   src={photo.image_url}
                   alt={photo.alt || photo.label || "Gallery image"}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   loading="lazy"
                 />
                 <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-background/60 backdrop-blur-sm">
                   <span className="text-sm font-medium text-foreground">{photo.label}</span>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
