@@ -11,9 +11,10 @@ interface PdfViewerProps {
   title?: string;
 }
 
-const SCALE_MIN = 0.25;
+const SCALE_MIN = 0.3;
 const SCALE_MAX = 3;
-const SCALE_FACTOR = 1.15;
+const SCALE_FACTOR = 1.2;
+const THUMB_WIDTH = 120;
 
 const PdfViewer = ({ url, title }: PdfViewerProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -22,7 +23,7 @@ const PdfViewer = ({ url, title }: PdfViewerProps) => {
   const [pdf, setPdf] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [scaleIndex, setScaleIndex] = useState(2);
+  const [scale, setScale] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [rendering, setRendering] = useState(false);
@@ -64,14 +65,8 @@ const PdfViewer = ({ url, title }: PdfViewerProps) => {
     pdf.getPage(1).then(page => {
       const viewport = page.getViewport({ scale: 1 });
       const containerWidth = containerRef.current?.clientWidth || 600;
-      const fitScale = (containerWidth - 32) / viewport.width;
-      let bestIdx = 0;
-      let bestDiff = Infinity;
-      SCALE_STEPS.forEach((s, i) => {
-        const diff = Math.abs(s - fitScale);
-        if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
-      });
-      setScaleIndex(bestIdx);
+      const fitScale = (containerWidth - 48) / viewport.width;
+      setScale(Math.min(Math.max(fitScale, SCALE_MIN), SCALE_MAX));
     });
   }, [pdf, isMobile]);
 
@@ -86,8 +81,8 @@ const PdfViewer = ({ url, title }: PdfViewerProps) => {
         if (cancelled) return;
         const page = await pdf.getPage(i);
         const vp = page.getViewport({ scale: 1 });
-        const scale = THUMB_WIDTH / vp.width;
-        const viewport = page.getViewport({ scale });
+        const s = THUMB_WIDTH / vp.width;
+        const viewport = page.getViewport({ scale: s });
         const canvas = document.createElement("canvas");
         canvas.width = viewport.width;
         canvas.height = viewport.height;
@@ -119,7 +114,6 @@ const PdfViewer = ({ url, title }: PdfViewerProps) => {
 
     try {
       const page = await pdf.getPage(currentPage);
-      const scale = SCALE_STEPS[scaleIndex];
       const dpr = window.devicePixelRatio || 1;
       const viewport = page.getViewport({ scale: scale * dpr });
 
@@ -140,7 +134,7 @@ const PdfViewer = ({ url, title }: PdfViewerProps) => {
     } finally {
       setRendering(false);
     }
-  }, [pdf, currentPage, scaleIndex]);
+  }, [pdf, currentPage, scale]);
 
   useEffect(() => { renderPage(); }, [renderPage]);
 
@@ -148,9 +142,8 @@ const PdfViewer = ({ url, title }: PdfViewerProps) => {
     setCurrentPage(p => Math.max(1, Math.min(totalPages, p + delta)));
   };
 
-  const zoom = (delta: number) => {
-    setScaleIndex(i => Math.max(0, Math.min(SCALE_STEPS.length - 1, i + delta)));
-  };
+  const zoomIn = () => setScale(s => Math.min(s * SCALE_FACTOR, SCALE_MAX));
+  const zoomOut = () => setScale(s => Math.max(s / SCALE_FACTOR, SCALE_MIN));
 
   if (loading) {
     return (
@@ -206,13 +199,13 @@ const PdfViewer = ({ url, title }: PdfViewerProps) => {
 
         <div className="w-px h-5 bg-border mx-1 hidden sm:block" />
 
-        <Button size="sm" variant="ghost" className="h-8 px-2" disabled={scaleIndex <= 0} onClick={() => zoom(-1)}>
+        <Button size="sm" variant="ghost" className="h-8 px-2" disabled={scale <= SCALE_MIN * 1.1} onClick={zoomOut}>
           <ZoomOut size={16} />
         </Button>
         <span className="text-xs text-muted-foreground min-w-[40px] text-center">
-          {Math.round(SCALE_STEPS[scaleIndex] * 100)}%
+          {Math.round(scale * 100)}%
         </span>
-        <Button size="sm" variant="ghost" className="h-8 px-2" disabled={scaleIndex >= SCALE_STEPS.length - 1} onClick={() => zoom(1)}>
+        <Button size="sm" variant="ghost" className="h-8 px-2" disabled={scale >= SCALE_MAX * 0.9} onClick={zoomIn}>
           <ZoomIn size={16} />
         </Button>
       </div>
@@ -259,11 +252,10 @@ const PdfViewer = ({ url, title }: PdfViewerProps) => {
 
         {/* Canvas area */}
         <div ref={containerRef} className="flex-1 overflow-auto bg-muted/20">
-          <div className="flex justify-center p-4 min-h-full">
+          <div className="flex items-start justify-center p-4 min-h-full">
             <canvas
               ref={canvasRef}
-              className="shadow-lg rounded-sm"
-              style={{ maxWidth: "100%" }}
+              className="shadow-lg rounded-sm block"
             />
           </div>
         </div>
