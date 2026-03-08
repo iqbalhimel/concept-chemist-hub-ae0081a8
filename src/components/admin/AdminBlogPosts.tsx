@@ -85,13 +85,13 @@ const SortableRow = ({
   const style = { transform: CSS.Transform.toString(transform), transition };
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-3 px-4 py-3 border border-border rounded-lg bg-card hover:bg-muted/40 transition-colors">
-      <button {...attributes} {...listeners} className="cursor-grab text-muted-foreground hover:text-foreground touch-none">
+    <div ref={setNodeRef} style={style} className="flex flex-wrap md:flex-nowrap items-start md:items-center gap-2 md:gap-3 px-3 py-3 md:px-4 border border-border rounded-lg bg-card hover:bg-muted/40 transition-colors">
+      <button {...attributes} {...listeners} className="cursor-grab text-muted-foreground hover:text-foreground touch-none shrink-0 mt-1 md:mt-0">
         <GripVertical size={16} />
       </button>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-foreground truncate">{post.title}</span>
           {!post.is_published && (
             <span className="text-[10px] font-semibold uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded shrink-0">Draft</span>
@@ -103,12 +103,14 @@ const SortableRow = ({
         <span className="text-xs text-muted-foreground">{post.category}</span>
       </div>
 
-      <Button size="sm" variant="ghost" onClick={() => onEdit(post.id)}>
-        <Pencil size={14} />
-      </Button>
-      <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => onDelete(post.id)}>
-        <Trash2 size={14} />
-      </Button>
+      <div className="flex items-center gap-1 w-full md:w-auto mt-1 md:mt-0">
+        <Button size="sm" variant="ghost" onClick={() => onEdit(post.id)}>
+          <Pencil size={14} className="mr-1 md:mr-0" /><span className="md:hidden text-xs">Edit</span>
+        </Button>
+        <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => onDelete(post.id)}>
+          <Trash2 size={14} className="mr-1 md:mr-0" /><span className="md:hidden text-xs">Delete</span>
+        </Button>
+      </div>
     </div>
   );
 };
