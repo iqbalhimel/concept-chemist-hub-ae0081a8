@@ -51,8 +51,18 @@ const AdminStudyMaterials = () => {
   const [bulkUploading, setBulkUploading] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [bulkCategory, setBulkCategory] = useState("Physics");
+  const [customCatInput, setCustomCatInput] = useState("");
+  const [showCustomCatFor, setShowCustomCatFor] = useState<string | null>(null); // "bulk" or item id
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
+
+  const PRESET_CATEGORIES = ["Physics", "Chemistry", "Mathematics", "Biology", "Question Bank", "Model Tests"];
+
+  const allCategories = useMemo(() => {
+    const fromItems = items.map(i => i.category).filter(Boolean);
+    const merged = new Set([...PRESET_CATEGORIES, ...fromItems]);
+    return Array.from(merged).sort();
+  }, [items]);
 
   useEffect(() => { fetchItems(); }, []);
 
