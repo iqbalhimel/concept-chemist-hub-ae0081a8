@@ -40,8 +40,8 @@ const ApproachSection = () => {
             return (
               <motion.div key={item.id} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }} className="glass-card-hover p-8">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4"><Icon size={24} className="text-primary" /></div>
-                <h3 className="font-display text-lg font-bold text-foreground mb-2">{lang === "bn" && item.title_bn ? item.title_bn : item.title_en}</h3>
-                <p className="text-muted-foreground leading-relaxed">{lang === "bn" && item.description_bn ? item.description_bn : item.description_en}</p>
+                <h3 className="font-display text-lg font-bold text-foreground mb-2">{(lang === "bn" && item.title_bn) ? item.title_bn : (item.title_en || "Untitled")}</h3>
+                <p className="text-muted-foreground leading-relaxed">{(lang === "bn" && item.description_bn) ? item.description_bn : (item.description_en || "")}</p>
               </motion.div>
             );
           })}

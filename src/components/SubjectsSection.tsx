@@ -53,10 +53,10 @@ const SubjectsSection = () => {
                 {subs.map((sub: any) => {
                   const Icon = iconMap[sub.icon] || BookOpen;
                   return (
-                    <div key={sub.id} className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Icon size={20} className="text-primary" /></div>
-                      <span className="text-foreground font-medium">{lang === "bn" && sub.subject_name_bn ? sub.subject_name_bn : sub.subject_name_en}</span>
-                    </div>
+                <div key={sub.id} className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Icon size={20} className="text-primary" /></div>
+                  <span className="text-foreground font-medium">{(lang === "bn" && sub.subject_name_bn) ? sub.subject_name_bn : (sub.subject_name_en || "Untitled")}</span>
+                </div>
                   );
                 })}
               </div>
