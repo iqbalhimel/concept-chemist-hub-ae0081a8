@@ -48,7 +48,7 @@ const BlogListing = () => {
         .from("blog_posts")
         .select("*", { count: "exact" })
         .eq("is_published", true)
-        .order("created_at", { ascending: false });
+        .order("sort_order", { ascending: true });
 
       if (filterCat !== "__all__") {
         query = query.eq("category", filterCat);

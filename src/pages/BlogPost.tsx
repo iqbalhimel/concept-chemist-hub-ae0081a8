@@ -64,7 +64,7 @@ const BlogPost = () => {
           .eq("is_published", true)
           .eq("category", p.category)
           .neq("id", p.id)
-          .order("created_at", { ascending: false })
+          .order("sort_order", { ascending: true })
           .limit(3);
         setRelated((rel as BlogPost[]) || []);
       }
