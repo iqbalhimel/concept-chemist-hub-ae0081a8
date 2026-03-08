@@ -6,6 +6,8 @@ import { setSeo } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BlogReactions from "@/components/BlogReactions";
+import BlogComments from "@/components/BlogComments";
 
 interface BlogPost {
   id: string;
