@@ -74,7 +74,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your content..
       handlePaste: (_view, event) => {
         const items = event.clipboardData?.items;
         if (items) {
-          for (const item of Array.from(items)) {
+          for (const item of Array.from(items) as DataTransferItem[]) {
             if (item.type.startsWith("image/")) {
               event.preventDefault();
               const file = item.getAsFile();
