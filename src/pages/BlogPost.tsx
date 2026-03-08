@@ -38,6 +38,13 @@ const BlogPost = () => {
       setLoading(false);
 
       if (p) {
+        setSeo({
+          title: `${p.title} – Iqbal Sir's Blog`,
+          description: p.excerpt || `Read "${p.title}" on Iqbal Sir's blog.`,
+          url: `https://iqbalsir.com/blog/${p.id}`,
+          image: p.featured_image || undefined,
+        });
+
         const { data: rel } = await supabase
           .from("blog_posts")
           .select("*")

@@ -28,6 +28,16 @@ const BlogListing = () => {
   const [filterCat, setFilterCat] = useState("__all__");
 
   useEffect(() => {
+    const cleanup = setSeo({
+      title: "Blog – Iqbal Sir | Science Education Articles & Tips",
+      description: "Browse all articles and tips on physics, chemistry, biology and SSC/HSC exam preparation by Iqbal Sir.",
+      url: "https://iqbalsir.com/blog",
+      type: "website",
+    });
+    return cleanup;
+  }, []);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, [page]);
 
