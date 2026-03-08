@@ -16,13 +16,41 @@ interface Approach { id: string; title_en: string; title_bn: string; description
 const empty: Omit<Approach, "id"> = { title_en: "", title_bn: "", description_en: "", description_bn: "", icon: "Lightbulb", sort_order: 0, is_active: true };
 const iconOptions = ["Lightbulb", "Target", "MonitorPlay", "Heart", "BookOpen", "Users", "Star", "Award"];
 
-const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+const SortableCard = ({ item, toggleActive, startEdit, handleDelete }: {
+  item: Approach; toggleActive: (id: string, v: boolean) => void; startEdit: (item: Approach) => void; handleDelete: (id: string) => void;
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
   return (
-    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="w-full max-w-full overflow-hidden">
-      <div className="flex items-start w-full max-w-full">
-        <button {...attributes} {...listeners} className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground touch-none pt-3.5 pl-1 pr-1"><GripVertical size={16} /></button>
-        <div className="flex-1 min-w-0">{children}</div>
+    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="w-full overflow-hidden">
+      <div className="glass-card p-2.5 sm:p-4">
+        {/* Desktop: single row */}
+        <div className="hidden sm:flex items-center gap-2.5">
+          <button {...attributes} {...listeners} className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground touch-none"><GripVertical size={16} /></button>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-foreground truncate">{item.title_en || "Untitled"}</p>
+            <p className="text-sm text-muted-foreground truncate">{item.description_en?.slice(0, 60)}...</p>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Switch checked={item.is_active} onCheckedChange={v => toggleActive(item.id, v)} />
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEdit(item)}><Pencil size={14} /></Button>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></Button>
+          </div>
+        </div>
+        {/* Mobile: stacked */}
+        <div className="flex sm:hidden flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <button {...attributes} {...listeners} className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground touch-none"><GripVertical size={16} /></button>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-foreground text-sm truncate">{item.title_en || "Untitled"}</p>
+              <p className="text-xs text-muted-foreground truncate">{item.description_en?.slice(0, 40)}...</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 self-end">
+            <Switch checked={item.is_active} onCheckedChange={v => toggleActive(item.id, v)} />
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEdit(item)}><Pencil size={14} /></Button>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></Button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -97,19 +125,7 @@ const AdminApproach = () => {
           <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2 w-full max-w-full overflow-hidden">
               {paginated.map(item => (
-                <SortableRow key={item.id} id={item.id}>
-                  <div className="glass-card p-2.5 sm:p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <p className="font-medium text-foreground truncate text-sm sm:text-base">{item.title_en || "Untitled"}</p>
-                      <p className="text-xs sm:text-sm text-muted-foreground truncate">{item.description_en?.slice(0, 60)}...</p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-                      <Switch checked={item.is_active} onCheckedChange={v => toggleActive(item.id, v)} />
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEdit(item)}><Pencil size={14} /></Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></Button>
-                    </div>
-                  </div>
-                </SortableRow>
+                <SortableCard key={item.id} item={item} toggleActive={toggleActive} startEdit={startEdit} handleDelete={handleDelete} />
               ))}
             </div>
           </SortableContext>
