@@ -68,6 +68,18 @@ const AdminStudyMaterials = () => {
     return Array.from(merged).sort();
   }, [items]);
 
+  const customCategories = useMemo(() => {
+    return allCategories.filter(c => !PRESET_CATEGORIES.includes(c));
+  }, [allCategories]);
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const item of items) {
+      counts[item.category] = (counts[item.category] || 0) + 1;
+    }
+    return counts;
+  }, [items]);
+
   useEffect(() => { fetchItems(); }, []);
 
   const fetchItems = async () => {
