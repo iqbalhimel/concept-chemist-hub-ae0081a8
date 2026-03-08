@@ -13,7 +13,10 @@ const SubjectsSection = () => {
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from("subjects").select("*").eq("is_active", true).order("sort_order").then(({ data }) => setItems(data || []));
+    supabase.from("subjects").select("*").eq("is_active", true).order("sort_order").then(({ data, error }) => {
+      console.log('SubjectsSection data:', data, 'error:', error);
+      setItems(data || []);
+    });
   }, []);
 
   const grouped = items.reduce<Record<string, any[]>>((acc, item) => {
@@ -23,7 +26,11 @@ const SubjectsSection = () => {
     return acc;
   }, {});
 
-  if (items.length === 0) return null;
+  if (!items || items.length === 0) {
+    console.log('SubjectsSection: No items to display');
+    return null;
+  }
+  console.log('SubjectsSection rendering with items:', items.length);
 
   const categoryLabels: Record<string, string> = lang === "bn"
     ? { "SSC": "SSC স্তর", "HSC": "HSC স্তর", "Class 6-10": "৬ষ্ঠ-১০ম শ্রেণি" }
@@ -46,10 +53,10 @@ const SubjectsSection = () => {
                 {subs.map((sub: any) => {
                   const Icon = iconMap[sub.icon] || BookOpen;
                   return (
-                    <div key={sub.id} className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Icon size={20} className="text-primary" /></div>
-                      <span className="text-foreground font-medium">{lang === "bn" && sub.subject_name_bn ? sub.subject_name_bn : sub.subject_name_en}</span>
-                    </div>
+                <div key={sub.id} className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Icon size={20} className="text-primary" /></div>
+                  <span className="text-foreground font-medium">{(lang === "bn" && sub.subject_name_bn) ? sub.subject_name_bn : (sub.subject_name_en || "Untitled")}</span>
+                </div>
                   );
                 })}
               </div>

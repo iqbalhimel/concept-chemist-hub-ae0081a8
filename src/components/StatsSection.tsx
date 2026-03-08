@@ -26,10 +26,17 @@ const StatsSection = () => {
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from("achievements").select("*").eq("is_active", true).order("sort_order").then(({ data }) => setItems(data || []));
+    supabase.from("achievements").select("*").eq("is_active", true).order("sort_order").then(({ data, error }) => {
+      console.log('StatsSection data:', data, 'error:', error);
+      setItems(data || []);
+    });
   }, []);
 
-  if (items.length === 0) return null;
+  if (!items || items.length === 0) {
+    console.log('StatsSection: No items to display');
+    return null;
+  }
+  console.log('StatsSection rendering with items:', items.length);
 
   return (
     <section id="student-success" className="section-padding section-gradient">
@@ -50,7 +57,7 @@ const StatsSection = () => {
               <motion.div key={stat.id} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.1 }} className="glass-card-hover p-6 md:p-8 text-center flex flex-col items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-1"><Icon size={24} className="text-primary" /></div>
                 <AnimatedCounter target={num} suffix={suffix} inView={inView} />
-                <p className="text-muted-foreground text-sm font-medium">{lang === "bn" && stat.title_bn ? stat.title_bn : stat.title_en}</p>
+                <p className="text-muted-foreground text-sm font-medium">{(lang === "bn" && stat.title_bn) ? stat.title_bn : (stat.title_en || "Achievement")}</p>
               </motion.div>
             );
           })}
