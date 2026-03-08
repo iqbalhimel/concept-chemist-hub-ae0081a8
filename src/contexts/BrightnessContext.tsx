@@ -25,6 +25,8 @@ export const BrightnessProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     try { localStorage.setItem("brightness-mode", mode); } catch {}
+    // Set data attribute so CSS can respond to brightness mode
+    document.documentElement.setAttribute("data-brightness", mode);
   }, [mode]);
 
   const toggle = useCallback(() => {
