@@ -5,14 +5,13 @@ import galleryProjector from "@/assets/gallery-projector.jpg";
 import galleryLab from "@/assets/gallery-lab.jpg";
 import galleryGroup from "@/assets/gallery-group.jpg";
 import galleryDigital from "@/assets/gallery-digital.jpg";
-import gallerySuccess from "@/assets/gallery-success.jpg";
+
 
 const photos = [
-  { src: galleryProjector, alt: "Projector-based science class", label: "Multimedia Class", span: "col-span-2" },
+  { src: galleryProjector, alt: "Classroom teaching session", label: "Teaching Session", span: "col-span-2" },
   { src: galleryLab, alt: "Students in science lab", label: "Lab Activity", span: "col-span-1" },
-  { src: galleryGroup, alt: "Group study session", label: "Group Study", span: "col-span-1 row-span-2" },
-  { src: galleryDigital, alt: "Digital teaching tools", label: "Digital Teaching", span: "col-span-1" },
-  { src: gallerySuccess, alt: "Student achievements", label: "Student Success", span: "col-span-1" },
+  { src: galleryGroup, alt: "Student celebration with teacher", label: "Student Celebration", span: "col-span-1 row-span-2" },
+  { src: galleryDigital, alt: "Class party with students", label: "Class Party", span: "col-span-1" },
 ];
 
 const GallerySection = () => {
