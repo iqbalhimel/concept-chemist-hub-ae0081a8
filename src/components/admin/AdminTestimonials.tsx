@@ -155,7 +155,7 @@ const AdminTestimonials = () => {
     toast.success("Order saved");
   };
 
-  const paginated = paginateItems(items, page, perPage);
+  const paginated = paginateItems(items, page, pageSize);
 
   return (
     <div className="space-y-6">
