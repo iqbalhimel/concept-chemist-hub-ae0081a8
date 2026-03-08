@@ -23,10 +23,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
-        <ThemeLoader />
-        <BrowserRouter>
-          <Routes>
+      <BrightnessProvider>
+        <AuthProvider>
+          <ThemeLoader />
+          <BrowserRouter>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
