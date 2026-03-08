@@ -115,7 +115,7 @@ const AdminEducation = () => {
     toast.success("Order saved!");
   };
 
-  const paginated = paginateItems(items, page, perPage);
+  const paginated = paginateItems(items, page, pageSize);
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
