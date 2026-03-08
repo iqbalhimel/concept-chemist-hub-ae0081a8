@@ -201,6 +201,12 @@ const AdminBlogPosts = () => {
             <span className="text-xs text-muted-foreground truncate">{post.title}</span>
             {!post.is_published && <span className="text-[10px] font-semibold uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded">Draft</span>}
           </div>
+          {/* Featured Image */}
+          <FeaturedImageField
+            imageUrl={(post as any).featured_image || ""}
+            onUpload={(url) => updateLocal(post.id, "featured_image", url)}
+            onClear={() => updateLocal(post.id, "featured_image", "")}
+          />
           <div className="grid gap-2 sm:grid-cols-2">
             <Input value={post.title} onChange={e => updateLocal(post.id, "title", e.target.value)} placeholder="Title" />
             <Input value={post.category} onChange={e => updateLocal(post.id, "category", e.target.value)} placeholder="Category" />
@@ -214,7 +220,7 @@ const AdminBlogPosts = () => {
               Published
             </label>
             <div className="flex-1" />
-            <Button size="sm" onClick={() => update(post.id, { title: post.title, category: post.category, excerpt: post.excerpt, content: post.content, read_time: post.read_time, is_published: post.is_published })}><Save size={14} className="mr-1" /> Save</Button>
+            <Button size="sm" onClick={() => update(post.id, { title: post.title, category: post.category, excerpt: post.excerpt, content: post.content, read_time: post.read_time, is_published: post.is_published, featured_image: (post as any).featured_image || null } as any)}><Save size={14} className="mr-1" /> Save</Button>
             <Button size="sm" variant="destructive" onClick={() => remove(post.id)}><Trash2 size={14} /></Button>
           </div>
         </div>
