@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags, GripVertical } from "lucide-react";
+import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags, GripVertical, Search, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Tables } from "@/integrations/supabase/types";
 import * as pdfjsLib from "pdfjs-dist";
@@ -82,6 +82,8 @@ const AdminStudyMaterials = () => {
   const [renamingCat, setRenamingCat] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [catActionLoading, setCatActionLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("__all__");
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -128,6 +130,22 @@ const AdminStudyMaterials = () => {
     }
     return counts;
   }, [items]);
+
+  const filteredItems = useMemo(() => {
+    let result = items;
+    if (filterCategory !== "__all__") {
+      result = result.filter(i => i.category === filterCategory);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(i =>
+        i.title.toLowerCase().includes(q) ||
+        i.category.toLowerCase().includes(q) ||
+        (i.file_url || "").toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [items, searchQuery, filterCategory]);
 
   useEffect(() => { fetchItems(); }, []);
 
@@ -285,7 +303,7 @@ const AdminStudyMaterials = () => {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-2xl font-bold text-foreground">Study Materials</h2>
+        <h2 className="font-display text-2xl font-bold text-foreground">Study Materials <span className="text-base font-normal text-muted-foreground">({items.length})</span></h2>
         <div className="flex gap-2">
           <Button onClick={() => setShowCatManager(v => !v)} size="sm" variant="outline">
             <Tags size={14} className="mr-1" /> Categories
@@ -297,7 +315,42 @@ const AdminStudyMaterials = () => {
         </div>
       </div>
 
-      {/* Category Manager */}
+      {/* Search & Filter */}
+      <div className="flex gap-2 items-center">
+        <div className="relative flex-1">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            className="pl-9 h-9"
+            placeholder="Search by title, category, or URL..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setSearchQuery("")}>
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger className="w-44 h-9">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All Categories</SelectItem>
+            {allCategories.map(cat => (
+              <SelectItem key={cat} value={cat}>{cat} ({categoryCounts[cat] || 0})</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {(searchQuery || filterCategory !== "__all__") && (
+        <p className="text-xs text-muted-foreground">
+          Showing {filteredItems.length} of {items.length} items
+          {searchQuery && <> matching "{searchQuery}"</>}
+          {filterCategory !== "__all__" && <> in {filterCategory}</>}
+        </p>
+      )}
+
       {showCatManager && (
         <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-3">
           <h3 className="text-sm font-semibold text-foreground">Manage Categories</h3>
@@ -460,8 +513,8 @@ const AdminStudyMaterials = () => {
 
       {/* Individual items with drag-and-drop reorder */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-      {items.map(item => (
+        <SortableContext items={filteredItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
+      {filteredItems.map(item => (
         <SortableItem key={item.id} id={item.id}>
         <div className="glass-card p-4 space-y-3">
           <div
