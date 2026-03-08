@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags, GripVertical, Search, X, Check, Eye, EyeOff, AlertTriangle, CheckSquare, Square } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import type { Tables } from "@/integrations/supabase/types";
 import * as pdfjsLib from "pdfjs-dist";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
