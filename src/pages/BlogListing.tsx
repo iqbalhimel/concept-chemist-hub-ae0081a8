@@ -17,6 +17,7 @@ interface BlogPost {
   read_time: string | null;
   featured_image?: string | null;
   created_at: string;
+  slug?: string | null;
 }
 
 const POSTS_PER_PAGE = 9;
