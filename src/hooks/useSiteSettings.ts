@@ -10,17 +10,15 @@ const fetchAllSettings = (): Promise<SiteSettings> => {
   if (cachedSettings) return Promise.resolve(cachedSettings);
   if (fetchPromise) return fetchPromise;
 
-  fetchPromise = supabase
-    .from("site_settings")
-    .select("key, value")
-    .then(({ data }) => {
-      const mapped: SiteSettings = {};
-      data?.forEach((row) => {
-        mapped[row.key] = row.value as Record<string, string>;
-      });
-      cachedSettings = mapped;
-      return mapped;
+  fetchPromise = (async () => {
+    const { data } = await supabase.from("site_settings").select("key, value");
+    const mapped: SiteSettings = {};
+    data?.forEach((row) => {
+      mapped[row.key] = row.value as Record<string, string>;
     });
+    cachedSettings = mapped;
+    return mapped;
+  })();
 
   return fetchPromise;
 };
