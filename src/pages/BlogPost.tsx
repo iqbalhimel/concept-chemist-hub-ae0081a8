@@ -24,6 +24,7 @@ const BlogPost = () => {
   const [related, setRelated] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   const handleScroll = useCallback(() => {
     const scrollTop = window.scrollY;
