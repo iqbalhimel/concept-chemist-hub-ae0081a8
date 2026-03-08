@@ -145,7 +145,7 @@ const AdminStudyMaterials = () => {
 
         const { error } = await supabase.from("study_materials").insert({
           title: cleanName,
-          category: "Uncategorized",
+          category: bulkCategory,
           file_url: fileUrl,
           file_size: fileSize,
           pages: pageCount,
