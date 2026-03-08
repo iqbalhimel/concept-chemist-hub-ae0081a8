@@ -34,6 +34,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "notices", label: "Notices", icon: Bell },
   { id: "study-materials", label: "Study Materials", icon: Download },
   { id: "blog", label: "Blog Posts", icon: FileText },
+  { id: "comments", label: "Comments", icon: MessageSquare },
   { id: "gallery", label: "Gallery", icon: Image },
   { id: "faq", label: "FAQ", icon: HelpCircle },
   { id: "media", label: "Media Library", icon: Image },
