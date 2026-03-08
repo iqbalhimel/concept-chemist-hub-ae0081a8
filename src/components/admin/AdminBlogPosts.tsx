@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, CheckSquare, Square, Eye, EyeOff, Search, X, Upload, Loader2, ImagePlus, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Save, CheckSquare, Square, Eye, EyeOff, Search, X, Upload, Loader2, ImagePlus, ExternalLink, CalendarClock } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Post = Tables<"blog_posts">;
@@ -270,14 +270,40 @@ const AdminBlogPosts = () => {
           <Input value={post.excerpt || ""} onChange={e => updateLocal(post.id, "excerpt", e.target.value)} placeholder="Excerpt" />
           <RichTextEditor content={post.content || ""} onChange={(html) => { updateLocal(post.id, "content", html); updateLocal(post.id, "read_time", calcReadTime(html)); }} placeholder="Write your blog post content..." />
           <p className="text-xs text-muted-foreground">Estimated read time: <span className="font-medium text-foreground">{post.read_time || calcReadTime(post.content || "")}</span></p>
+          {/* Scheduling */}
+          {!post.is_published && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <CalendarClock size={14} className="text-muted-foreground" />
+              <label className="text-xs text-muted-foreground">Schedule publish:</label>
+              <Input
+                type="datetime-local"
+                className="w-auto h-8 text-xs"
+                value={(post as any).scheduled_at ? new Date(new Date((post as any).scheduled_at).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ""}
+                onChange={e => {
+                  const val = e.target.value;
+                  updateLocal(post.id, "scheduled_at", val ? new Date(val).toISOString() : "");
+                }}
+              />
+              {(post as any).scheduled_at && (
+                <button onClick={() => updateLocal(post.id, "scheduled_at", "")} className="text-xs text-muted-foreground hover:text-destructive">
+                  <X size={12} /> Clear
+                </button>
+              )}
+              {(post as any).scheduled_at && (
+                <span className="text-xs text-primary font-medium">
+                  Will auto-publish {new Date((post as any).scheduled_at).toLocaleString()}
+                </span>
+              )}
+            </div>
+          )}
           <div className="flex gap-2 items-center">
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <input type="checkbox" checked={post.is_published} onChange={e => updateLocal(post.id, "is_published", e.target.checked)} />
+              <input type="checkbox" checked={post.is_published} onChange={e => { updateLocal(post.id, "is_published", e.target.checked); if (e.target.checked) updateLocal(post.id, "scheduled_at", ""); }} />
               Published
             </label>
             <div className="flex-1" />
             <Button size="sm" variant="outline" onClick={() => window.open(`/blog/${post.id}`, "_blank")}><ExternalLink size={14} className="mr-1" /> Preview</Button>
-            <Button size="sm" onClick={() => update(post.id, { title: post.title, category: post.category, excerpt: post.excerpt, content: post.content, read_time: post.read_time, is_published: post.is_published, featured_image: (post as any).featured_image || null } as any)}><Save size={14} className="mr-1" /> Save</Button>
+            <Button size="sm" onClick={() => update(post.id, { title: post.title, category: post.category, excerpt: post.excerpt, content: post.content, read_time: post.read_time, is_published: post.is_published, featured_image: (post as any).featured_image || null, scheduled_at: (post as any).scheduled_at || null } as any)}><Save size={14} className="mr-1" /> Save</Button>
             <Button size="sm" variant="destructive" onClick={() => remove(post.id)}><Trash2 size={14} /></Button>
           </div>
         </div>
