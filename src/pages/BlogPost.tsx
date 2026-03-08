@@ -25,6 +25,7 @@ const BlogPost = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cleanup: (() => void) | undefined;
     const fetchPost = async () => {
       if (!id) return;
       const { data } = await supabase
@@ -38,7 +39,7 @@ const BlogPost = () => {
       setLoading(false);
 
       if (p) {
-        setSeo({
+        cleanup = setSeo({
           title: `${p.title} – Iqbal Sir's Blog`,
           description: p.excerpt || `Read "${p.title}" on Iqbal Sir's blog.`,
           url: `https://iqbalsir.com/blog/${p.id}`,
@@ -58,6 +59,7 @@ const BlogPost = () => {
     };
     fetchPost();
     window.scrollTo(0, 0);
+    return () => cleanup?.();
   }, [id]);
 
   if (loading) {
