@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,8 +51,18 @@ const AdminStudyMaterials = () => {
   const [bulkUploading, setBulkUploading] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [bulkCategory, setBulkCategory] = useState("Physics");
+  const [customCatInput, setCustomCatInput] = useState("");
+  const [showCustomCatFor, setShowCustomCatFor] = useState<string | null>(null); // "bulk" or item id
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
+
+  const PRESET_CATEGORIES = ["Physics", "Chemistry", "Mathematics", "Biology", "Question Bank", "Model Tests"];
+
+  const allCategories = useMemo(() => {
+    const fromItems = items.map(i => i.category).filter(Boolean);
+    const merged = new Set([...PRESET_CATEGORIES, ...fromItems]);
+    return Array.from(merged).sort();
+  }, [items]);
 
   useEffect(() => { fetchItems(); }, []);
 
@@ -225,16 +235,49 @@ const AdminStudyMaterials = () => {
             </p>
             <div className="flex items-center justify-center gap-2">
               <span className="text-xs text-muted-foreground">Category:</span>
-              <Select value={bulkCategory} onValueChange={setBulkCategory}>
+              <Select
+                value={bulkCategory}
+                onValueChange={v => {
+                  if (v === "__custom__") {
+                    setShowCustomCatFor("bulk");
+                    setCustomCatInput("");
+                  } else {
+                    setBulkCategory(v);
+                    setShowCustomCatFor(null);
+                  }
+                }}
+              >
                 <SelectTrigger className="w-44 h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {["Physics", "Chemistry", "Mathematics", "Biology", "Question Bank", "Model Tests", "Uncategorized"].map(cat => (
+                  {allCategories.map(cat => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
+                  <SelectItem value="__custom__">+ Custom category…</SelectItem>
                 </SelectContent>
               </Select>
+              {showCustomCatFor === "bulk" && (
+                <form
+                  className="flex gap-1"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    if (customCatInput.trim()) {
+                      setBulkCategory(customCatInput.trim());
+                      setShowCustomCatFor(null);
+                    }
+                  }}
+                >
+                  <Input
+                    className="h-8 w-32 text-xs"
+                    placeholder="New category"
+                    value={customCatInput}
+                    onChange={e => setCustomCatInput(e.target.value)}
+                    autoFocus
+                  />
+                  <Button type="submit" size="sm" variant="outline" className="h-8 text-xs">Add</Button>
+                </form>
+              )}
             </div>
             <p className="text-xs text-muted-foreground/60">
               Each PDF becomes a new entry with auto-detected title, size & pages
@@ -294,7 +337,51 @@ const AdminStudyMaterials = () => {
 
           <div className="grid gap-2 sm:grid-cols-2">
             <Input value={item.title} onChange={e => updateLocal(item.id, "title", e.target.value)} placeholder="Title" />
-            <Input value={item.category} onChange={e => updateLocal(item.id, "category", e.target.value)} placeholder="Category" />
+            <div className="space-y-1">
+              <Select
+                value={allCategories.includes(item.category) ? item.category : "__custom__"}
+                onValueChange={v => {
+                  if (v === "__custom__") {
+                    setShowCustomCatFor(item.id);
+                    setCustomCatInput(item.category);
+                  } else {
+                    updateLocal(item.id, "category", v);
+                    setShowCustomCatFor(null);
+                  }
+                }}
+              >
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allCategories.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                  <SelectItem value="__custom__">+ Custom category…</SelectItem>
+                </SelectContent>
+              </Select>
+              {showCustomCatFor === item.id && (
+                <form
+                  className="flex gap-1"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    if (customCatInput.trim()) {
+                      updateLocal(item.id, "category", customCatInput.trim());
+                      setShowCustomCatFor(null);
+                    }
+                  }}
+                >
+                  <Input
+                    className="h-8 text-xs"
+                    placeholder="New category"
+                    value={customCatInput}
+                    onChange={e => setCustomCatInput(e.target.value)}
+                    autoFocus
+                  />
+                  <Button type="submit" size="sm" variant="outline" className="h-8 text-xs">Add</Button>
+                </form>
+              )}
+            </div>
             <Input value={item.file_url || ""} onChange={e => updateLocal(item.id, "file_url", e.target.value)} placeholder="File URL (auto-filled on upload)" />
             <Input value={item.file_size || ""} onChange={e => updateLocal(item.id, "file_size", e.target.value)} placeholder="File Size (auto-detected)" />
             <Input type="number" value={item.pages || ""} onChange={e => updateLocal(item.id, "pages", e.target.value ? parseInt(e.target.value) : null)} placeholder="Pages (auto-detected)" />
