@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, MessageCircle } from "lucide-react";
 
 const navLinks = [
   { label: "Home", href: "#home" },
