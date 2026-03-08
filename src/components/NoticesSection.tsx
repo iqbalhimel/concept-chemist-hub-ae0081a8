@@ -1,25 +1,33 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect, useMemo } from "react";
-import { Bell, Calendar, Copy, Pin } from "lucide-react";
+import { Bell, Calendar, Copy, Pin, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Link } from "react-router-dom";
 
-interface Notice { id: string; title: string; date: string; description: string | null; sort_order?: number; is_pinned?: boolean; expires_at?: string | null; }
+interface Notice { id: string; title: string; date: string; description: string | null; sort_order?: number; is_pinned?: boolean; expires_at?: string | null; created_at: string; }
+
+const HOMEPAGE_LIMIT = 5;
 
 const NoticesSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const [notices, setNotices] = useState<Notice[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [selected, setSelected] = useState<Notice | null>(null);
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   useEffect(() => {
     const fetchNotices = async () => {
-      const { data } = await supabase.from("notices").select("*").eq("is_active", true).order("sort_order", { ascending: true });
+      const [{ data }, { count }] = await Promise.all([
+        supabase.from("notices").select("*").eq("is_active", true).order("created_at", { ascending: false }).limit(HOMEPAGE_LIMIT),
+        supabase.from("notices").select("*", { count: "exact", head: true }).eq("is_active", true),
+      ]);
       if (data && data.length > 0) setNotices(data as Notice[]);
+      setTotalCount(count || 0);
     };
     fetchNotices();
   }, []);
@@ -59,6 +67,17 @@ const NoticesSection = () => {
               </motion.div>
             ))}
           </div>
+          {totalCount > HOMEPAGE_LIMIT && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.6 }} className="text-center mt-10">
+              <Link
+                to={`/${lang}/notices`}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all glow-primary"
+              >
+                {t.notices.see_all}
+                <ArrowRight size={16} />
+              </Link>
+            </motion.div>
+          )}
         </div>
       </section>
       <Dialog open={!!selected} onOpenChange={open => !open && setSelected(null)}>
