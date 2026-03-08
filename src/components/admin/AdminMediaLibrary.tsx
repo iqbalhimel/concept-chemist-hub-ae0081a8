@@ -43,8 +43,8 @@ const AdminMediaLibrary = () => {
       await supabase.from("media_library").insert({
         name: file.name,
         file_url: urlData.publicUrl,
-        file_type: file.type,
-        file_size: file.size,
+        file_type: wasCompressed ? "image/jpeg" : file.type,
+        file_size: blob.size,
       });
     }
 
