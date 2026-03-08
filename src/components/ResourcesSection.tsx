@@ -168,22 +168,28 @@ const ResourcesSection = () => {
 
       {/* PDF Preview Modal */}
       <Dialog open={!!previewUrl} onOpenChange={open => { if (!open) setPreviewUrl(null); }}>
-        <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 gap-0 overflow-hidden [&>button:last-child]:hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background">
-            <h3 className="font-medium text-sm text-foreground truncate mr-4">{previewTitle}</h3>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {previewUrl && (
-                <a
-                  href={previewUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-all"
-                >
-                  <Download size={12} /> Download
-                </a>
-              )}
-            </div>
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-background flex-shrink-0">
+            <h3 className="font-medium text-sm text-foreground truncate flex-1 min-w-0">{previewTitle}</h3>
+            {previewUrl && (
+              <a
+                href={previewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-all flex-shrink-0"
+              >
+                <Download size={12} /> <span className="hidden sm:inline">Download</span>
+              </a>
+            )}
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 p-0 flex-shrink-0"
+              onClick={() => setPreviewUrl(null)}
+            >
+              <X size={16} />
+            </Button>
           </div>
 
           {/* PDF Viewer */}
