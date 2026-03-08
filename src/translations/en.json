@@ -119,7 +119,13 @@
     "download": "Download",
     "coming_soon": "Coming soon",
     "empty": "Study materials are being prepared. Check back soon!",
-    "pages": "pages"
+    "pages": "pages",
+    "see_all": "See All Materials",
+    "all_categories": "All",
+    "filter_category": "Category",
+    "showing": "Showing",
+    "of": "of",
+    "materials": "materials"
   },
   "blog": {
     "title_1": "Educational",
