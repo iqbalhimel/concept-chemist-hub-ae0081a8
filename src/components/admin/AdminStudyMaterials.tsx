@@ -52,7 +52,11 @@ const AdminStudyMaterials = () => {
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [bulkCategory, setBulkCategory] = useState("Physics");
   const [customCatInput, setCustomCatInput] = useState("");
-  const [showCustomCatFor, setShowCustomCatFor] = useState<string | null>(null); // "bulk" or item id
+  const [showCustomCatFor, setShowCustomCatFor] = useState<string | null>(null);
+  const [showCatManager, setShowCatManager] = useState(false);
+  const [renamingCat, setRenamingCat] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [catActionLoading, setCatActionLoading] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
 
