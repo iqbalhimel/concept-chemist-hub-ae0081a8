@@ -1,0 +1,1 @@
+ALTER TABLE public.themes ADD COLUMN IF NOT EXISTS colors_light jsonb DEFAULT '{}'::jsonb;

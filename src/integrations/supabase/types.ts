@@ -349,6 +349,7 @@ export type Database = {
       themes: {
         Row: {
           colors: Json
+          colors_light: Json | null
           created_at: string
           id: string
           is_active: boolean
@@ -357,6 +358,7 @@ export type Database = {
         }
         Insert: {
           colors: Json
+          colors_light?: Json | null
           created_at?: string
           id?: string
           is_active?: boolean
@@ -365,6 +367,7 @@ export type Database = {
         }
         Update: {
           colors?: Json
+          colors_light?: Json | null
           created_at?: string
           id?: string
           is_active?: boolean
