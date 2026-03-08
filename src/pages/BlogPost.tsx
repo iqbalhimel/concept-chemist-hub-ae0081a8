@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Clock, User, Calendar } from "lucide-react";
+import { ArrowLeft, Clock, User, Calendar, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -20,6 +20,7 @@ interface BlogPost {
 const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<BlogPost | null>(null);
+  const [related, setRelated] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,10 +32,24 @@ const BlogPost = () => {
         .eq("id", id)
         .eq("is_published", true)
         .single();
-      setPost(data as BlogPost | null);
+      const p = data as BlogPost | null;
+      setPost(p);
       setLoading(false);
+
+      if (p) {
+        const { data: rel } = await supabase
+          .from("blog_posts")
+          .select("*")
+          .eq("is_published", true)
+          .eq("category", p.category)
+          .neq("id", p.id)
+          .order("created_at", { ascending: false })
+          .limit(3);
+        setRelated((rel as BlogPost[]) || []);
+      }
     };
     fetchPost();
+    window.scrollTo(0, 0);
   }, [id]);
 
   if (loading) {
@@ -124,6 +139,52 @@ const BlogPost = () => {
           />
         </div>
       </article>
+
+      {/* Related Posts */}
+      {related.length > 0 && (
+        <section className="pb-16">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <h2 className="font-display text-2xl font-bold text-foreground mb-8">
+              More in <span className="text-primary">{post.category}</span>
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {related.map((r) => (
+                <Link
+                  key={r.id}
+                  to={`/blog/${r.id}`}
+                  className="glass-card-hover group flex flex-col overflow-hidden"
+                >
+                  {r.featured_image && (
+                    <div className="w-full h-36 overflow-hidden">
+                      <img
+                        src={r.featured_image}
+                        alt={r.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5 flex flex-col flex-1">
+                    <span className="text-xs font-semibold text-accent uppercase tracking-wider mb-2">
+                      {r.category}
+                    </span>
+                    <h3 className="font-display text-base font-bold text-foreground mb-2 group-hover:text-primary transition-colors flex items-start gap-1.5">
+                      {r.title}
+                      <ArrowUpRight size={14} className="shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+                    </h3>
+                    <p className="text-muted-foreground text-sm line-clamp-2 flex-1">{r.excerpt}</p>
+                    {r.read_time && (
+                      <span className="inline-flex items-center gap-1 mt-3 text-xs text-muted-foreground">
+                        <Clock size={12} /> {r.read_time}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <Footer />
     </div>
