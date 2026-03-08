@@ -46,20 +46,35 @@ const BlogPost = () => {
     let cleanup: (() => void) | undefined;
     const fetchPost = async () => {
       if (!id) return;
-      const { data } = await supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("id", id)
-        .single();
-      const p = data as (BlogPostType & { is_published?: boolean }) | null;
+      
+      // Try slug first, then fall back to UUID
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      
+      let data: any = null;
+      if (!isUUID) {
+        const res = await supabase.from("blog_posts").select("*").eq("slug", id).single();
+        data = res.data;
+      }
+      if (!data && isUUID) {
+        const res = await supabase.from("blog_posts").select("*").eq("id", id).single();
+        data = res.data;
+        // Redirect UUID URL to slug URL
+        if (data?.slug) {
+          navigate(`/${lang}/blog/${data.slug}`, { replace: true });
+          return;
+        }
+      }
+      
+      const p = data as (BlogPostType & { is_published?: boolean; slug?: string | null }) | null;
       setPost(p);
       setLoading(false);
 
       if (p) {
+        const postSlug = p.slug || p.id;
         cleanup = setSeo({
           title: `${p.title} – Iqbal Sir's Blog`,
           description: p.excerpt || `Read "${p.title}" on Iqbal Sir's blog.`,
-          url: `https://iqbalsir.com/blog/${p.id}`,
+          url: `https://iqbalsir.com/blog/${postSlug}`,
           image: p.featured_image || undefined,
         });
 
@@ -71,7 +86,7 @@ const BlogPost = () => {
           .neq("id", p.id)
           .order("sort_order", { ascending: true })
           .limit(3);
-        setRelated((rel as BlogPostType[]) || []);
+        setRelated((rel as (BlogPostType & { slug?: string | null })[]) || []);
       }
     };
     fetchPost();
