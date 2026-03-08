@@ -158,9 +158,11 @@ const AdminStudyMaterials = () => {
     return () => window.removeEventListener("beforeunload", handler);
   }, [orderDirty]);
 
-  // Focus & scroll to new item
+  // Auto-expand and focus new item
   useEffect(() => {
     if (newItemId) {
+      setExpandedEditId(newItemId);
+      setExpandedDeleteId(null);
       topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       setTimeout(() => {
         newTitleRef.current?.focus();
