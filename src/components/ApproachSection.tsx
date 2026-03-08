@@ -13,7 +13,10 @@ const ApproachSection = () => {
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from("teaching_approach").select("*").eq("is_active", true).order("sort_order").then(({ data }) => setItems(data || []));
+    supabase.from("teaching_approach").select("*").eq("is_active", true).order("sort_order").then(({ data, error }) => {
+      console.log('ApproachSection data:', data, 'error:', error);
+      setItems(data || []);
+    });
   }, []);
 
   if (items.length === 0) return null;
