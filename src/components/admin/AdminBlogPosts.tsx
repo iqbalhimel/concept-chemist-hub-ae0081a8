@@ -207,7 +207,7 @@ const EditPanel = ({
         Published
       </label>
       <div className="flex-1" />
-      <Button size="sm" variant="outline" onClick={() => window.open(`/blog/${post.id}`, "_blank")}>
+      <Button size="sm" variant="outline" onClick={() => window.open(`/blog/${(post as any).slug || post.id}`, "_blank")}>
         <ExternalLink size={14} className="mr-1" /> Preview
       </Button>
       <Button size="sm" onClick={() => onSave(post)}>
