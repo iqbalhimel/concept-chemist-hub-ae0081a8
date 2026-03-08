@@ -235,16 +235,49 @@ const AdminStudyMaterials = () => {
             </p>
             <div className="flex items-center justify-center gap-2">
               <span className="text-xs text-muted-foreground">Category:</span>
-              <Select value={bulkCategory} onValueChange={setBulkCategory}>
+              <Select
+                value={bulkCategory}
+                onValueChange={v => {
+                  if (v === "__custom__") {
+                    setShowCustomCatFor("bulk");
+                    setCustomCatInput("");
+                  } else {
+                    setBulkCategory(v);
+                    setShowCustomCatFor(null);
+                  }
+                }}
+              >
                 <SelectTrigger className="w-44 h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {["Physics", "Chemistry", "Mathematics", "Biology", "Question Bank", "Model Tests", "Uncategorized"].map(cat => (
+                  {allCategories.map(cat => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
+                  <SelectItem value="__custom__">+ Custom category…</SelectItem>
                 </SelectContent>
               </Select>
+              {showCustomCatFor === "bulk" && (
+                <form
+                  className="flex gap-1"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    if (customCatInput.trim()) {
+                      setBulkCategory(customCatInput.trim());
+                      setShowCustomCatFor(null);
+                    }
+                  }}
+                >
+                  <Input
+                    className="h-8 w-32 text-xs"
+                    placeholder="New category"
+                    value={customCatInput}
+                    onChange={e => setCustomCatInput(e.target.value)}
+                    autoFocus
+                  />
+                  <Button type="submit" size="sm" variant="outline" className="h-8 text-xs">Add</Button>
+                </form>
+              )}
             </div>
             <p className="text-xs text-muted-foreground/60">
               Each PDF becomes a new entry with auto-detected title, size & pages
