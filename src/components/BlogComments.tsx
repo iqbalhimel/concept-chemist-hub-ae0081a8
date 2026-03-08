@@ -21,7 +21,7 @@ interface Props {
 }
 
 const sanitize = (str: string) =>
-  str.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/g, "&amp;");
+  str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 /* ── Comment Form ──────────────────────────── */
 
