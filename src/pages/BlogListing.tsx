@@ -86,7 +86,7 @@ const BlogListing = () => {
       setLoading(false);
     };
     fetchPosts();
-  }, [page, filterCat]);
+  }, [page, filterCat, searchQuery]);
 
   useEffect(() => {
     const fetchCategories = async () => {
