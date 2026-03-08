@@ -2,6 +2,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { BookOpen, Monitor, Users, Lightbulb, MapPin, Calendar, Clock, UsersRound, GraduationCap, Languages } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { supabase } from "@/integrations/supabase/client";
 
 type CoachingInfo = Record<string, string>;
@@ -9,8 +10,11 @@ type CoachingInfo = Record<string, string>;
 const AboutSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const { get } = useSiteSettings();
   const [coaching, setCoaching] = useState<CoachingInfo | null>(null);
+
+  const isBn = lang === "bn";
 
   useEffect(() => {
     supabase
@@ -24,6 +28,11 @@ const AboutSection = () => {
         }
       });
   }, []);
+
+  const intro = get("about", isBn ? "intro_text_bn" : "intro_text_en", "") || get("about", "intro_text_en", "") || t.about.intro;
+  const point1 = get("about", isBn ? "point_1_bn" : "point_1_en", "") || get("about", "point_1_en", "") || t.about.point_1;
+  const point2 = get("about", isBn ? "point_2_bn" : "point_2_en", "") || get("about", "point_2_en", "") || t.about.point_2;
+  const point3 = get("about", isBn ? "point_3_bn" : "point_3_en", "") || get("about", "point_3_en", "") || t.about.point_3;
 
   const highlights = [
     { icon: BookOpen, label: t.about.highlight_1 },
@@ -51,19 +60,19 @@ const AboutSection = () => {
           <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">{t.about.subtitle}</p>
 
           <div className="glass-card p-8 md:p-12 mb-10">
-            <p className="text-secondary-foreground leading-relaxed text-lg mb-6" dangerouslySetInnerHTML={{ __html: t.about.intro }} />
+            <p className="text-secondary-foreground leading-relaxed text-lg mb-6" dangerouslySetInnerHTML={{ __html: intro }} />
             <ul className="space-y-3 text-secondary-foreground text-base">
               <li className="flex items-start gap-3">
                 <span className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />
-                <span dangerouslySetInnerHTML={{ __html: t.about.point_1 }} />
+                <span dangerouslySetInnerHTML={{ __html: point1 }} />
               </li>
               <li className="flex items-start gap-3">
                 <span className="mt-1.5 w-2 h-2 rounded-full bg-accent shrink-0" />
-                <span dangerouslySetInnerHTML={{ __html: t.about.point_2 }} />
+                <span dangerouslySetInnerHTML={{ __html: point2 }} />
               </li>
               <li className="flex items-start gap-3">
                 <span className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />
-                <span>{t.about.point_3}</span>
+                <span dangerouslySetInnerHTML={{ __html: point3 }} />
               </li>
             </ul>
           </div>

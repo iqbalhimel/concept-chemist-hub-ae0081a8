@@ -61,6 +61,21 @@ const sections: SectionDef[] = [
     ],
   },
   {
+    key: "about",
+    label: "About Section",
+    icon: Globe,
+    fields: [
+      { name: "intro_text_en", label: "Intro Text (English)", type: "textarea", placeholder: "With 10+ years of teaching experience..." },
+      { name: "intro_text_bn", label: "Intro Text (Bangla)", type: "textarea", placeholder: "১০+ বছরের শিক্ষকতার অভিজ্ঞতা নিয়ে..." },
+      { name: "point_1_en", label: "Bullet Point 1 (English)", type: "textarea" },
+      { name: "point_1_bn", label: "Bullet Point 1 (Bangla)", type: "textarea" },
+      { name: "point_2_en", label: "Bullet Point 2 (English)", type: "textarea" },
+      { name: "point_2_bn", label: "Bullet Point 2 (Bangla)", type: "textarea" },
+      { name: "point_3_en", label: "Bullet Point 3 (English)", type: "textarea" },
+      { name: "point_3_bn", label: "Bullet Point 3 (Bangla)", type: "textarea" },
+    ],
+  },
+  {
     key: "coaching",
     label: "Coaching Information",
     icon: Globe,
