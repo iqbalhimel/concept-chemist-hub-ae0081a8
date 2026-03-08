@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-interface BlogPost { id: string; title: string; category: string; excerpt: string | null; read_time: string | null; featured_image?: string | null; }
+interface BlogPost { id: string; title: string; category: string; excerpt: string | null; read_time: string | null; featured_image?: string | null; slug?: string | null; }
 
 const BlogSection = () => {
   const ref = useRef(null);
