@@ -14,6 +14,7 @@ import AdminGallery from "@/components/admin/AdminGallery";
 import AdminFAQ from "@/components/admin/AdminFAQ";
 import AdminMediaLibrary from "@/components/admin/AdminMediaLibrary";
 import AdminThemes from "@/components/admin/AdminThemes";
+import AdminComments from "@/components/admin/AdminComments";
 
 type Tab =
   | "dashboard"
@@ -21,6 +22,7 @@ type Tab =
   | "notices"
   | "study-materials"
   | "blog"
+  | "comments"
   | "gallery"
   | "faq"
   | "media"
@@ -32,6 +34,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "notices", label: "Notices", icon: Bell },
   { id: "study-materials", label: "Study Materials", icon: Download },
   { id: "blog", label: "Blog Posts", icon: FileText },
+  { id: "comments", label: "Comments", icon: MessageSquare },
   { id: "gallery", label: "Gallery", icon: Image },
   { id: "faq", label: "FAQ", icon: HelpCircle },
   { id: "media", label: "Media Library", icon: Image },
@@ -53,6 +56,8 @@ const AdminDashboard = () => {
         return <AdminStudyMaterials />;
       case "blog":
         return <AdminBlogPosts />;
+      case "comments":
+        return <AdminComments />;
       case "gallery":
         return <AdminGallery />;
       case "faq":
