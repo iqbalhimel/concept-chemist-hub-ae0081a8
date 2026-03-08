@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -117,13 +117,33 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   html {
     scroll-behavior: smooth;
     overflow-x: hidden;
+  }
+
+  /* Bangla text rendering improvements */
+  html[lang="bn"] body {
+    font-family: 'Noto Sans Bengali', 'Inter', sans-serif;
+    line-height: 1.8;
+    word-spacing: 0.05em;
+  }
+
+  html[lang="bn"] .font-display {
+    font-family: 'Noto Sans Bengali', 'Space Grotesk', sans-serif;
+  }
+
+  html[lang="bn"] p,
+  html[lang="bn"] span,
+  html[lang="bn"] li,
+  html[lang="bn"] a {
+    line-height: 1.85;
   }
 }
 
@@ -188,5 +208,35 @@
 
   .font-display {
     font-family: 'Space Grotesk', sans-serif;
+  }
+
+  /* Light mode form inputs */
+  [data-brightness="light"] input,
+  [data-brightness="light"] textarea,
+  [data-brightness="light"] select {
+    background-color: hsl(var(--secondary)) !important;
+    border-color: hsl(var(--border)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  [data-brightness="light"] input::placeholder,
+  [data-brightness="light"] textarea::placeholder {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  /* Light mode secondary/outline button contrast */
+  [data-brightness="light"] .border-border {
+    border-color: hsl(220 13% 82%);
+  }
+
+  /* Mobile touch target minimums */
+  @media (max-width: 768px) {
+    a, button {
+      min-height: 44px;
+    }
+
+    .section-padding {
+      @apply py-14 px-4;
+    }
   }
 }

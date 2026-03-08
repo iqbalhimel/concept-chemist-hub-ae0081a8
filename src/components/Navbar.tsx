@@ -68,17 +68,17 @@ const Navbar = () => {
         </div>
 
         {/* Mobile controls */}
-        <div className="md:hidden flex items-center gap-1">
+        <div className="md:hidden flex items-center gap-2">
           <button
             onClick={switchLang}
-            className="px-2 py-1 rounded text-xs font-semibold border border-border text-muted-foreground"
+            className="px-3 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors min-h-[44px] flex items-center"
           >
-            {lang === "en" ? "বাং" : "EN"}
+            {lang === "en" ? "বাংলা" : "EN"}
           </button>
-          <button onClick={toggle} className="p-2 text-foreground">
+          <button onClick={toggle} className="p-2.5 rounded-lg text-foreground hover:bg-secondary/50 transition-colors min-h-[44px] flex items-center justify-center">
             {mode === "dark" ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 text-foreground" aria-label="Toggle menu">
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2.5 rounded-lg text-foreground hover:bg-secondary/50 transition-colors min-h-[44px] flex items-center justify-center" aria-label="Toggle menu">
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
