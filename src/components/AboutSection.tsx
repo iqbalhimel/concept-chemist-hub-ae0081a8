@@ -1,12 +1,29 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
-import { BookOpen, Monitor, Users, Lightbulb } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { BookOpen, Monitor, Users, Lightbulb, MapPin, Calendar, Clock, UsersRound, GraduationCap, Languages } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
+
+type CoachingInfo = Record<string, string>;
 
 const AboutSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const { t } = useLanguage();
+  const [coaching, setCoaching] = useState<CoachingInfo | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "coaching")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value && typeof data.value === "object") {
+          setCoaching(data.value as CoachingInfo);
+        }
+      });
+  }, []);
 
   const highlights = [
     { icon: BookOpen, label: t.about.highlight_1 },
@@ -14,6 +31,15 @@ const AboutSection = () => {
     { icon: Users, label: t.about.highlight_3 },
     { icon: Lightbulb, label: t.about.highlight_4 },
   ];
+
+  const coachingItems = coaching ? [
+    { icon: MapPin, label: "Location", value: coaching.location },
+    { icon: Calendar, label: "Class Days", value: coaching.class_days },
+    { icon: Clock, label: "Class Time", value: coaching.class_time },
+    { icon: UsersRound, label: "Batch Size", value: coaching.batch_size },
+    { icon: GraduationCap, label: "Target", value: coaching.target_students },
+    { icon: Languages, label: "Medium", value: coaching.medium },
+  ].filter(item => item.value) : [];
 
   return (
     <section id="about" className="section-padding section-gradient">
@@ -41,6 +67,30 @@ const AboutSection = () => {
               </li>
             </ul>
           </div>
+
+          {coachingItems.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="glass-card p-6 md:p-8 mb-10"
+            >
+              <h3 className="font-display font-semibold text-foreground text-xl mb-5 text-center">
+                🎓 Coaching Information
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {coachingItems.map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                    <item.icon size={20} className="text-primary shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">{item.label}</p>
+                      <p className="text-sm font-medium text-foreground capitalize">{item.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {highlights.map((item, i) => (

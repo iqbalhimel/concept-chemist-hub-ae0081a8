@@ -61,7 +61,19 @@ const sections: SectionDef[] = [
     ],
   },
   {
-    key: "seo",
+    key: "coaching",
+    label: "Coaching Information",
+    icon: Globe,
+    fields: [
+      { name: "location", label: "Coaching Location", type: "text", placeholder: "Kishoreganj, Bangladesh" },
+      { name: "class_days", label: "Class Days", type: "text", placeholder: "Saturday – Thursday" },
+      { name: "class_time", label: "Class Time", type: "text", placeholder: "4:00 PM – 8:00 PM" },
+      { name: "batch_size", label: "Batch Size", type: "text", placeholder: "20 students per batch" },
+      { name: "target_students", label: "Target Students", type: "text", placeholder: "SSC / HSC" },
+      { name: "medium", label: "Medium", type: "select", options: [{ value: "bangla", label: "Bangla" }, { value: "english", label: "English" }, { value: "both", label: "Bangla & English" }] },
+    ],
+  },
+  {
     label: "SEO Settings",
     icon: Search,
     fields: [
