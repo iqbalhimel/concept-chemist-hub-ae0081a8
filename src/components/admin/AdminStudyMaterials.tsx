@@ -566,8 +566,10 @@ const AdminStudyMaterials = () => {
             </div>
           </div>
         </div>
+        </SortableItem>
       ))}
-    </div>
+        </SortableContext>
+      </DndContext>
   );
 };
 
