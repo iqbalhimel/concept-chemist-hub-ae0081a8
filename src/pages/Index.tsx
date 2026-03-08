@@ -49,10 +49,10 @@ const Index = () => {
         {show("show_subjects") && <SubjectsSection />}
         {show("show_approach") && <ApproachSection />}
         {show("show_stats") && <StatsSection />}
-        {show("show_gallery") && <GallerySection />}
-        {show("show_testimonials") && <TestimonialsSection />}
         {show("show_experience") && <ExperienceSection />}
         {show("show_education") && <EducationSection />}
+        {show("show_gallery") && <GallerySection />}
+        {show("show_testimonials") && <TestimonialsSection />}
         {show("show_notices") && <NoticesSection />}
         {show("show_resources") && <ResourcesSection />}
         {show("show_blog") && <BlogSection />}
