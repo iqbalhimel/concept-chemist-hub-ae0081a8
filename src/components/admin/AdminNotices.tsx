@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle, CheckSquare, Square } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -32,6 +32,8 @@ const SortableNoticeCard = ({
   onDelete,
   onTogglePin,
   inputRef,
+  selected,
+  onToggleSelect,
 }: {
   notice: Notice;
   onUpdateLocal: (id: string, updates: Record<string, any>) => void;
@@ -39,6 +41,8 @@ const SortableNoticeCard = ({
   onDelete: (id: string) => void;
   onTogglePin: (n: Notice) => void;
   inputRef?: React.RefObject<HTMLInputElement>;
+  selected: boolean;
+  onToggleSelect: (id: string) => void;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: notice.id });
@@ -55,9 +59,12 @@ const SortableNoticeCard = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`glass-card p-4 space-y-2 ${n.is_pinned ? "ring-2 ring-primary/50" : ""} ${isExpired ? "opacity-50" : ""}`}
+      className={`glass-card p-4 space-y-2 ${n.is_pinned ? "ring-2 ring-primary/50" : ""} ${isExpired ? "opacity-50" : ""} ${selected ? "ring-2 ring-primary/50" : ""}`}
     >
       <div className="flex items-center gap-2">
+        <button onClick={() => onToggleSelect(notice.id)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
+          {selected ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
+        </button>
         <button
           {...attributes}
           {...listeners}
@@ -145,6 +152,8 @@ const AdminNotices = () => {
   const [orderDirty, setOrderDirty] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
   const [newNoticeId, setNewNoticeId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const newTitleRef = useRef<HTMLInputElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -253,7 +262,39 @@ const AdminNotices = () => {
   const deleteNotice = async (id: string) => {
     await supabase.from("notices").delete().eq("id", id);
     setNotices((prev) => prev.filter((n) => n.id !== id));
+    setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
     toast.success("Deleted");
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const allIds = notices.map((n) => n.id);
+    const allSelected = allIds.every((id) => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(allIds));
+    }
+  };
+
+  const bulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected notice(s)? This cannot be undone.`)) return;
+    setBulkDeleting(true);
+    for (const id of selectedIds) {
+      await supabase.from("notices").delete().eq("id", id);
+    }
+    setNotices((prev) => prev.filter((n) => !selectedIds.has(n.id)));
+    toast.success(`${selectedIds.size} notice(s) deleted`);
+    setSelectedIds(new Set());
+    setBulkDeleting(false);
   };
 
   const updateLocal = (id: string, updates: Record<string, any>) => {
@@ -293,7 +334,13 @@ const AdminNotices = () => {
         <h2 className="font-display text-2xl font-bold text-foreground">
           Notices
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedIds.size > 0 && (
+            <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting} className="animate-in fade-in">
+              <Trash2 size={14} className="mr-1" />
+              {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+            </Button>
+          )}
           {orderDirty && (
             <>
               <span className="text-xs text-destructive flex items-center gap-1">
@@ -315,6 +362,17 @@ const AdminNotices = () => {
           </Button>
         </div>
       </div>
+      {/* Select all toggle */}
+      {notices.length > 0 && (
+        <div className="flex items-center gap-2">
+          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+            {notices.length > 0 && notices.every((n) => selectedIds.has(n.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+          </button>
+          <span className="text-xs text-muted-foreground">
+            {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}
+          </span>
+        </div>
+      )}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -333,6 +391,8 @@ const AdminNotices = () => {
               onDelete={deleteNotice}
               onTogglePin={togglePin}
               inputRef={n.id === newNoticeId ? newTitleRef : undefined}
+              selected={selectedIds.has(n.id)}
+              onToggleSelect={toggleSelect}
             />
           ))}
         </SortableContext>
