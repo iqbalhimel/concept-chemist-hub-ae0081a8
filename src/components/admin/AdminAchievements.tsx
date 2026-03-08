@@ -16,18 +16,40 @@ const empty: Omit<Achievement, "id"> = { title_en: "", title_bn: "", value: "", 
 
 const iconOptions = ["Trophy", "Clock", "Users", "GraduationCap", "Star", "Award", "Target", "BookOpen"];
 
-const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+const SortableCard = ({ item, toggleActive, startEdit, handleDelete }: {
+  item: Achievement; toggleActive: (id: string, v: boolean) => void; startEdit: (item: Achievement) => void; handleDelete: (id: string) => void;
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
   return (
     <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="w-full overflow-hidden">
-      {children}
+      <div className="glass-card p-2.5 sm:p-4">
+        {/* Desktop: single row. Mobile: stacked */}
+        <div className="hidden sm:flex items-center gap-2.5">
+          <button {...attributes} {...listeners} className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground touch-none"><GripVertical size={16} /></button>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-foreground truncate">{item.value} — {item.title_en || "Untitled"}</p>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Switch checked={item.is_active} onCheckedChange={v => toggleActive(item.id, v)} />
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEdit(item)}><Pencil size={14} /></Button>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></Button>
+          </div>
+        </div>
+        <div className="flex sm:hidden flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <button {...attributes} {...listeners} className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground touch-none"><GripVertical size={16} /></button>
+            <p className="font-medium text-foreground text-sm truncate min-w-0 flex-1">{item.value} — {item.title_en || "Untitled"}</p>
+          </div>
+          <div className="flex items-center gap-1.5 self-end">
+            <Switch checked={item.is_active} onCheckedChange={v => toggleActive(item.id, v)} />
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEdit(item)}><Pencil size={14} /></Button>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
-
-const DragHandle = ({ attributes, listeners }: { attributes: any; listeners: any }) => (
-  <button {...attributes} {...listeners} className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground touch-none"><GripVertical size={16} /></button>
-);
 
 const AdminAchievements = () => {
   const [items, setItems] = useState<Achievement[]>([]);
