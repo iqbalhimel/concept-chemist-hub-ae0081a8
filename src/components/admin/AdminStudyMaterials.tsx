@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags, GripVertical, Search, X, Check, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags, GripVertical, Search, X, Check, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Tables } from "@/integrations/supabase/types";
 import * as pdfjsLib from "pdfjs-dist";
@@ -93,8 +93,13 @@ const AdminStudyMaterials = () => {
   const [catActionLoading, setCatActionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("__all__");
+  const [orderDirty, setOrderDirty] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
+  const [newItemId, setNewItemId] = useState<string | null>(null);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
+  const newTitleRef = useRef<HTMLInputElement | null>(null);
+  const topRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -134,10 +139,34 @@ const AdminStudyMaterials = () => {
     fetchCategories();
   }, []);
 
+  // Warn before leaving with unsaved order
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (orderDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [orderDirty]);
+
+  // Focus & scroll to new item
+  useEffect(() => {
+    if (newItemId) {
+      topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(() => {
+        newTitleRef.current?.focus();
+        setNewItemId(null);
+      }, 100);
+    }
+  }, [newItemId]);
+
   const fetchItems = async () => {
     const { data } = await supabase.from("study_materials").select("*").order("sort_order");
     setItems(data || []);
     setLoading(false);
+    setOrderDirty(false);
   };
 
   const fetchCategories = async () => {
@@ -153,10 +182,16 @@ const AdminStudyMaterials = () => {
   // --- Material CRUD ---
   const add = async () => {
     const defaultCat = activeCategoryNames[0] || "Uncategorized";
-    const { error } = await supabase.from("study_materials").insert({ title: "New Material", category: defaultCat });
-    if (error) { toast.error(error.message); return; }
+    const { data, error } = await supabase.from("study_materials").insert({ title: "New Material", category: defaultCat, sort_order: 0 }).select().single();
+    if (error || !data) { toast.error(error?.message || "Failed"); return; }
+    // Shift existing sort_orders
+    const updated = items.map((n, i) => ({ ...n, sort_order: i + 1 }));
+    for (const u of updated) {
+      await supabase.from("study_materials").update({ sort_order: u.sort_order }).eq("id", u.id);
+    }
+    setItems([data, ...updated]);
+    setNewItemId(data.id);
     toast.success("Added");
-    fetchItems();
   };
 
   const update = async (id: string, updates: Partial<Material>) => {
@@ -174,18 +209,24 @@ const AdminStudyMaterials = () => {
     setItems(prev => prev.map(x => x.id === id ? { ...x, [field]: value } : x));
   };
 
-  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     const oldIndex = items.findIndex(i => i.id === active.id);
     const newIndex = items.findIndex(i => i.id === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
-    const reordered = arrayMove(items, oldIndex, newIndex);
-    setItems(reordered);
-    for (let i = 0; i < reordered.length; i++) {
-      await supabase.from("study_materials").update({ sort_order: i }).eq("id", reordered[i].id);
+    setItems(arrayMove(items, oldIndex, newIndex));
+    setOrderDirty(true);
+  }, [items]);
+
+  const saveOrder = useCallback(async () => {
+    setSavingOrder(true);
+    for (let i = 0; i < items.length; i++) {
+      await supabase.from("study_materials").update({ sort_order: i }).eq("id", items[i].id);
     }
-    toast.success("Order updated");
+    setOrderDirty(false);
+    setSavingOrder(false);
+    toast.success("Order saved");
   }, [items]);
 
   // --- Category CRUD ---
@@ -212,9 +253,7 @@ const AdminStudyMaterials = () => {
     const newName = editCatName.trim();
     if (!newName || newName === cat.name) { setEditingCatId(null); return; }
     setCatActionLoading(true);
-    // Update category record
     await updateCategory(cat.id, { name: newName, slug: newName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") });
-    // Update all materials with old name
     const affected = items.filter(i => i.category === cat.name);
     for (const item of affected) {
       await supabase.from("study_materials").update({ category: newName }).eq("id", item.id);
@@ -322,11 +361,22 @@ const AdminStudyMaterials = () => {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div ref={topRef} className="flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2 -mt-2">
         <h2 className="font-display text-2xl font-bold text-foreground">
           Study Materials <span className="text-base font-normal text-muted-foreground">({items.length})</span>
         </h2>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {orderDirty && (
+            <>
+              <span className="text-xs text-destructive flex items-center gap-1">
+                <AlertTriangle size={12} /> Order changed
+              </span>
+              <Button size="sm" onClick={saveOrder} disabled={savingOrder} className="animate-in fade-in">
+                <Save size={14} className="mr-1" />
+                {savingOrder ? "Saving…" : "Save Order"}
+              </Button>
+            </>
+          )}
           <Button onClick={() => setShowCatManager(v => !v)} size="sm" variant="outline">
             <Tags size={14} className="mr-1" /> Categories
           </Button>
@@ -374,7 +424,6 @@ const AdminStudyMaterials = () => {
             <span className="text-xs text-muted-foreground">{categories.length} categories</span>
           </div>
 
-          {/* Add new */}
           <form className="flex gap-2" onSubmit={e => { e.preventDefault(); addCategory(); }}>
             <Input className="h-8 text-xs flex-1" placeholder="New category name..." value={newCatName} onChange={e => setNewCatName(e.target.value)} />
             <Button type="submit" size="sm" variant="outline" className="h-8 text-xs" disabled={!newCatName.trim()}>
@@ -382,7 +431,6 @@ const AdminStudyMaterials = () => {
             </Button>
           </form>
 
-          {/* Category list with drag-and-drop */}
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleCatDragEnd}>
             <SortableContext items={categories.map(c => c.id)} strategy={verticalListSortingStrategy}>
               <div className="space-y-1">
@@ -503,7 +551,12 @@ const AdminStudyMaterials = () => {
 
                 {/* Fields */}
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <Input value={item.title} onChange={e => updateLocal(item.id, "title", e.target.value)} placeholder="Title" />
+                  <Input
+                    ref={item.id === newItemId ? newTitleRef : undefined}
+                    value={item.title}
+                    onChange={e => updateLocal(item.id, "title", e.target.value)}
+                    placeholder="Title"
+                  />
                   <Select
                     value={activeCategoryNames.includes(item.category) ? item.category : ""}
                     onValueChange={v => updateLocal(item.id, "category", v)}
@@ -513,7 +566,6 @@ const AdminStudyMaterials = () => {
                       {activeCategories.map(cat => (
                         <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                       ))}
-                      {/* Show current category if it's inactive/missing */}
                       {!activeCategoryNames.includes(item.category) && item.category && (
                         <SelectItem value={item.category}>{item.category} (inactive)</SelectItem>
                       )}
