@@ -98,15 +98,15 @@ const AdminApproach = () => {
             <div className="space-y-2">
               {paginated.map(item => (
                 <SortableRow key={item.id} id={item.id}>
-                  <div className="glass-card p-4 flex items-center justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground truncate">{item.title_en || "Untitled"}</p>
-                      <p className="text-sm text-muted-foreground truncate">{item.description_en?.slice(0, 60)}...</p>
+                  <div className="glass-card p-2.5 sm:p-4 flex items-center justify-between gap-2 sm:gap-3">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <p className="font-medium text-foreground truncate text-sm sm:text-base">{item.title_en || "Untitled"}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground truncate">{item.description_en?.slice(0, 60)}...</p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                       <Switch checked={item.is_active} onCheckedChange={v => toggleActive(item.id, v)} />
-                      <Button variant="ghost" size="sm" onClick={() => startEdit(item)}><Pencil size={14} /></Button>
-                      <Button variant="ghost" size="sm" className="text-destructive" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEdit(item)}><Pencil size={14} /></Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></Button>
                     </div>
                   </div>
                 </SortableRow>

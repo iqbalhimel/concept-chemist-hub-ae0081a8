@@ -116,7 +116,7 @@ const AdminDashboard = () => {
             {tabs.find(t => t.id === activeTab)?.label}
           </h2>
         </header>
-        <div className="p-4 md:p-6 lg:p-8 max-w-6xl">{renderContent()}</div>
+        <div className="p-3 sm:p-4 md:p-6 lg:p-8 max-w-6xl w-full overflow-x-hidden">{renderContent()}</div>
       </main>
     </div>
   );
