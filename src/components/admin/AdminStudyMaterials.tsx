@@ -1,17 +1,42 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags } from "lucide-react";
+import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags, GripVertical } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Tables } from "@/integrations/supabase/types";
 import * as pdfjsLib from "pdfjs-dist";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
 type Material = Tables<"study_materials">;
+
+const SortableItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    position: "relative" as const,
+  };
+  return (
+    <div ref={setNodeRef} style={style}>
+      <div
+        className="absolute left-2 top-4 z-10 cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical size={18} />
+      </div>
+      <div className="pl-8">{children}</div>
+    </div>
+  );
+};
 
 const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
@@ -59,6 +84,30 @@ const AdminStudyMaterials = () => {
   const [catActionLoading, setCatActionLoading] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex(i => i.id === active.id);
+    const newIndex = items.findIndex(i => i.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(items, oldIndex, newIndex);
+    setItems(reordered);
+
+    // Persist new sort_order values
+    const updates = reordered.map((item, idx) => ({ id: item.id, sort_order: idx }));
+    for (const u of updates) {
+      await supabase.from("study_materials").update({ sort_order: u.sort_order }).eq("id", u.id);
+    }
+    toast.success("Order updated");
+  }, [items]);
 
   const PRESET_CATEGORIES = ["Physics", "Chemistry", "Mathematics", "Biology", "Question Bank", "Model Tests"];
 
@@ -409,9 +458,12 @@ const AdminStudyMaterials = () => {
         )}
       </div>
 
-      {/* Individual items */}
+      {/* Individual items with drag-and-drop reorder */}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
       {items.map(item => (
-        <div key={item.id} className="glass-card p-4 space-y-3">
+        <SortableItem key={item.id} id={item.id}>
+        <div className="glass-card p-4 space-y-3">
           <div
             className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
               dragOverId === item.id
@@ -514,7 +566,10 @@ const AdminStudyMaterials = () => {
             </div>
           </div>
         </div>
+        </SortableItem>
       ))}
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };
