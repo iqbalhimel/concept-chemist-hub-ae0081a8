@@ -458,9 +458,12 @@ const AdminStudyMaterials = () => {
         )}
       </div>
 
-      {/* Individual items */}
+      {/* Individual items with drag-and-drop reorder */}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
       {items.map(item => (
-        <div key={item.id} className="glass-card p-4 space-y-3">
+        <SortableItem key={item.id} id={item.id}>
+        <div className="glass-card p-4 space-y-3">
           <div
             className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
               dragOverId === item.id
