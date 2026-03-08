@@ -135,7 +135,7 @@ const ResourcesSection = () => {
                   {item.file_url ? (
                     <div className="flex-shrink-0 flex items-center gap-2">
                       <button
-                        onClick={() => { setPreviewUrl(item.file_url); setPreviewTitle(item.title); setPreviewError(false); }}
+                        onClick={() => { setPreviewUrl(item.file_url); setPreviewTitle(item.title); }}
                         className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-primary/30 text-primary text-sm font-medium hover:bg-primary/10 transition-all"
                       >
                         <Eye size={14} />
