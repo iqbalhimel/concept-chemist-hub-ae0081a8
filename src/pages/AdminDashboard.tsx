@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, FileText, BookOpen, Bell, Download,
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
-  MessageSquare, Globe, MessageSquareQuote
+  MessageSquare, Globe, MessageSquareQuote, GraduationCap,
+  Briefcase, Trophy, Lightbulb, Atom
 } from "lucide-react";
 import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminNotices from "@/components/admin/AdminNotices";
@@ -17,19 +18,17 @@ import AdminThemes from "@/components/admin/AdminThemes";
 import AdminComments from "@/components/admin/AdminComments";
 import AdminTestimonials from "@/components/admin/AdminTestimonials";
 import AdminDashboardOverview from "@/components/admin/AdminDashboardOverview";
+import AdminEducation from "@/components/admin/AdminEducation";
+import AdminExperience from "@/components/admin/AdminExperience";
+import AdminAchievements from "@/components/admin/AdminAchievements";
+import AdminApproach from "@/components/admin/AdminApproach";
+import AdminSubjects from "@/components/admin/AdminSubjects";
 
 type Tab =
-  | "dashboard"
-  | "site-settings"
-  | "notices"
-  | "study-materials"
-  | "blog"
-  | "comments"
-  | "testimonials"
-  | "gallery"
-  | "faq"
-  | "media"
-  | "themes";
+  | "dashboard" | "site-settings" | "notices" | "study-materials"
+  | "blog" | "comments" | "testimonials" | "gallery" | "faq"
+  | "media" | "themes" | "education" | "experience"
+  | "achievements" | "approach" | "subjects";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -41,6 +40,11 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
   { id: "gallery", label: "Gallery", icon: Image },
   { id: "faq", label: "FAQ", icon: HelpCircle },
+  { id: "education", label: "Education", icon: GraduationCap },
+  { id: "experience", label: "Experience", icon: Briefcase },
+  { id: "achievements", label: "Achievements", icon: Trophy },
+  { id: "approach", label: "Teaching Approach", icon: Lightbulb },
+  { id: "subjects", label: "Teaching Subjects", icon: Atom },
   { id: "media", label: "Media Library", icon: Image },
   { id: "themes", label: "Themes", icon: Palette },
 ];
@@ -52,28 +56,22 @@ const AdminDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "site-settings":
-        return <AdminSiteSettings />;
-      case "notices":
-        return <AdminNotices />;
-      case "study-materials":
-        return <AdminStudyMaterials />;
-      case "blog":
-        return <AdminBlogPosts />;
-      case "comments":
-        return <AdminComments />;
-      case "testimonials":
-        return <AdminTestimonials />;
-      case "gallery":
-        return <AdminGallery />;
-      case "faq":
-        return <AdminFAQ />;
-      case "media":
-        return <AdminMediaLibrary />;
-      case "themes":
-        return <AdminThemes />;
-      default:
-        return <AdminDashboardOverview onNavigate={(tab) => setActiveTab(tab as Tab)} />;
+      case "site-settings": return <AdminSiteSettings />;
+      case "notices": return <AdminNotices />;
+      case "study-materials": return <AdminStudyMaterials />;
+      case "blog": return <AdminBlogPosts />;
+      case "comments": return <AdminComments />;
+      case "testimonials": return <AdminTestimonials />;
+      case "gallery": return <AdminGallery />;
+      case "faq": return <AdminFAQ />;
+      case "education": return <AdminEducation />;
+      case "experience": return <AdminExperience />;
+      case "achievements": return <AdminAchievements />;
+      case "approach": return <AdminApproach />;
+      case "subjects": return <AdminSubjects />;
+      case "media": return <AdminMediaLibrary />;
+      case "themes": return <AdminThemes />;
+      default: return <AdminDashboardOverview onNavigate={(tab) => setActiveTab(tab as Tab)} />;
     }
   };
 
@@ -82,23 +80,18 @@ const AdminDashboard = () => {
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
-
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h1 className="font-display text-lg font-bold gradient-text">Admin Panel</h1>
-          <button className="lg:hidden text-muted-foreground" onClick={() => setSidebarOpen(false)}>
-            <X size={20} />
-          </button>
+          <button className="lg:hidden text-muted-foreground" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
         </div>
-        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
+        <nav className="p-3 space-y-1 flex-1 overflow-y-auto max-h-[calc(100vh-140px)]">
           {tabs.map(t => (
             <button
               key={t.id}
               onClick={() => { setActiveTab(t.id); setSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === t.id
-                  ? "bg-primary/15 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                activeTab === t.id ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
             >
               <t.icon size={18} />
@@ -112,25 +105,18 @@ const AdminDashboard = () => {
             <Button variant="outline" size="sm" className="flex-1" onClick={() => window.open("/", "_blank")}>
               <Globe size={14} className="mr-1" /> View Site
             </Button>
-            <Button variant="outline" size="sm" onClick={signOut}>
-              <LogOut size={14} />
-            </Button>
+            <Button variant="outline" size="sm" onClick={signOut}><LogOut size={14} /></Button>
           </div>
         </div>
       </aside>
-
       <main className="flex-1 min-h-screen">
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center gap-3">
-          <button className="lg:hidden text-foreground" onClick={() => setSidebarOpen(true)}>
-            <Menu size={22} />
-          </button>
+          <button className="lg:hidden text-foreground" onClick={() => setSidebarOpen(true)}><Menu size={22} /></button>
           <h2 className="font-display font-semibold text-foreground capitalize">
             {tabs.find(t => t.id === activeTab)?.label}
           </h2>
         </header>
-        <div className="p-4 md:p-6 lg:p-8 max-w-6xl">
-          {renderContent()}
-        </div>
+        <div className="p-4 md:p-6 lg:p-8 max-w-6xl">{renderContent()}</div>
       </main>
     </div>
   );

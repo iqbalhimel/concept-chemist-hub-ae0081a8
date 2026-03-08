@@ -1,7 +1,10 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
-import { GraduationCap, Users, Trophy, Clock } from "lucide-react";
+import { GraduationCap, Users, Trophy, Clock, Star, Award, Target, BookOpen } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
+
+const iconMap: Record<string, React.ElementType> = { Trophy, Clock, Users, GraduationCap, Star, Award, Target, BookOpen };
 
 const AnimatedCounter = ({ target, suffix, inView }: { target: number; suffix: string; inView: boolean }) => {
   const [count, setCount] = useState(0);
@@ -19,14 +22,14 @@ const AnimatedCounter = ({ target, suffix, inView }: { target: number; suffix: s
 const StatsSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const [items, setItems] = useState<any[]>([]);
 
-  const stats = [
-    { value: 10, suffix: "+", label: t.stats.years, icon: Clock },
-    { value: 5000, suffix: "+", label: t.stats.students, icon: Users },
-    { value: 90, suffix: "%+", label: t.stats.success, icon: Trophy },
-    { value: 8, suffix: "+", label: t.stats.subjects_covered, icon: GraduationCap },
-  ];
+  useEffect(() => {
+    supabase.from("achievements").select("*").eq("is_active", true).order("sort_order").then(({ data }) => setItems(data || []));
+  }, []);
+
+  if (items.length === 0) return null;
 
   return (
     <section id="student-success" className="section-padding section-gradient">
@@ -37,15 +40,17 @@ const StatsSection = () => {
             {t.stats.title_1} <span className="gradient-text">{t.stats.title_highlight}</span>
           </h2>
         </motion.div>
-
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
-          {stats.map((stat, i) => {
-            const Icon = stat.icon;
+          {items.map((stat, i) => {
+            const Icon = iconMap[stat.icon] || Trophy;
+            const numMatch = stat.value.match(/^(\d+)/);
+            const num = numMatch ? parseInt(numMatch[1]) : 0;
+            const suffix = stat.value.replace(/^\d+/, "");
             return (
-              <motion.div key={i} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.1 }} className="glass-card-hover p-6 md:p-8 text-center flex flex-col items-center gap-3">
+              <motion.div key={stat.id} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.1 }} className="glass-card-hover p-6 md:p-8 text-center flex flex-col items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-1"><Icon size={24} className="text-primary" /></div>
-                <AnimatedCounter target={stat.value} suffix={stat.suffix} inView={inView} />
-                <p className="text-muted-foreground text-sm font-medium">{stat.label}</p>
+                <AnimatedCounter target={num} suffix={suffix} inView={inView} />
+                <p className="text-muted-foreground text-sm font-medium">{lang === "bn" && stat.title_bn ? stat.title_bn : stat.title_en}</p>
               </motion.div>
             );
           })}

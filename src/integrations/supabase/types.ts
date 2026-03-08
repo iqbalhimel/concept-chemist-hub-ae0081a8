@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          is_active: boolean
+          sort_order: number
+          title_bn: string
+          title_en: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title_bn?: string
+          title_en?: string
+          value?: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title_bn?: string
+          title_en?: string
+          value?: string
+        }
+        Relationships: []
+      }
       blog_post_comments: {
         Row: {
           content: string
@@ -127,6 +160,90 @@ export type Database = {
           sort_order?: number
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      education: {
+        Row: {
+          cgpa_or_result: string
+          created_at: string
+          degree_title_bn: string
+          degree_title_en: string
+          id: string
+          institution_bn: string
+          institution_en: string
+          is_active: boolean
+          sort_order: number
+          year: string
+        }
+        Insert: {
+          cgpa_or_result?: string
+          created_at?: string
+          degree_title_bn?: string
+          degree_title_en?: string
+          id?: string
+          institution_bn?: string
+          institution_en?: string
+          is_active?: boolean
+          sort_order?: number
+          year?: string
+        }
+        Update: {
+          cgpa_or_result?: string
+          created_at?: string
+          degree_title_bn?: string
+          degree_title_en?: string
+          id?: string
+          institution_bn?: string
+          institution_en?: string
+          is_active?: boolean
+          sort_order?: number
+          year?: string
+        }
+        Relationships: []
+      }
+      experience: {
+        Row: {
+          created_at: string
+          description_bn: string
+          description_en: string
+          duration_bn: string
+          duration_en: string
+          id: string
+          institution_bn: string
+          institution_en: string
+          is_active: boolean
+          job_title_bn: string
+          job_title_en: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          description_bn?: string
+          description_en?: string
+          duration_bn?: string
+          duration_en?: string
+          id?: string
+          institution_bn?: string
+          institution_en?: string
+          is_active?: boolean
+          job_title_bn?: string
+          job_title_en?: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          description_bn?: string
+          description_en?: string
+          duration_bn?: string
+          duration_en?: string
+          id?: string
+          institution_bn?: string
+          institution_en?: string
+          is_active?: boolean
+          job_title_bn?: string
+          job_title_en?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -349,6 +466,75 @@ export type Database = {
           sort_order?: number
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      subjects: {
+        Row: {
+          category: string
+          created_at: string
+          icon: string
+          id: string
+          is_active: boolean
+          sort_order: number
+          subject_name_bn: string
+          subject_name_en: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          subject_name_bn?: string
+          subject_name_en?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          subject_name_bn?: string
+          subject_name_en?: string
+        }
+        Relationships: []
+      }
+      teaching_approach: {
+        Row: {
+          created_at: string
+          description_bn: string
+          description_en: string
+          icon: string
+          id: string
+          is_active: boolean
+          sort_order: number
+          title_bn: string
+          title_en: string
+        }
+        Insert: {
+          created_at?: string
+          description_bn?: string
+          description_en?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title_bn?: string
+          title_en?: string
+        }
+        Update: {
+          created_at?: string
+          description_bn?: string
+          description_en?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title_bn?: string
+          title_en?: string
         }
         Relationships: []
       }
