@@ -15,6 +15,7 @@ import AdminFAQ from "@/components/admin/AdminFAQ";
 import AdminMediaLibrary from "@/components/admin/AdminMediaLibrary";
 import AdminThemes from "@/components/admin/AdminThemes";
 import AdminComments from "@/components/admin/AdminComments";
+import AdminDashboardOverview from "@/components/admin/AdminDashboardOverview";
 
 type Tab =
   | "dashboard"
@@ -67,24 +68,7 @@ const AdminDashboard = () => {
       case "themes":
         return <AdminThemes />;
       default:
-        return (
-          <div>
-            <h2 className="font-display text-2xl font-bold text-foreground mb-2">Welcome, Admin</h2>
-            <p className="text-muted-foreground mb-8">Manage your website content from here.</p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {tabs.filter(t => t.id !== "dashboard").map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setActiveTab(t.id)}
-                  className="glass-card-hover p-6 text-left"
-                >
-                  <t.icon className="text-primary mb-3" size={24} />
-                  <p className="font-display font-semibold text-foreground">{t.label}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-        );
+        return <AdminDashboardOverview onNavigate={(tab) => setActiveTab(tab as Tab)} />;
     }
   };
 
