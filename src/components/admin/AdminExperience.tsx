@@ -44,7 +44,7 @@ const AdminExperience = () => {
   const [adding, setAdding] = useState(false);
   const [orderChanged, setOrderChanged] = useState(false);
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+  const [pageSize, setPageSize] = useState<number | "all">(10);
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
 
   useEffect(() => { fetchAll(); }, []);
