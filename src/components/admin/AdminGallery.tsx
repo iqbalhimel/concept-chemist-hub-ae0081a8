@@ -196,19 +196,32 @@ const AdminGallery = () => {
 
       <p className="text-xs text-muted-foreground">Drag the grip icon to reorder images.</p>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-          {items.map(item => (
-            <SortableGalleryItem
-              key={item.id}
-              item={item}
-              onUpdateLocal={updateLocal}
-              onSave={update}
-              onRemove={remove}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+      <AdminPagination
+        total={items.length}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+      />
+
+      {(() => {
+        const pagedItems = paginateItems(items, page, pageSize);
+        return (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={pagedItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
+              {pagedItems.map(item => (
+                <SortableGalleryItem
+                  key={item.id}
+                  item={item}
+                  onUpdateLocal={updateLocal}
+                  onSave={update}
+                  onRemove={remove}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        );
+      })()}
 
       {items.length === 0 && <p className="text-muted-foreground text-center py-8">No gallery images yet. Upload images or add by URL.</p>}
     </div>

@@ -376,30 +376,37 @@ const AdminNotices = () => {
           </span>
         </div>
       )}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={notices.map((n) => n.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          {notices.map((n) => (
-            <SortableNoticeCard
-              key={n.id}
-              notice={n}
-              onUpdateLocal={updateLocal}
-              onSave={updateNotice}
-              onDelete={deleteNotice}
-              onTogglePin={togglePin}
-              inputRef={n.id === newNoticeId ? newTitleRef : undefined}
-              selected={selectedIds.has(n.id)}
-              onToggleSelect={toggleSelect}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+
+      <AdminPagination
+        total={notices.length}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+      />
+
+      {(() => {
+        const pagedNotices = paginateItems(notices, page, pageSize);
+        return (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={pagedNotices.map((n) => n.id)} strategy={verticalListSortingStrategy}>
+              {pagedNotices.map((n) => (
+                <SortableNoticeCard
+                  key={n.id}
+                  notice={n}
+                  onUpdateLocal={updateLocal}
+                  onSave={updateNotice}
+                  onDelete={deleteNotice}
+                  onTogglePin={togglePin}
+                  inputRef={n.id === newNoticeId ? newTitleRef : undefined}
+                  selected={selectedIds.has(n.id)}
+                  onToggleSelect={toggleSelect}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        );
+      })()}
     </div>
   );
 };
