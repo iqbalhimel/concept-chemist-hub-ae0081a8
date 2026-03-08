@@ -127,6 +127,7 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       {/* Reading progress bar */}
       <div className="fixed top-0 left-0 w-full h-1 z-[60] bg-muted/30">
         <div
