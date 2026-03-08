@@ -18,6 +18,9 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import BlogPostPage from "./pages/BlogPost";
 import BlogListing from "./pages/BlogListing";
+import TestimonialsPage from "./pages/TestimonialsPage";
+import NoticesPage from "./pages/NoticesPage";
+import ResourcesPage from "./pages/ResourcesPage";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +33,9 @@ const AppRoutes = () => (
       <Route path="/:lang" element={<Index />} />
       <Route path="/:lang/blog" element={<BlogListing />} />
       <Route path="/:lang/blog/:id" element={<BlogPostPage />} />
+      <Route path="/:lang/testimonials" element={<TestimonialsPage />} />
+      <Route path="/:lang/notices" element={<NoticesPage />} />
+      <Route path="/:lang/resources" element={<ResourcesPage />} />
 
       {/* Admin routes (no lang prefix) */}
       <Route path="/admin/login" element={<AdminLogin />} />
@@ -48,6 +54,9 @@ const AppRoutes = () => (
       <Route path="/" element={<Index />} />
       <Route path="/blog" element={<BlogListing />} />
       <Route path="/blog/:id" element={<BlogPostPage />} />
+      <Route path="/testimonials" element={<TestimonialsPage />} />
+      <Route path="/notices" element={<NoticesPage />} />
+      <Route path="/resources" element={<ResourcesPage />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

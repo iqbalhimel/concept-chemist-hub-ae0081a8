@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
-import { Download, FolderOpen, FileText, Eye, X } from "lucide-react";
+import { Download, FolderOpen, FileText, Eye, X, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import PdfViewer from "@/components/PdfViewer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Link } from "react-router-dom";
 
 type StudyMaterial = Tables<"study_materials">;
 
@@ -25,9 +26,12 @@ const tagColors: Record<string, string> = {
   Biology: "bg-rose-500/15 text-rose-400 border-rose-500/20",
 };
 
+const HOMEPAGE_LIMIT = 5;
+
 const ResourcesSection = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [categories, setCategories] = useState<StudyCategory[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -36,9 +40,10 @@ const ResourcesSection = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [matRes, catRes] = await Promise.all([
-        supabase.from("study_materials").select("*").eq("is_active", true).order("created_at", { ascending: false }),
+      const [matRes, catRes, countRes] = await Promise.all([
+        supabase.from("study_materials").select("*").eq("is_active", true).order("created_at", { ascending: false }).limit(HOMEPAGE_LIMIT),
         supabase.from("study_categories").select("*").eq("is_active", true).order("sort_order"),
+        supabase.from("study_materials").select("*", { count: "exact", head: true }).eq("is_active", true),
       ]);
 
       const items = matRes.data || [];
@@ -46,6 +51,7 @@ const ResourcesSection = () => {
 
       setMaterials(items);
       setCategories(cats);
+      setTotalCount(countRes.count || 0);
 
       const materialCats = new Set(items.map(m => m.category));
       const firstMatch = cats.find(c => materialCats.has(c.name));
@@ -164,11 +170,23 @@ const ResourcesSection = () => {
             <p className="text-muted-foreground">{t.resources.empty}</p>
           </div>
         )}
+
+        {totalCount > HOMEPAGE_LIMIT && (
+          <div className="text-center mt-10">
+            <Link
+              to={`/${lang}/resources`}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all glow-primary"
+            >
+              {t.resources.see_all}
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* PDF Preview Modal */}
       <Dialog open={!!previewUrl} onOpenChange={open => { if (!open) setPreviewUrl(null); }}>
-      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 gap-0 overflow-hidden [&>button:last-child]:hidden">
+        <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 gap-0 overflow-hidden [&>button:last-child]:hidden">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-background flex-shrink-0">
             <h3 className="font-medium text-sm text-foreground truncate flex-1 min-w-0">{previewTitle}</h3>
             {previewUrl && (

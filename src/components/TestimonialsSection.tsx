@@ -1,8 +1,9 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { Quote, Star } from "lucide-react";
+import { Quote, Star, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 interface Testimonial {
   id: string;
@@ -13,26 +14,38 @@ interface Testimonial {
   rating: number;
   sort_order: number;
   is_active: boolean;
+  created_at: string;
 }
+
+const HOMEPAGE_LIMIT = 5;
 
 const TestimonialsSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const { lang, t } = useLanguage();
   const [items, setItems] = useState<Testimonial[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const fetch = async () => {
-      const { data } = await supabase
-        .from("testimonials")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
+    const fetchData = async () => {
+      const [{ data }, { count }] = await Promise.all([
+        supabase
+          .from("testimonials")
+          .select("*")
+          .eq("is_active", true)
+          .order("created_at", { ascending: false })
+          .limit(HOMEPAGE_LIMIT),
+        supabase
+          .from("testimonials")
+          .select("*", { count: "exact", head: true })
+          .eq("is_active", true),
+      ]);
       setItems((data as Testimonial[]) || []);
+      setTotalCount(count || 0);
       setLoaded(true);
     };
-    fetch();
+    fetchData();
   }, []);
 
   if (loaded && items.length === 0) return null;
@@ -68,6 +81,17 @@ const TestimonialsSection = () => {
             );
           })}
         </div>
+        {totalCount > HOMEPAGE_LIMIT && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.6 }} className="text-center mt-10">
+            <Link
+              to={`/${lang}/testimonials`}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all glow-primary"
+            >
+              {t.testimonials.see_all}
+              <ArrowRight size={16} />
+            </Link>
+          </motion.div>
+        )}
       </div>
     </section>
   );
