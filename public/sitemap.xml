@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://iqbalsir.com/en</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://iqbalsir.com/en"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://iqbalsir.com/bn"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://iqbalsir.com/en"/>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://iqbalsir.com/bn</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://iqbalsir.com/en/blog</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://iqbalsir.com/en/blog"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://iqbalsir.com/bn/blog"/>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://iqbalsir.com/en/testimonials</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://iqbalsir.com/en/testimonials"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://iqbalsir.com/bn/testimonials"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://iqbalsir.com/en/notices</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://iqbalsir.com/en/notices"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://iqbalsir.com/bn/notices"/>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://iqbalsir.com/en/resources</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://iqbalsir.com/en/resources"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://iqbalsir.com/bn/resources"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>
