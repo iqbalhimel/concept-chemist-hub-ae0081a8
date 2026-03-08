@@ -17,6 +17,7 @@ interface BlogPost {
   read_time: string | null;
   featured_image?: string | null;
   created_at: string;
+  slug?: string | null;
 }
 
 const POSTS_PER_PAGE = 9;
@@ -194,7 +195,7 @@ const BlogListing = () => {
                 {posts.map((post) => (
                   <Link
                     key={post.id}
-                    to={`/${lang}/blog/${post.id}`}
+                    to={`/${lang}/blog/${post.slug || post.id}`}
                     className="glass-card-hover group flex flex-col overflow-hidden"
                   >
                     {post.featured_image && (

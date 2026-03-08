@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { slugify } from "@/lib/slugify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RichTextEditor from "@/components/admin/RichTextEditor";
@@ -136,8 +137,29 @@ const EditPanel = ({
     />
 
     <div className="grid gap-2 sm:grid-cols-2">
-      <Input value={post.title} onChange={e => onUpdateLocal(post.id, "title", e.target.value)} placeholder="Title" />
+      <div className="space-y-1">
+        <Input value={post.title} onChange={e => {
+          onUpdateLocal(post.id, "title", e.target.value);
+          // Auto-generate slug if slug is empty or was auto-generated
+          const currentSlug = (post as any).slug || "";
+          const oldAutoSlug = slugify(post.title);
+          if (!currentSlug || currentSlug === oldAutoSlug) {
+            onUpdateLocal(post.id, "slug", slugify(e.target.value));
+          }
+        }} placeholder="Title" />
+      </div>
       <Input value={post.category} onChange={e => onUpdateLocal(post.id, "category", e.target.value)} placeholder="Category" />
+    </div>
+
+    <div className="space-y-1">
+      <label className="text-xs font-medium text-muted-foreground">URL Slug</label>
+      <div className="flex gap-2">
+        <Input value={(post as any).slug || ""} onChange={e => onUpdateLocal(post.id, "slug", slugify(e.target.value))} placeholder="auto-generated-from-title" className="font-mono text-sm" />
+        <Button size="sm" variant="outline" type="button" onClick={() => onUpdateLocal(post.id, "slug", slugify(post.title))}>
+          Auto
+        </Button>
+      </div>
+      <p className="text-[11px] text-muted-foreground">/blog/{(post as any).slug || "..."}</p>
     </div>
 
     <Input value={post.excerpt || ""} onChange={e => onUpdateLocal(post.id, "excerpt", e.target.value)} placeholder="Excerpt" />
@@ -185,7 +207,7 @@ const EditPanel = ({
         Published
       </label>
       <div className="flex-1" />
-      <Button size="sm" variant="outline" onClick={() => window.open(`/blog/${post.id}`, "_blank")}>
+      <Button size="sm" variant="outline" onClick={() => window.open(`/blog/${(post as any).slug || post.id}`, "_blank")}>
         <ExternalLink size={14} className="mr-1" /> Preview
       </Button>
       <Button size="sm" onClick={() => onSave(post)}>
@@ -220,7 +242,8 @@ const AdminBlogPosts = () => {
 
   const add = async () => {
     const maxOrder = posts.length > 0 ? Math.max(...posts.map(p => (p as any).sort_order ?? 0)) + 1 : 0;
-    const { error } = await supabase.from("blog_posts").insert({ title: "New Post", category: "General", excerpt: "", content: "", sort_order: maxOrder } as any);
+    const newSlug = slugify("new-post") + "-" + Date.now().toString(36);
+    const { error } = await supabase.from("blog_posts").insert({ title: "New Post", category: "General", excerpt: "", content: "", sort_order: maxOrder, slug: newSlug } as any);
     if (error) { toast.error(error.message); return; }
     toast.success("Post added");
     fetchAll();
@@ -240,8 +263,17 @@ const AdminBlogPosts = () => {
       is_published: post.is_published,
       featured_image: (post as any).featured_image || null,
       scheduled_at: (post as any).scheduled_at || null,
+      slug: (post as any).slug || null,
     } as any).eq("id", post.id);
-    if (error) toast.error(error.message); else toast.success("Post saved");
+    if (error) {
+      if (error.message.includes("blog_posts_slug_unique")) {
+        toast.error("This slug is already in use. Please choose a different one.");
+      } else {
+        toast.error(error.message);
+      }
+    } else {
+      toast.success("Post saved");
+    }
   };
 
   const remove = async (id: string) => {

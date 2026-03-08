@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Clock, User, Calendar, ArrowUpRight, Share2, Link2, Check } from "lucide-react";
 import { setSeo } from "@/lib/seo";
@@ -23,9 +23,10 @@ interface BlogPostType {
 
 const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { lang, t } = useLanguage();
-  const [post, setPost] = useState<BlogPostType | null>(null);
-  const [related, setRelated] = useState<BlogPostType[]>([]);
+  const [post, setPost] = useState<(BlogPostType & { slug?: string | null }) | null>(null);
+  const [related, setRelated] = useState<(BlogPostType & { slug?: string | null })[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -45,20 +46,35 @@ const BlogPost = () => {
     let cleanup: (() => void) | undefined;
     const fetchPost = async () => {
       if (!id) return;
-      const { data } = await supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("id", id)
-        .single();
-      const p = data as (BlogPostType & { is_published?: boolean }) | null;
+      
+      // Try slug first, then fall back to UUID
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      
+      let data: any = null;
+      if (!isUUID) {
+        const res = await supabase.from("blog_posts").select("*").eq("slug", id).single();
+        data = res.data;
+      }
+      if (!data && isUUID) {
+        const res = await supabase.from("blog_posts").select("*").eq("id", id).single();
+        data = res.data;
+        // Redirect UUID URL to slug URL
+        if (data?.slug) {
+          navigate(`/${lang}/blog/${data.slug}`, { replace: true });
+          return;
+        }
+      }
+      
+      const p = data as (BlogPostType & { is_published?: boolean; slug?: string | null }) | null;
       setPost(p);
       setLoading(false);
 
       if (p) {
+        const postSlug = p.slug || p.id;
         cleanup = setSeo({
           title: `${p.title} – Iqbal Sir's Blog`,
           description: p.excerpt || `Read "${p.title}" on Iqbal Sir's blog.`,
-          url: `https://iqbalsir.com/blog/${p.id}`,
+          url: `https://iqbalsir.com/blog/${postSlug}`,
           image: p.featured_image || undefined,
         });
 
@@ -70,7 +86,7 @@ const BlogPost = () => {
           .neq("id", p.id)
           .order("sort_order", { ascending: true })
           .limit(3);
-        setRelated((rel as BlogPostType[]) || []);
+        setRelated((rel as (BlogPostType & { slug?: string | null })[]) || []);
       }
     };
     fetchPost();
@@ -172,7 +188,8 @@ const BlogPost = () => {
                 <Share2 size={14} /> {t.blog_post.share}
               </span>
               {(() => {
-                const shareUrl = encodeURIComponent(`https://iqbalsir.com/blog/${post.id}`);
+                const postUrl = `https://iqbalsir.com/blog/${post.slug || post.id}`;
+                const shareUrl = encodeURIComponent(postUrl);
                 const shareTitle = encodeURIComponent(post.title);
                 return (
                   <>
@@ -205,7 +222,7 @@ const BlogPost = () => {
                     </a>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`https://iqbalsir.com/blog/${post.id}`);
+                        navigator.clipboard.writeText(`https://iqbalsir.com/blog/${post.slug || post.id}`);
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
                       }}
@@ -245,7 +262,7 @@ const BlogPost = () => {
               {related.map((r) => (
                 <Link
                   key={r.id}
-                  to={`/${lang}/blog/${r.id}`}
+                  to={`/${lang}/blog/${r.slug || r.id}`}
                   className="glass-card-hover group flex flex-col overflow-hidden"
                 >
                   {r.featured_image && (
