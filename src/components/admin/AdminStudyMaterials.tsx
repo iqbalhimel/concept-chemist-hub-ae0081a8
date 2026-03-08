@@ -126,8 +126,22 @@ const AdminStudyMaterials = () => {
       </div>
       {items.map(item => (
         <div key={item.id} className="glass-card p-4 space-y-3">
-          {/* PDF Upload */}
-          <div>
+          {/* PDF Upload with Drag & Drop */}
+          <div
+            className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
+              dragOverId === item.id
+                ? "border-primary bg-primary/5"
+                : "border-muted-foreground/25 hover:border-muted-foreground/50"
+            }`}
+            onDragOver={e => { e.preventDefault(); setDragOverId(item.id); }}
+            onDragLeave={() => setDragOverId(null)}
+            onDrop={e => {
+              e.preventDefault();
+              setDragOverId(null);
+              const file = e.dataTransfer.files?.[0];
+              if (file) handleFileUpload(item.id, file);
+            }}
+          >
             <input
               type="file"
               accept=".pdf"
@@ -139,18 +153,21 @@ const AdminStudyMaterials = () => {
                 e.target.value = "";
               }}
             />
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={uploadingId === item.id}
-              onClick={() => fileInputRefs.current[item.id]?.click()}
-            >
-              {uploadingId === item.id ? (
-                <><Loader2 size={14} className="mr-1 animate-spin" /> Uploading...</>
-              ) : (
-                <><Upload size={14} className="mr-1" /> Upload PDF</>
-              )}
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={uploadingId === item.id}
+                onClick={() => fileInputRefs.current[item.id]?.click()}
+              >
+                {uploadingId === item.id ? (
+                  <><Loader2 size={14} className="mr-1 animate-spin" /> Uploading...</>
+                ) : (
+                  <><Upload size={14} className="mr-1" /> Upload PDF</>
+                )}
+              </Button>
+              <span className="text-xs text-muted-foreground">or drag & drop a PDF here</span>
+            </div>
             {uploadingId === item.id && (
               <Progress value={uploadProgress} className="mt-2 h-2" />
             )}
