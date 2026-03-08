@@ -47,7 +47,7 @@ const BlogSection = () => {
                   <span className="inline-flex items-center gap-1"><Clock size={12} /> {post.read_time}</span>
                   {(commentCounts[post.id] || 0) > 0 && <span className="inline-flex items-center gap-1"><MessageSquare size={12} /> {commentCounts[post.id]}</span>}
                 </div>
-                <Link to={`/${lang}/blog/${post.id}`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline transition-all">{t.blog.read_article} <ArrowUpRight size={14} /></Link>
+                <Link to={`/${lang}/blog/${post.slug || post.id}`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline transition-all">{t.blog.read_article} <ArrowUpRight size={14} /></Link>
               </div>
             </motion.article>
           ))}

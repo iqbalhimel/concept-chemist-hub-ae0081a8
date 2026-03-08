@@ -262,7 +262,7 @@ const BlogPost = () => {
               {related.map((r) => (
                 <Link
                   key={r.id}
-                  to={`/${lang}/blog/${r.id}`}
+                  to={`/${lang}/blog/${r.slug || r.id}`}
                   className="glass-card-hover group flex flex-col overflow-hidden"
                 >
                   {r.featured_image && (
