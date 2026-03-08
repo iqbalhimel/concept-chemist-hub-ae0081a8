@@ -26,7 +26,11 @@ const SubjectsSection = () => {
     return acc;
   }, {});
 
-  if (items.length === 0) return null;
+  if (!items || items.length === 0) {
+    console.log('SubjectsSection: No items to display');
+    return null;
+  }
+  console.log('SubjectsSection rendering with items:', items.length);
 
   const categoryLabels: Record<string, string> = lang === "bn"
     ? { "SSC": "SSC স্তর", "HSC": "HSC স্তর", "Class 6-10": "৬ষ্ঠ-১০ম শ্রেণি" }
