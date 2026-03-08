@@ -26,7 +26,10 @@ const StatsSection = () => {
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from("achievements").select("*").eq("is_active", true).order("sort_order").then(({ data }) => setItems(data || []));
+    supabase.from("achievements").select("*").eq("is_active", true).order("sort_order").then(({ data, error }) => {
+      console.log('StatsSection data:', data, 'error:', error);
+      setItems(data || []);
+    });
   }, []);
 
   if (items.length === 0) return null;
