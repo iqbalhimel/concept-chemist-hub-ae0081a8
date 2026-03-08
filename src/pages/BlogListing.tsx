@@ -61,6 +61,21 @@ const BlogListing = () => {
 
       setPosts((data as BlogPost[]) || []);
       setTotal(count || 0);
+
+      // Fetch comment counts
+      if (data && data.length > 0) {
+        const ids = data.map((d: any) => d.id);
+        const { data: cData } = await supabase
+          .from("blog_post_comments")
+          .select("post_id")
+          .in("post_id", ids);
+        if (cData) {
+          const counts: Record<string, number> = {};
+          cData.forEach((c: any) => { counts[c.post_id] = (counts[c.post_id] || 0) + 1; });
+          setCommentCounts(counts);
+        }
+      }
+
       setLoading(false);
     };
     fetchPosts();
