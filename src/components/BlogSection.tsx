@@ -105,9 +105,9 @@ const BlogSection = () => {
                   <span className="inline-flex items-center gap-1"><User size={12} /> Iqbal Sir</span>
                   <span className="inline-flex items-center gap-1"><Clock size={12} /> {post.read_time}</span>
                 </div>
-                <button className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline transition-all">
+                <Link to={`/blog/${post.id}`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline transition-all">
                   Read Article <ArrowUpRight size={14} />
-                </button>
+                </Link>
               </div>
             </motion.article>
           ))}
