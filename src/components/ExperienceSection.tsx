@@ -11,7 +11,10 @@ const ExperienceSection = () => {
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from("experience").select("*").eq("is_active", true).order("sort_order").then(({ data }) => setItems(data || []));
+    supabase.from("experience").select("*").eq("is_active", true).order("sort_order").then(({ data, error }) => {
+      console.log('ExperienceSection data:', data, 'error:', error);
+      setItems(data || []);
+    });
   }, []);
 
   if (items.length === 0) return null;
