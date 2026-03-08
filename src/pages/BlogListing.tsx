@@ -26,6 +26,7 @@ const BlogListing = () => {
   const [page, setPage] = useState(1);
   const [categories, setCategories] = useState<string[]>([]);
   const [filterCat, setFilterCat] = useState("__all__");
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const cleanup = setSeo({
