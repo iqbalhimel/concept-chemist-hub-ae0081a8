@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, Upload, GripVertical } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { compressImage } from "@/lib/imageCompression";
 import {
   DndContext,
   closestCenter,
