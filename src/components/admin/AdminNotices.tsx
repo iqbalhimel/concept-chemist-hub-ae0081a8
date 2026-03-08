@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle, CheckSquare, Square } from "lucide-react";
 import {
   DndContext,
   closestCenter,
