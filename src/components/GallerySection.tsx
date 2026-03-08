@@ -39,8 +39,8 @@ const GallerySection = () => {
     fetch();
   }, []);
 
-  // Don't render section if loaded and no photos and no fallbacks to show
-  const displayPhotos = photos.length > 0 ? photos : [];
+  // Filter out items with empty image URLs
+  const displayPhotos = photos.filter(p => p.image_url && p.image_url.trim() !== "");
   
   if (loaded && displayPhotos.length === 0) {
     return (
