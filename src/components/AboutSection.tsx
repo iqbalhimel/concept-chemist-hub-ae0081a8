@@ -32,16 +32,22 @@ const AboutSection = () => {
 
           <div className="glass-card p-8 md:p-12 mb-10">
             <p className="text-secondary-foreground leading-relaxed text-lg mb-6">
-              A passionate science educator who has been teaching students since 2014.
-              Currently serving as <strong className="text-foreground">Assistant Teacher (Science)</strong> at
-              Zilla Smarani Girls' High School, Kishoreganj, Iqbal Sir is dedicated to
-              making science simple and interesting through concept-based learning.
+              With <span className="text-primary font-semibold">10+ years of teaching experience</span> since 2014, Iqbal Sir serves as Assistant Teacher (Science) at Zilla Smarani Girls' High School, Kishoreganj.
             </p>
-            <p className="text-secondary-foreground leading-relaxed text-lg">
-              With a strong emphasis on building fundamentals, clear explanations of difficult topics,
-              and multimedia projector-based classes, he creates a student-friendly learning environment
-              that helps students truly understand and love science.
-            </p>
+            <ul className="space-y-3 text-secondary-foreground text-base">
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />
+                <span>Specializes in <span className="text-foreground font-medium">concept-based learning</span> — making complex science topics simple and intuitive</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 w-2 h-2 rounded-full bg-accent shrink-0" />
+                <span>Uses <span className="text-foreground font-medium">multimedia projector-based classes</span> for engaging, visual explanations</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />
+                <span>Teaches SSC (Physics, Chemistry, Biology), HSC Chemistry, and Classes 6–10 (Math, Higher Math, ICT)</span>
+              </li>
+            </ul>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
