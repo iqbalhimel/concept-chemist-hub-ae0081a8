@@ -45,9 +45,8 @@ const BlogPost = () => {
         .from("blog_posts")
         .select("*")
         .eq("id", id)
-        .eq("is_published", true)
         .single();
-      const p = data as BlogPost | null;
+      const p = data as (BlogPost & { is_published?: boolean }) | null;
       setPost(p);
       setLoading(false);
 
@@ -116,6 +115,12 @@ const BlogPost = () => {
       </div>
 
       <Navbar />
+
+      {post && !(post as any).is_published && (
+        <div className="bg-accent/20 border-b border-accent text-accent-foreground text-center text-sm py-2 font-medium">
+          ⚠️ Draft Preview — This post is not published yet
+        </div>
+      )}
 
       <article className="pt-24 pb-16">
         {/* Hero / Featured Image */}
