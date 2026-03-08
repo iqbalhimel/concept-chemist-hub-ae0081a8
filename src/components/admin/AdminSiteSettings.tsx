@@ -74,6 +74,7 @@ const sections: SectionDef[] = [
     ],
   },
   {
+    key: "seo",
     label: "SEO Settings",
     icon: Search,
     fields: [
