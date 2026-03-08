@@ -188,34 +188,8 @@ const ResourcesSection = () => {
           </div>
 
           {/* PDF Viewer */}
-          <div className="flex-1 overflow-hidden relative" style={{ height: "calc(90vh - 56px)" }}>
-            {previewError ? (
-              <div className="flex flex-col items-center justify-center h-full gap-4 p-6 text-center">
-                <AlertTriangle size={48} className="text-muted-foreground/40" />
-                <p className="text-muted-foreground">Unable to preview this PDF in the browser.</p>
-                {previewUrl && (
-                  <a
-                    href={previewUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all"
-                  >
-                    <Download size={14} /> Download instead
-                  </a>
-                )}
-              </div>
-            ) : (
-              <iframe
-                src={`${previewUrl}#toolbar=1&navpanes=0`}
-                className="w-full h-full border-0"
-                title={`Preview: ${previewTitle}`}
-                onError={() => setPreviewError(true)}
-                onLoad={(e) => {
-                  // Some browsers block PDF rendering in iframes silently
-                  // We can't reliably detect this, so we keep the iframe
-                }}
-              />
-            )}
+          <div className="flex-1 overflow-hidden" style={{ height: "calc(90vh - 56px)" }}>
+            {previewUrl && <PdfViewer url={previewUrl} title={previewTitle} />}
           </div>
         </DialogContent>
       </Dialog>
