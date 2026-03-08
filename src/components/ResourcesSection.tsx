@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { Download, FolderOpen, FileText, Eye, X, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Download, FolderOpen, FileText, Eye, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import PdfViewer from "@/components/PdfViewer";
 
 type StudyMaterial = Tables<"study_materials">;
 
@@ -30,7 +31,6 @@ const ResourcesSection = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewTitle, setPreviewTitle] = useState("");
-  const [previewError, setPreviewError] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -135,7 +135,7 @@ const ResourcesSection = () => {
                   {item.file_url ? (
                     <div className="flex-shrink-0 flex items-center gap-2">
                       <button
-                        onClick={() => { setPreviewUrl(item.file_url); setPreviewTitle(item.title); setPreviewError(false); }}
+                        onClick={() => { setPreviewUrl(item.file_url); setPreviewTitle(item.title); }}
                         className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-primary/30 text-primary text-sm font-medium hover:bg-primary/10 transition-all"
                       >
                         <Eye size={14} />
@@ -187,34 +187,8 @@ const ResourcesSection = () => {
           </div>
 
           {/* PDF Viewer */}
-          <div className="flex-1 overflow-hidden relative" style={{ height: "calc(90vh - 56px)" }}>
-            {previewError ? (
-              <div className="flex flex-col items-center justify-center h-full gap-4 p-6 text-center">
-                <AlertTriangle size={48} className="text-muted-foreground/40" />
-                <p className="text-muted-foreground">Unable to preview this PDF in the browser.</p>
-                {previewUrl && (
-                  <a
-                    href={previewUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all"
-                  >
-                    <Download size={14} /> Download instead
-                  </a>
-                )}
-              </div>
-            ) : (
-              <iframe
-                src={`${previewUrl}#toolbar=1&navpanes=0`}
-                className="w-full h-full border-0"
-                title={`Preview: ${previewTitle}`}
-                onError={() => setPreviewError(true)}
-                onLoad={(e) => {
-                  // Some browsers block PDF rendering in iframes silently
-                  // We can't reliably detect this, so we keep the iframe
-                }}
-              />
-            )}
+          <div className="flex-1 overflow-hidden" style={{ height: "calc(90vh - 56px)" }}>
+            {previewUrl && <PdfViewer url={previewUrl} title={previewTitle} />}
           </div>
         </DialogContent>
       </Dialog>
