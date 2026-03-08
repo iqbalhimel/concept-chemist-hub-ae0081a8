@@ -95,7 +95,7 @@ const AdminApproach = () => {
       {items.length === 0 ? <p className="text-muted-foreground text-center py-8">No approach items added yet.</p> : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-2">
+            <div className="space-y-2 w-full max-w-full overflow-hidden">
               {paginated.map(item => (
                 <SortableRow key={item.id} id={item.id}>
                   <div className="glass-card p-2.5 sm:p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
