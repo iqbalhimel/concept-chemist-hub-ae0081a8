@@ -1,31 +1,51 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { ArrowUpRight, Clock, User } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-const posts = [
+const fallbackPosts = [
   {
+    id: "fallback-1",
     title: "Understanding Newton's Laws of Motion",
     category: "Physics",
     excerpt: "A beginner-friendly guide to the three fundamental laws that govern how objects move and interact.",
-    readTime: "5 min read",
+    read_time: "5 min read",
   },
   {
+    id: "fallback-2",
     title: "The Periodic Table Made Easy",
     category: "Chemistry",
     excerpt: "Tips and tricks to memorize the periodic table and understand element properties effectively.",
-    readTime: "4 min read",
+    read_time: "4 min read",
   },
   {
+    id: "fallback-3",
     title: "5 Study Strategies for Science Exams",
     category: "Study Tips",
     excerpt: "Proven techniques to improve retention, manage time, and score higher in board examinations.",
-    readTime: "6 min read",
+    read_time: "6 min read",
   },
 ];
 
 const BlogSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [posts, setPosts] = useState(fallbackPosts);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const { data } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(3);
+      if (data && data.length > 0) {
+        setPosts(data);
+      }
+    };
+    fetchPosts();
+  }, []);
 
   return (
     <section id="blog" className="section-padding section-gradient">
@@ -46,7 +66,7 @@ const BlogSection = () => {
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {posts.map((post, i) => (
             <motion.article
-              key={post.title}
+              key={post.id}
               initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.2 + i * 0.15 }}
@@ -62,7 +82,7 @@ const BlogSection = () => {
               <p className="text-muted-foreground text-sm leading-relaxed flex-1">{post.excerpt}</p>
               <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1"><User size={12} /> Iqbal Sir</span>
-                <span className="inline-flex items-center gap-1"><Clock size={12} /> {post.readTime}</span>
+                <span className="inline-flex items-center gap-1"><Clock size={12} /> {post.read_time}</span>
               </div>
               <button className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline transition-all">
                 Read Article <ArrowUpRight size={14} />
