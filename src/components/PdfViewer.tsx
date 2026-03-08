@@ -11,8 +11,9 @@ interface PdfViewerProps {
   title?: string;
 }
 
-const SCALE_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 2];
-const THUMB_WIDTH = 120;
+const SCALE_MIN = 0.25;
+const SCALE_MAX = 3;
+const SCALE_FACTOR = 1.15;
 
 const PdfViewer = ({ url, title }: PdfViewerProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
