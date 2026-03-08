@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags, GripVertical, Search, X, Check, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags, GripVertical, Search, X, Check, Eye, EyeOff, AlertTriangle, CheckSquare, Square } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Tables } from "@/integrations/supabase/types";
 import * as pdfjsLib from "pdfjs-dist";
@@ -96,6 +96,8 @@ const AdminStudyMaterials = () => {
   const [orderDirty, setOrderDirty] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
   const [newItemId, setNewItemId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
   const newTitleRef = useRef<HTMLInputElement | null>(null);
@@ -202,7 +204,43 @@ const AdminStudyMaterials = () => {
   const remove = async (id: string) => {
     await supabase.from("study_materials").delete().eq("id", id);
     setItems(prev => prev.filter(n => n.id !== id));
+    setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
     toast.success("Deleted");
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const visibleIds = filteredItems.map(i => i.id);
+    const allSelected = visibleIds.every(id => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        visibleIds.forEach(id => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds(prev => new Set([...prev, ...visibleIds]));
+    }
+  };
+
+  const bulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected item(s)? This cannot be undone.`)) return;
+    setBulkDeleting(true);
+    for (const id of selectedIds) {
+      await supabase.from("study_materials").delete().eq("id", id);
+    }
+    setItems(prev => prev.filter(n => !selectedIds.has(n.id)));
+    toast.success(`${selectedIds.size} item(s) deleted`);
+    setSelectedIds(new Set());
+    setBulkDeleting(false);
   };
 
   const updateLocal = (id: string, field: string, value: string | number | boolean | null) => {
@@ -366,6 +404,12 @@ const AdminStudyMaterials = () => {
           Study Materials <span className="text-base font-normal text-muted-foreground">({items.length})</span>
         </h2>
         <div className="flex flex-wrap items-center gap-2">
+          {selectedIds.size > 0 && (
+            <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting} className="animate-in fade-in">
+              <Trash2 size={14} className="mr-1" />
+              {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+            </Button>
+          )}
           {orderDirty && (
             <>
               <span className="text-xs text-destructive flex items-center gap-1">
@@ -521,12 +565,31 @@ const AdminStudyMaterials = () => {
         )}
       </div>
 
+      {/* Select all toggle */}
+      {filteredItems.length > 0 && (
+        <div className="flex items-center gap-2">
+          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+            {filteredItems.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+          </button>
+          <span className="text-xs text-muted-foreground">
+            {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}
+          </span>
+        </div>
+      )}
+
       {/* Individual items with drag-and-drop reorder */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={filteredItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
           {filteredItems.map(item => (
             <SortableItem key={item.id} id={item.id}>
-              <div className={`glass-card p-4 space-y-3 transition-opacity ${item.is_active ? "" : "opacity-50"}`}>
+              <div className={`glass-card p-4 space-y-3 transition-opacity ${item.is_active ? "" : "opacity-50"} ${selectedIds.has(item.id) ? "ring-2 ring-primary/50" : ""}`}>
+                {/* Selection checkbox */}
+                <div className="flex items-center gap-2 -mb-1">
+                  <button onClick={() => toggleSelect(item.id)} className="text-muted-foreground hover:text-foreground transition-colors">
+                    {selectedIds.has(item.id) ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
+                  </button>
+                  <span className="text-xs text-muted-foreground truncate">{item.title}</span>
+                </div>
                 {/* PDF Upload with Drag & Drop */}
                 <div
                   className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
