@@ -112,6 +112,15 @@ const BlogSection = () => {
             </motion.article>
           ))}
         </div>
+
+        <div className="text-center mt-10">
+          <Link
+            to="/blog"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/10 text-primary font-semibold hover:bg-primary/20 transition-colors"
+          >
+            View All Posts <ArrowUpRight size={16} />
+          </Link>
+        </div>
       </div>
     </section>
   );
