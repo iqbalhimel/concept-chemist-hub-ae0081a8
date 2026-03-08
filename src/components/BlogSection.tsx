@@ -53,6 +53,17 @@ const BlogSection = () => {
         .limit(3);
       if (data && data.length > 0) {
         setPosts(data as BlogPost[]);
+        // Fetch comment counts
+        const ids = data.map((d: any) => d.id);
+        const { data: cData } = await supabase
+          .from("blog_post_comments")
+          .select("post_id")
+          .in("post_id", ids);
+        if (cData) {
+          const counts: Record<string, number> = {};
+          cData.forEach((c: any) => { counts[c.post_id] = (counts[c.post_id] || 0) + 1; });
+          setCommentCounts(counts);
+        }
       }
     };
     fetchPosts();
