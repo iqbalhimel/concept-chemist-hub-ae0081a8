@@ -4,12 +4,12 @@ import iqbalSir from "@/assets/iqbal-sir.png";
 
 const HeroSection = () => {
   return (
-    <section id="home" className="relative min-h-screen flex items-center hero-gradient overflow-hidden">
+    <section id="home" className="relative min-h-screen flex items-center hero-gradient overflow-hidden w-full max-w-full">
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse-glow" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
 
-      <div className="container mx-auto px-4 pt-20 relative z-10">
-        <div className="flex flex-col-reverse md:flex-row items-center gap-10 md:gap-16 max-w-6xl mx-auto">
+      <div className="w-full max-w-full px-4 sm:px-6 lg:px-8 pt-20 relative z-10 mx-auto">
+        <div className="flex flex-col-reverse md:flex-row items-center gap-8 md:gap-16 max-w-6xl mx-auto">
           {/* Text */}
           <div className="flex-1 text-center md:text-left">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
