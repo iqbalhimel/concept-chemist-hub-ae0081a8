@@ -565,12 +565,31 @@ const AdminStudyMaterials = () => {
         )}
       </div>
 
+      {/* Select all toggle */}
+      {filteredItems.length > 0 && (
+        <div className="flex items-center gap-2">
+          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+            {filteredItems.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+          </button>
+          <span className="text-xs text-muted-foreground">
+            {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}
+          </span>
+        </div>
+      )}
+
       {/* Individual items with drag-and-drop reorder */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={filteredItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
           {filteredItems.map(item => (
             <SortableItem key={item.id} id={item.id}>
-              <div className={`glass-card p-4 space-y-3 transition-opacity ${item.is_active ? "" : "opacity-50"}`}>
+              <div className={`glass-card p-4 space-y-3 transition-opacity ${item.is_active ? "" : "opacity-50"} ${selectedIds.has(item.id) ? "ring-2 ring-primary/50" : ""}`}>
+                {/* Selection checkbox */}
+                <div className="flex items-center gap-2 -mb-1">
+                  <button onClick={() => toggleSelect(item.id)} className="text-muted-foreground hover:text-foreground transition-colors">
+                    {selectedIds.has(item.id) ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
+                  </button>
+                  <span className="text-xs text-muted-foreground truncate">{item.title}</span>
+                </div>
                 {/* PDF Upload with Drag & Drop */}
                 <div
                   className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
