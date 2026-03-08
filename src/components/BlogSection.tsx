@@ -1,22 +1,25 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Clock, User } from "lucide-react";
 
 const posts = [
   {
     title: "Understanding Newton's Laws of Motion",
     category: "Physics",
     excerpt: "A beginner-friendly guide to the three fundamental laws that govern how objects move and interact.",
+    readTime: "5 min read",
   },
   {
     title: "The Periodic Table Made Easy",
     category: "Chemistry",
     excerpt: "Tips and tricks to memorize the periodic table and understand element properties effectively.",
+    readTime: "4 min read",
   },
   {
     title: "5 Study Strategies for Science Exams",
     category: "Study Tips",
     excerpt: "Proven techniques to improve retention, manage time, and score higher in board examinations.",
+    readTime: "6 min read",
   },
 ];
 
@@ -57,6 +60,13 @@ const BlogSection = () => {
                 <ArrowUpRight size={18} className="shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
               </h3>
               <p className="text-muted-foreground text-sm leading-relaxed flex-1">{post.excerpt}</p>
+              <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1"><User size={12} /> Iqbal Sir</span>
+                <span className="inline-flex items-center gap-1"><Clock size={12} /> {post.readTime}</span>
+              </div>
+              <button className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline transition-all">
+                Read Article <ArrowUpRight size={14} />
+              </button>
             </motion.article>
           ))}
         </div>
