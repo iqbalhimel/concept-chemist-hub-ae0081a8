@@ -9,6 +9,7 @@ const ContactSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [sending, setSending] = useState(false);
   const { t } = useLanguage();
   const { get } = useSiteSettings();
 
@@ -27,9 +28,39 @@ const ContactSection = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) { toast.error(t.contact.error_fields); return; }
+    const name = form.name.trim();
+    const emailVal = form.email.trim();
+    const message = form.message.trim();
+
+    if (!name || !emailVal || !message) {
+      toast.error(t.contact.error_fields);
+      return;
+    }
+
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      toast.error(t.contact.error_fields);
+      return;
+    }
+
+    // Validate lengths
+    if (name.length > 100 || emailVal.length > 255 || message.length > 1000) {
+      toast.error(t.contact.error_fields);
+      return;
+    }
+
+    setSending(true);
+
+    // Send via WhatsApp as the delivery mechanism
+    const waNumber = whatsapp.replace(/[^0-9]/g, "");
+    const waText = encodeURIComponent(
+      `📩 New Contact Form Message\n\nName: ${name}\nEmail: ${emailVal}\n\nMessage:\n${message}`
+    );
+    window.open(`https://wa.me/${waNumber}?text=${waText}`, "_blank");
+
     toast.success(t.contact.success);
     setForm({ name: "", email: "", message: "" });
+    setSending(false);
   };
 
   return (
@@ -57,8 +88,8 @@ const ContactSection = () => {
               <div><label htmlFor="email" className="block text-sm text-muted-foreground mb-1.5">{t.contact.label_email}</label>
                 <input id="email" type="email" maxLength={255} value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder={t.contact.placeholder_email} /></div>
               <div><label htmlFor="message" className="block text-sm text-muted-foreground mb-1.5">{t.contact.label_message}</label>
-                <textarea id="message" rows={4} maxLength={1000} value={form.message} onChange={e => setForm({...form, message: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none" placeholder={t.contact.placeholder_message} /></div>
-              <button type="submit" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all glow-primary"><Send size={18} />{t.contact.send}</button>
+                <textarea id="message" rows={4} maxLength={1000} value={form.message} onChange={e => setForm({...form, message: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none" placeholder={t.contact.placeholder_message} /></textarea></div>
+              <button type="submit" disabled={sending} className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all glow-primary disabled:opacity-50"><Send size={18} />{t.contact.send}</button>
             </form>
           </motion.div>
         </div>

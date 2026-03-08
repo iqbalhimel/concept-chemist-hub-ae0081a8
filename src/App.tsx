@@ -10,56 +10,78 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import ThemeLoader from "@/components/ThemeLoader";
 import HreflangTags from "@/components/HreflangTags";
 import LanguageRedirect from "@/components/LanguageRedirect";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import BlogPostPage from "./pages/BlogPost";
-import BlogListing from "./pages/BlogListing";
-import TestimonialsPage from "./pages/TestimonialsPage";
-import NoticesPage from "./pages/NoticesPage";
-import ResourcesPage from "./pages/ResourcesPage";
+import { lazy, Suspense } from "react";
 
-const queryClient = new QueryClient();
+// Eagerly loaded (homepage critical path)
+import Index from "./pages/Index";
+
+// Lazy loaded (secondary pages)
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const BlogPostPage = lazy(() => import("./pages/BlogPost"));
+const BlogListing = lazy(() => import("./pages/BlogListing"));
+const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage"));
+const NoticesPage = lazy(() => import("./pages/NoticesPage"));
+const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 min
+      gcTime: 1000 * 60 * 10, // 10 min (formerly cacheTime)
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const PageLoader = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+  </div>
+);
 
 const AppRoutes = () => (
   <>
     <HreflangTags />
     <LanguageRedirect />
-    <Routes>
-      {/* Lang-prefixed public routes */}
-      <Route path="/:lang" element={<Index />} />
-      <Route path="/:lang/blog" element={<BlogListing />} />
-      <Route path="/:lang/blog/:id" element={<BlogPostPage />} />
-      <Route path="/:lang/testimonials" element={<TestimonialsPage />} />
-      <Route path="/:lang/notices" element={<NoticesPage />} />
-      <Route path="/:lang/resources" element={<ResourcesPage />} />
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Lang-prefixed public routes */}
+        <Route path="/:lang" element={<Index />} />
+        <Route path="/:lang/blog" element={<BlogListing />} />
+        <Route path="/:lang/blog/:id" element={<BlogPostPage />} />
+        <Route path="/:lang/testimonials" element={<TestimonialsPage />} />
+        <Route path="/:lang/notices" element={<NoticesPage />} />
+        <Route path="/:lang/resources" element={<ResourcesPage />} />
 
-      {/* Admin routes (no lang prefix) */}
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
+        {/* Admin routes (no lang prefix) */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Legacy routes (redirect via LanguageRedirect) */}
-      <Route path="/" element={<Index />} />
-      <Route path="/blog" element={<BlogListing />} />
-      <Route path="/blog/:id" element={<BlogPostPage />} />
-      <Route path="/testimonials" element={<TestimonialsPage />} />
-      <Route path="/notices" element={<NoticesPage />} />
-      <Route path="/resources" element={<ResourcesPage />} />
+        {/* Legacy routes (redirect via LanguageRedirect) */}
+        <Route path="/" element={<Index />} />
+        <Route path="/blog" element={<BlogListing />} />
+        <Route path="/blog/:id" element={<BlogPostPage />} />
+        <Route path="/testimonials" element={<TestimonialsPage />} />
+        <Route path="/notices" element={<NoticesPage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
 
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   </>
 );
 
