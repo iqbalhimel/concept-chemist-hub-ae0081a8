@@ -85,6 +85,30 @@ const AdminStudyMaterials = () => {
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex(i => i.id === active.id);
+    const newIndex = items.findIndex(i => i.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(items, oldIndex, newIndex);
+    setItems(reordered);
+
+    // Persist new sort_order values
+    const updates = reordered.map((item, idx) => ({ id: item.id, sort_order: idx }));
+    for (const u of updates) {
+      await supabase.from("study_materials").update({ sort_order: u.sort_order }).eq("id", u.id);
+    }
+    toast.success("Order updated");
+  }, [items]);
+
   const PRESET_CATEGORIES = ["Physics", "Chemistry", "Mathematics", "Biology", "Question Bank", "Model Tests"];
 
   const allCategories = useMemo(() => {
