@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, Upload, Loader2, FileUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -49,6 +50,7 @@ const AdminStudyMaterials = () => {
   const [bulkDragOver, setBulkDragOver] = useState(false);
   const [bulkUploading, setBulkUploading] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
+  const [bulkCategory, setBulkCategory] = useState("Physics");
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -143,7 +145,7 @@ const AdminStudyMaterials = () => {
 
         const { error } = await supabase.from("study_materials").insert({
           title: cleanName,
-          category: "Uncategorized",
+          category: bulkCategory,
           file_url: fileUrl,
           file_size: fileSize,
           pages: pageCount,
@@ -216,11 +218,24 @@ const AdminStudyMaterials = () => {
             <Progress value={(bulkProgress.current / bulkProgress.total) * 100} className="h-2 max-w-xs mx-auto" />
           </div>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-3">
             <FileUp size={24} className="mx-auto text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
               Drag & drop multiple PDFs here to bulk create study materials
             </p>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xs text-muted-foreground">Category:</span>
+              <Select value={bulkCategory} onValueChange={setBulkCategory}>
+                <SelectTrigger className="w-44 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Physics", "Chemistry", "Mathematics", "Biology", "Question Bank", "Model Tests", "Uncategorized"].map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <p className="text-xs text-muted-foreground/60">
               Each PDF becomes a new entry with auto-detected title, size & pages
             </p>
