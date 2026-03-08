@@ -580,95 +580,96 @@ const AdminStudyMaterials = () => {
         </div>
       )}
 
-      {/* Individual items with drag-and-drop reorder */}
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={filteredItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
-          {filteredItems.map(item => (
-            <SortableItem key={item.id} id={item.id}>
-              <div className={`glass-card p-4 space-y-3 transition-opacity ${item.is_active ? "" : "opacity-50"} ${selectedIds.has(item.id) ? "ring-2 ring-primary/50" : ""}`}>
-                {/* Selection checkbox */}
-                <div className="flex items-center gap-2 -mb-1">
-                  <button onClick={() => toggleSelect(item.id)} className="text-muted-foreground hover:text-foreground transition-colors">
-                    {selectedIds.has(item.id) ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
-                  </button>
-                  <span className="text-xs text-muted-foreground truncate">{item.title}</span>
-                </div>
-                {/* PDF Upload with Drag & Drop */}
-                <div
-                  className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
-                    dragOverId === item.id ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
-                  }`}
-                  onDragOver={e => { e.preventDefault(); setDragOverId(item.id); }}
-                  onDragLeave={() => setDragOverId(null)}
-                  onDrop={e => { e.preventDefault(); setDragOverId(null); const file = e.dataTransfer.files?.[0]; if (file) handleFileUpload(item.id, file); }}
-                >
-                  <input type="file" accept=".pdf" className="hidden" ref={el => { fileInputRefs.current[item.id] = el; }}
-                    onChange={e => { const file = e.target.files?.[0]; if (file) handleFileUpload(item.id, file); e.target.value = ""; }} />
-                  <div className="flex items-center gap-3">
-                    <Button size="sm" variant="outline" disabled={uploadingId === item.id} onClick={() => fileInputRefs.current[item.id]?.click()}>
-                      {uploadingId === item.id
-                        ? <><Loader2 size={14} className="mr-1 animate-spin" /> Uploading...</>
-                        : <><Upload size={14} className="mr-1" /> Upload PDF</>}
-                    </Button>
-                    <span className="text-xs text-muted-foreground">or drag & drop a PDF here</span>
-                  </div>
-                  {uploadingId === item.id && <Progress value={uploadProgress} className="mt-2 h-2" />}
-                </div>
+      <AdminPagination
+        total={filteredItems.length}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+      />
 
-                {/* Fields */}
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <Input
-                    ref={item.id === newItemId ? newTitleRef : undefined}
-                    value={item.title}
-                    onChange={e => updateLocal(item.id, "title", e.target.value)}
-                    placeholder="Title"
-                  />
-                  <Select
-                    value={activeCategoryNames.includes(item.category) ? item.category : ""}
-                    onValueChange={v => updateLocal(item.id, "category", v)}
-                  >
-                    <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select category" /></SelectTrigger>
-                    <SelectContent>
-                      {activeCategories.map(cat => (
-                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
-                      ))}
-                      {!activeCategoryNames.includes(item.category) && item.category && (
-                        <SelectItem value={item.category}>{item.category} (inactive)</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <Input value={item.file_url || ""} onChange={e => updateLocal(item.id, "file_url", e.target.value)} placeholder="File URL (auto-filled on upload)" />
-                  <Input value={item.file_size || ""} onChange={e => updateLocal(item.id, "file_size", e.target.value)} placeholder="File Size (auto-detected)" />
-                  <Input type="number" value={item.pages || ""} onChange={e => updateLocal(item.id, "pages", e.target.value ? parseInt(e.target.value) : null)} placeholder="Pages (auto-detected)" />
-                  <div className="flex gap-2 items-center justify-between">
-                    <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-                      <input type="checkbox" checked={item.is_active}
-                        onChange={async () => {
-                          const newVal = !item.is_active;
-                          updateLocal(item.id, "is_active", newVal);
-                          const { error } = await supabase.from("study_materials").update({ is_active: newVal }).eq("id", item.id);
-                          if (error) toast.error(error.message);
-                          else toast.success(newVal ? "Activated" : "Hidden from public site");
-                        }}
-                        className="accent-primary h-3.5 w-3.5"
-                      />
-                      <span className={item.is_active ? "text-foreground" : "text-muted-foreground"}>
-                        {item.is_active ? "Active" : "Inactive"}
-                      </span>
-                    </label>
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={() => update(item.id, { title: item.title, category: item.category, file_url: item.file_url, file_size: item.file_size, pages: item.pages })}>
-                        <Save size={14} className="mr-1" /> Save
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={() => remove(item.id)}><Trash2 size={14} /></Button>
+      {/* Individual items with drag-and-drop reorder */}
+      {(() => {
+        const pagedItems = paginateItems(filteredItems, page, pageSize);
+        return (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={pagedItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
+              {pagedItems.map(item => (
+                <SortableItem key={item.id} id={item.id}>
+                  <div className={`glass-card p-4 space-y-3 transition-opacity ${item.is_active ? "" : "opacity-50"} ${selectedIds.has(item.id) ? "ring-2 ring-primary/50" : ""}`}>
+                    <div className="flex items-center gap-2 -mb-1">
+                      <button onClick={() => toggleSelect(item.id)} className="text-muted-foreground hover:text-foreground transition-colors">
+                        {selectedIds.has(item.id) ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
+                      </button>
+                      <span className="text-xs text-muted-foreground truncate">{item.title}</span>
+                    </div>
+                    <div
+                      className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
+                        dragOverId === item.id ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                      }`}
+                      onDragOver={e => { e.preventDefault(); setDragOverId(item.id); }}
+                      onDragLeave={() => setDragOverId(null)}
+                      onDrop={e => { e.preventDefault(); setDragOverId(null); const file = e.dataTransfer.files?.[0]; if (file) handleFileUpload(item.id, file); }}
+                    >
+                      <input type="file" accept=".pdf" className="hidden" ref={el => { fileInputRefs.current[item.id] = el; }}
+                        onChange={e => { const file = e.target.files?.[0]; if (file) handleFileUpload(item.id, file); e.target.value = ""; }} />
+                      <div className="flex items-center gap-3">
+                        <Button size="sm" variant="outline" disabled={uploadingId === item.id} onClick={() => fileInputRefs.current[item.id]?.click()}>
+                          {uploadingId === item.id
+                            ? <><Loader2 size={14} className="mr-1 animate-spin" /> Uploading...</>
+                            : <><Upload size={14} className="mr-1" /> Upload PDF</>}
+                        </Button>
+                        <span className="text-xs text-muted-foreground">or drag & drop a PDF here</span>
+                      </div>
+                      {uploadingId === item.id && <Progress value={uploadProgress} className="mt-2 h-2" />}
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <Input ref={item.id === newItemId ? newTitleRef : undefined} value={item.title} onChange={e => updateLocal(item.id, "title", e.target.value)} placeholder="Title" />
+                      <Select value={activeCategoryNames.includes(item.category) ? item.category : ""} onValueChange={v => updateLocal(item.id, "category", v)}>
+                        <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select category" /></SelectTrigger>
+                        <SelectContent>
+                          {activeCategories.map(cat => (
+                            <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                          ))}
+                          {!activeCategoryNames.includes(item.category) && item.category && (
+                            <SelectItem value={item.category}>{item.category} (inactive)</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <Input value={item.file_url || ""} onChange={e => updateLocal(item.id, "file_url", e.target.value)} placeholder="File URL (auto-filled on upload)" />
+                      <Input value={item.file_size || ""} onChange={e => updateLocal(item.id, "file_size", e.target.value)} placeholder="File Size (auto-detected)" />
+                      <Input type="number" value={item.pages || ""} onChange={e => updateLocal(item.id, "pages", e.target.value ? parseInt(e.target.value) : null)} placeholder="Pages (auto-detected)" />
+                      <div className="flex gap-2 items-center justify-between">
+                        <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                          <input type="checkbox" checked={item.is_active}
+                            onChange={async () => {
+                              const newVal = !item.is_active;
+                              updateLocal(item.id, "is_active", newVal);
+                              const { error } = await supabase.from("study_materials").update({ is_active: newVal }).eq("id", item.id);
+                              if (error) toast.error(error.message);
+                              else toast.success(newVal ? "Activated" : "Hidden from public site");
+                            }}
+                            className="accent-primary h-3.5 w-3.5"
+                          />
+                          <span className={item.is_active ? "text-foreground" : "text-muted-foreground"}>
+                            {item.is_active ? "Active" : "Inactive"}
+                          </span>
+                        </label>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => update(item.id, { title: item.title, category: item.category, file_url: item.file_url, file_size: item.file_size, pages: item.pages })}>
+                            <Save size={14} className="mr-1" /> Save
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => remove(item.id)}><Trash2 size={14} /></Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </SortableItem>
-          ))}
-        </SortableContext>
-      </DndContext>
+                </SortableItem>
+              ))}
+            </SortableContext>
+          </DndContext>
+        );
+      })()}
     </div>
   );
 };
