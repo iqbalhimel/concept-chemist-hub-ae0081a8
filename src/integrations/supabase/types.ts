@@ -145,6 +145,7 @@ export type Database = {
           created_at: string
           date: string
           description: string | null
+          expires_at: string | null
           id: string
           is_active: boolean
           is_pinned: boolean
@@ -156,6 +157,7 @@ export type Database = {
           created_at?: string
           date?: string
           description?: string | null
+          expires_at?: string | null
           id?: string
           is_active?: boolean
           is_pinned?: boolean
@@ -167,6 +169,7 @@ export type Database = {
           created_at?: string
           date?: string
           description?: string | null
+          expires_at?: string | null
           id?: string
           is_active?: boolean
           is_pinned?: boolean

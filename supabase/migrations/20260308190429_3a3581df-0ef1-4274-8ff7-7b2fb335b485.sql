@@ -1,0 +1,1 @@
+ALTER TABLE public.notices ADD COLUMN expires_at date DEFAULT NULL;
