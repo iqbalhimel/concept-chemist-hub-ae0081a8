@@ -78,25 +78,31 @@ const GallerySection = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 max-w-5xl mx-auto">
-            {displayPhotos.map((photo) => (
-              <div
-                key={photo.id}
-                className="relative rounded-xl overflow-hidden cursor-pointer group"
-                style={{ minHeight: "250px" }}
-                onClick={() => setLightbox(photo.image_url)}
-              >
-                <img
-                  src={photo.image_url}
-                  alt={photo.alt || photo.label || "Gallery image"}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading="lazy"
-                />
-                <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-background/60 backdrop-blur-sm">
-                  <span className="text-sm font-medium text-foreground">{photo.label}</span>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 max-w-5xl mx-auto auto-rows-[220px] md:auto-rows-[260px]">
+            {displayPhotos.map((photo) => {
+              const spanClass =
+                photo.span === "wide" ? "col-span-2" :
+                photo.span === "tall" ? "row-span-2" :
+                photo.span === "large" ? "col-span-2 row-span-2" : "";
+
+              return (
+                <div
+                  key={photo.id}
+                  className={`relative rounded-xl overflow-hidden cursor-pointer group ${spanClass}`}
+                  onClick={() => setLightbox(photo.image_url)}
+                >
+                  <img
+                    src={photo.image_url}
+                    alt={photo.alt || photo.label || "Gallery image"}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-background/60 backdrop-blur-sm">
+                    <span className="text-sm font-medium text-foreground">{photo.label}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

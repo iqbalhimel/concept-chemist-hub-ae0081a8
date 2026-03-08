@@ -54,9 +54,19 @@ const SortableGalleryItem = ({
       {item.image_url && <img src={item.image_url} alt={item.alt || ""} className="w-20 h-20 rounded-lg object-cover bg-muted" />}
       <div className="flex-1 space-y-2">
         <Input value={item.image_url} onChange={e => onUpdateLocal(item.id, "image_url", e.target.value)} placeholder="Image URL" />
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <Input value={item.label || ""} onChange={e => onUpdateLocal(item.id, "label", e.target.value)} placeholder="Label" />
           <Input value={item.alt || ""} onChange={e => onUpdateLocal(item.id, "alt", e.target.value)} placeholder="Alt text" />
+          <select
+            value={item.span || "normal"}
+            onChange={e => onUpdateLocal(item.id, "span", e.target.value)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="normal">Normal</option>
+            <option value="wide">Wide (2 cols)</option>
+            <option value="tall">Tall (2 rows)</option>
+            <option value="large">Large (2×2)</option>
+          </select>
         </div>
         <div className="flex gap-2">
           <Button size="sm" onClick={() => onSave(item)}><Save size={14} className="mr-1" /> Save</Button>
@@ -130,7 +140,7 @@ const AdminGallery = () => {
   };
 
   const update = async (item: GalleryItem) => {
-    const { error } = await supabase.from("gallery").update({ image_url: item.image_url, label: item.label, alt: item.alt }).eq("id", item.id);
+    const { error } = await supabase.from("gallery").update({ image_url: item.image_url, label: item.label, alt: item.alt, span: item.span }).eq("id", item.id);
     if (error) toast.error(error.message); else toast.success("Updated");
   };
 
