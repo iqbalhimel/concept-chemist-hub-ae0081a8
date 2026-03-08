@@ -1,0 +1,4 @@
+
+ALTER TABLE public.faq
+  ADD COLUMN question_bn TEXT NOT NULL DEFAULT '',
+  ADD COLUMN answer_bn TEXT NOT NULL DEFAULT '';
