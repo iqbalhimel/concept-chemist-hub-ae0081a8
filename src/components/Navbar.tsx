@@ -3,12 +3,16 @@ import { Menu, X, Moon, Sun } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBrightness } from "@/contexts/BrightnessContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { mode, toggle } = useBrightness();
   const { lang, t, switchLang } = useLanguage();
+  const { get } = useSiteSettings();
+
+  const siteName = get("site_info", "site_name", "Iqbal Sir");
 
   const navLinks = [
     { label: t.nav.home, href: "#home" },
@@ -35,44 +39,25 @@ const Navbar = () => {
     >
       <div className="w-full flex items-center justify-between h-16 md:h-20 px-4">
         <a href="#home" className="font-display text-xl font-bold gradient-text">
-          Iqbal Sir
+          {siteName}
         </a>
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
-            >
-              {link.label}
-            </a>
+            <a key={link.href} href={link.href} className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50">{link.label}</a>
           ))}
-          {/* Language switcher */}
-          <button
-            onClick={switchLang}
-            className="ml-2 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-            aria-label="Switch language"
-          >
+          <button onClick={switchLang} className="ml-2 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors" aria-label="Switch language">
             {lang === "en" ? "বাংলা" : "EN"}
           </button>
-          {/* Brightness toggle */}
-          <button
-            onClick={toggle}
-            className="ml-1 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-            aria-label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          >
+          <button onClick={toggle} className="ml-1 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors" aria-label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
             {mode === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
         </div>
 
         {/* Mobile controls */}
         <div className="md:hidden flex items-center gap-2">
-          <button
-            onClick={switchLang}
-            className="px-3 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors min-h-[44px] flex items-center"
-          >
+          <button onClick={switchLang} className="px-3 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors min-h-[44px] flex items-center">
             {lang === "en" ? "বাংলা" : "EN"}
           </button>
           <button onClick={toggle} className="p-2.5 rounded-lg text-foreground hover:bg-secondary/50 transition-colors min-h-[44px] flex items-center justify-center">
@@ -87,22 +72,10 @@ const Navbar = () => {
       {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-background/95 backdrop-blur-xl border-b border-border overflow-hidden"
-          >
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="md:hidden bg-background/95 backdrop-blur-xl border-b border-border overflow-hidden">
             <div className="flex flex-col p-4 gap-1">
               {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-colors"
-                >
-                  {link.label}
-                </a>
+                <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-colors">{link.label}</a>
               ))}
             </div>
           </motion.div>
