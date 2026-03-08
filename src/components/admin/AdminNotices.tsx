@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle, CheckSquare, Square } from "lucide-react";
+import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
   DndContext,
   closestCenter,
@@ -154,6 +155,8 @@ const AdminNotices = () => {
   const [newNoticeId, setNewNoticeId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "all">(10);
   const newTitleRef = useRef<HTMLInputElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -373,30 +376,37 @@ const AdminNotices = () => {
           </span>
         </div>
       )}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={notices.map((n) => n.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          {notices.map((n) => (
-            <SortableNoticeCard
-              key={n.id}
-              notice={n}
-              onUpdateLocal={updateLocal}
-              onSave={updateNotice}
-              onDelete={deleteNotice}
-              onTogglePin={togglePin}
-              inputRef={n.id === newNoticeId ? newTitleRef : undefined}
-              selected={selectedIds.has(n.id)}
-              onToggleSelect={toggleSelect}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+
+      <AdminPagination
+        total={notices.length}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+      />
+
+      {(() => {
+        const pagedNotices = paginateItems(notices, page, pageSize);
+        return (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={pagedNotices.map((n) => n.id)} strategy={verticalListSortingStrategy}>
+              {pagedNotices.map((n) => (
+                <SortableNoticeCard
+                  key={n.id}
+                  notice={n}
+                  onUpdateLocal={updateLocal}
+                  onSave={updateNotice}
+                  onDelete={deleteNotice}
+                  onTogglePin={togglePin}
+                  inputRef={n.id === newNoticeId ? newTitleRef : undefined}
+                  selected={selectedIds.has(n.id)}
+                  onToggleSelect={toggleSelect}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        );
+      })()}
     </div>
   );
 };

@@ -9,6 +9,7 @@ import {
   ExternalLink, CalendarClock, Search,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
   DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent,
 } from "@dnd-kit/core";
@@ -204,6 +205,8 @@ const AdminBlogPosts = () => {
   const [savingOrder, setSavingOrder] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("__all__");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "all">(10);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -347,21 +350,35 @@ const AdminBlogPosts = () => {
         />
       )}
 
+      {/* Page size selector */}
+      <AdminPagination
+        total={filteredPosts.length}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+      />
+
       {/* Sortable List */}
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={filteredPosts.map(p => p.id)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-2">
-            {filteredPosts.map(post => (
-              <SortableRow
-                key={post.id}
-                post={post}
-                onEdit={(id) => setEditingId(editingId === id ? null : id)}
-                onDelete={remove}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+      {(() => {
+        const pagedPosts = paginateItems(filteredPosts, page, pageSize);
+        return (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={pagedPosts.map(p => p.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {pagedPosts.map(post => (
+                  <SortableRow
+                    key={post.id}
+                    post={post}
+                    onEdit={(id) => setEditingId(editingId === id ? null : id)}
+                    onDelete={remove}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        );
+      })()}
 
       {filteredPosts.length === 0 && (
         <p className="text-center text-muted-foreground py-10">
