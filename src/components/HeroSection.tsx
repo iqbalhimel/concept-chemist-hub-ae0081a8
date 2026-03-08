@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, MessageCircle } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
 import iqbalSir from "@/assets/iqbal-sir.png";
 
 const HeroSection = () => {
