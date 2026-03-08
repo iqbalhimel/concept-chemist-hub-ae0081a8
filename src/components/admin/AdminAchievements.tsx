@@ -97,11 +97,11 @@ const AdminAchievements = () => {
             <div className="space-y-2">
               {paginated.map(item => (
                 <SortableRow key={item.id} id={item.id}>
-                  <div className="glass-card p-2.5 sm:p-4 flex items-center justify-between gap-2 sm:gap-3">
+                  <div className="glass-card p-2.5 sm:p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <p className="font-medium text-foreground truncate text-sm sm:text-base">{item.value} — {item.title_en || "Untitled"}</p>
                     </div>
-                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
                       <Switch checked={item.is_active} onCheckedChange={v => toggleActive(item.id, v)} />
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEdit(item)}><Pencil size={14} /></Button>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></Button>
