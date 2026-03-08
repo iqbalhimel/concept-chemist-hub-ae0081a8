@@ -270,6 +270,20 @@ const AdminBlogPosts = () => {
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
+  const categories = useMemo(() => [...new Set(posts.map(p => p.category))].sort(), [posts]);
+
+  const filteredPosts = useMemo(() => {
+    let result = posts;
+    if (filterCategory !== "__all__") result = result.filter(p => p.category === filterCategory);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(p => p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+    }
+    return result;
+  }, [posts, searchQuery, filterCategory]);
+
+  const isFiltering = searchQuery.trim() !== "" || filterCategory !== "__all__";
+
   const editingPost = editingId ? posts.find(p => p.id === editingId) : null;
 
   return (
