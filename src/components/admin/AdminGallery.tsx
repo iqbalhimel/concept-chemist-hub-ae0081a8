@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, Upload, GripVertical } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { compressImage } from "@/lib/imageCompression";
 import {
   DndContext,
   closestCenter,
@@ -94,10 +95,13 @@ const AdminGallery = () => {
 
     for (let idx = 0; idx < files.length; idx++) {
       const file = files[idx];
-      const ext = file.name.split(".").pop();
+      const { blob, wasCompressed } = await compressImage(file);
+      const ext = wasCompressed ? "jpg" : file.name.split(".").pop();
       const path = `gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage.from("media").upload(path, file);
+      const { error: uploadError } = await supabase.storage.from("media").upload(path, blob, {
+        contentType: wasCompressed ? "image/jpeg" : file.type,
+      });
       if (uploadError) { toast.error("Upload failed: " + uploadError.message); continue; }
 
       const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);

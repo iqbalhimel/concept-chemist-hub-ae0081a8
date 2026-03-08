@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Upload, Trash2, Copy, FileText, Image as ImageIcon } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { compressImage } from "@/lib/imageCompression";
 
 type Media = Tables<"media_library">;
 
@@ -27,10 +28,14 @@ const AdminMediaLibrary = () => {
     setUploading(true);
 
     for (const file of Array.from(files)) {
-      const ext = file.name.split(".").pop();
+      const isImage = file.type.startsWith("image/");
+      const { blob, wasCompressed } = isImage ? await compressImage(file) : { blob: file as Blob, wasCompressed: false };
+      const ext = wasCompressed ? "jpg" : file.name.split(".").pop();
       const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage.from("media").upload(path, file);
+      const { error: uploadError } = await supabase.storage.from("media").upload(path, blob, {
+        contentType: wasCompressed ? "image/jpeg" : file.type,
+      });
       if (uploadError) { toast.error("Upload failed: " + uploadError.message); continue; }
 
       const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
@@ -38,8 +43,8 @@ const AdminMediaLibrary = () => {
       await supabase.from("media_library").insert({
         name: file.name,
         file_url: urlData.publicUrl,
-        file_type: file.type,
-        file_size: file.size,
+        file_type: wasCompressed ? "image/jpeg" : file.type,
+        file_size: blob.size,
       });
     }
 
