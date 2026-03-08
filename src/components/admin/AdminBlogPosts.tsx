@@ -1,14 +1,63 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, CheckSquare, Square, Eye, EyeOff, Search, X } from "lucide-react";
+import { Plus, Trash2, Save, CheckSquare, Square, Eye, EyeOff, Search, X, Upload, Loader2, ImagePlus } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Post = Tables<"blog_posts">;
+
+const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string; onUpload: (url: string) => void; onClear: () => void }) => {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Only images allowed"); return; }
+    setUploading(true);
+    try {
+      const fileName = `blog-featured/${Date.now()}-${file.name}`;
+      const { error } = await supabase.storage.from("media").upload(fileName, file, { contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("media").getPublicUrl(fileName);
+      onUpload(data.publicUrl);
+      toast.success("Image uploaded");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="text-xs font-medium text-muted-foreground">Featured Image</label>
+      <input type="file" accept="image/*" className="hidden" ref={inputRef} onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.target.value = ""; }} />
+      {imageUrl ? (
+        <div className="relative group w-full max-w-xs">
+          <img src={imageUrl} alt="Featured" className="rounded-lg w-full h-32 object-cover border border-border" />
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+            <Button size="sm" variant="secondary" onClick={() => inputRef.current?.click()} disabled={uploading}>
+              {uploading ? <Loader2 size={14} className="animate-spin" /> : "Replace"}
+            </Button>
+            <Button size="sm" variant="destructive" onClick={onClear}>Remove</Button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 rounded-lg text-sm text-muted-foreground transition-colors"
+        >
+          {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+          {uploading ? "Uploading..." : "Add featured image"}
+        </button>
+      )}
+    </div>
+  );
+};
 
 const AdminBlogPosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -201,6 +250,12 @@ const AdminBlogPosts = () => {
             <span className="text-xs text-muted-foreground truncate">{post.title}</span>
             {!post.is_published && <span className="text-[10px] font-semibold uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded">Draft</span>}
           </div>
+          {/* Featured Image */}
+          <FeaturedImageField
+            imageUrl={(post as any).featured_image || ""}
+            onUpload={(url) => updateLocal(post.id, "featured_image", url)}
+            onClear={() => updateLocal(post.id, "featured_image", "")}
+          />
           <div className="grid gap-2 sm:grid-cols-2">
             <Input value={post.title} onChange={e => updateLocal(post.id, "title", e.target.value)} placeholder="Title" />
             <Input value={post.category} onChange={e => updateLocal(post.id, "category", e.target.value)} placeholder="Category" />
@@ -214,7 +269,7 @@ const AdminBlogPosts = () => {
               Published
             </label>
             <div className="flex-1" />
-            <Button size="sm" onClick={() => update(post.id, { title: post.title, category: post.category, excerpt: post.excerpt, content: post.content, read_time: post.read_time, is_published: post.is_published })}><Save size={14} className="mr-1" /> Save</Button>
+            <Button size="sm" onClick={() => update(post.id, { title: post.title, category: post.category, excerpt: post.excerpt, content: post.content, read_time: post.read_time, is_published: post.is_published, featured_image: (post as any).featured_image || null } as any)}><Save size={14} className="mr-1" /> Save</Button>
             <Button size="sm" variant="destructive" onClick={() => remove(post.id)}><Trash2 size={14} /></Button>
           </div>
         </div>
