@@ -570,6 +570,7 @@ const AdminStudyMaterials = () => {
       ))}
         </SortableContext>
       </DndContext>
+    </div>
   );
 };
 
