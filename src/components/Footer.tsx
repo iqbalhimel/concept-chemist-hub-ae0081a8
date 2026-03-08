@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, MessageCircle } from "lucide-react";
 
 const navLinks = [
   { label: "Home", href: "#home" },
@@ -60,10 +60,21 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border mt-10 pt-6 text-center">
+        <div className="border-t border-border mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} MD. IQBAL HUSEN. All rights reserved.
           </p>
+          <div className="flex items-center gap-3">
+            <a href="https://www.fb.com/i.h.himel" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all">
+              <Facebook size={16} />
+            </a>
+            <a href="https://wa.me/8801733579100" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all">
+              <MessageCircle size={16} />
+            </a>
+            <a href="mailto:i.h.himel@gmail.com" className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all">
+              <Mail size={16} />
+            </a>
+          </div>
         </div>
       </div>
     </footer>
