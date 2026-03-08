@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Upload, Trash2, Copy, FileText, Image as ImageIcon } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { compressImage } from "@/lib/imageCompression";
 
 type Media = Tables<"media_library">;
 
