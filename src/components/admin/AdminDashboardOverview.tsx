@@ -95,6 +95,24 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
         ))}
       </div>
 
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          {[
+            { label: "New Blog Post", tab: "blog", icon: FileText },
+            { label: "New Notice", tab: "notices", icon: Bell },
+            { label: "New Material", tab: "study-materials", icon: Download },
+          ].map(a => (
+            <Button key={a.tab} variant="outline" size="sm" onClick={() => onNavigate(a.tab)} className="gap-1.5">
+              <Plus size={14} /> <a.icon size={14} /> {a.label}
+            </Button>
+          ))}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center justify-between">
