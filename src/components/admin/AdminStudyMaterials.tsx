@@ -110,6 +110,42 @@ const AdminStudyMaterials = () => {
     setItems(prev => prev.map(x => x.id === id ? { ...x, [field]: value } : x));
   };
 
+  const renameCategory = async (oldName: string, newName: string) => {
+    if (!newName.trim() || newName.trim() === oldName) { setRenamingCat(null); return; }
+    setCatActionLoading(true);
+    const affected = items.filter(i => i.category === oldName);
+    let success = 0;
+    for (const item of affected) {
+      const { error } = await supabase.from("study_materials").update({ category: newName.trim() }).eq("id", item.id);
+      if (!error) success++;
+    }
+    if (bulkCategory === oldName) setBulkCategory(newName.trim());
+    toast.success(`Renamed "${oldName}" → "${newName.trim()}" (${success} item${success !== 1 ? "s" : ""})`);
+    setRenamingCat(null);
+    setCatActionLoading(false);
+    fetchItems();
+  };
+
+  const deleteCategory = async (catName: string) => {
+    const affected = items.filter(i => i.category === catName);
+    if (affected.length === 0) {
+      toast.info("No materials in this category");
+      return;
+    }
+    const confirmed = window.confirm(
+      `Move ${affected.length} item${affected.length !== 1 ? "s" : ""} from "${catName}" to "Uncategorized"?`
+    );
+    if (!confirmed) return;
+    setCatActionLoading(true);
+    for (const item of affected) {
+      await supabase.from("study_materials").update({ category: "Uncategorized" }).eq("id", item.id);
+    }
+    if (bulkCategory === catName) setBulkCategory("Physics");
+    toast.success(`Deleted "${catName}" — ${affected.length} item${affected.length !== 1 ? "s" : ""} moved to Uncategorized`);
+    setCatActionLoading(false);
+    fetchItems();
+  };
+
   const handleFileUpload = async (id: string, file: File) => {
     if (file.type !== "application/pdf") {
       toast.error("Only PDF files are supported");
