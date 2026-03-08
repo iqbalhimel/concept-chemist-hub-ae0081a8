@@ -206,7 +206,7 @@ const AdminBlogPosts = () => {
             <Input value={post.category} onChange={e => updateLocal(post.id, "category", e.target.value)} placeholder="Category" />
           </div>
           <Input value={post.excerpt || ""} onChange={e => updateLocal(post.id, "excerpt", e.target.value)} placeholder="Excerpt" />
-          <Textarea value={post.content || ""} onChange={e => updateLocal(post.id, "content", e.target.value)} placeholder="Content" rows={4} />
+          <RichTextEditor content={post.content || ""} onChange={(html) => updateLocal(post.id, "content", html)} placeholder="Write your blog post content..." />
           <Input value={post.read_time || ""} onChange={e => updateLocal(post.id, "read_time", e.target.value)} placeholder="Read time (e.g. 5 min read)" />
           <div className="flex gap-2 items-center">
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
