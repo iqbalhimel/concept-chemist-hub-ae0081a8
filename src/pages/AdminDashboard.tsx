@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, FileText, BookOpen, Bell, Download,
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
-  MessageSquare, Globe
+  MessageSquare, Globe, MessageSquareQuote
 } from "lucide-react";
 import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminNotices from "@/components/admin/AdminNotices";
@@ -15,6 +15,7 @@ import AdminFAQ from "@/components/admin/AdminFAQ";
 import AdminMediaLibrary from "@/components/admin/AdminMediaLibrary";
 import AdminThemes from "@/components/admin/AdminThemes";
 import AdminComments from "@/components/admin/AdminComments";
+import AdminTestimonials from "@/components/admin/AdminTestimonials";
 import AdminDashboardOverview from "@/components/admin/AdminDashboardOverview";
 
 type Tab =
@@ -24,6 +25,7 @@ type Tab =
   | "study-materials"
   | "blog"
   | "comments"
+  | "testimonials"
   | "gallery"
   | "faq"
   | "media"
@@ -36,6 +38,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "study-materials", label: "Study Materials", icon: Download },
   { id: "blog", label: "Blog Posts", icon: FileText },
   { id: "comments", label: "Comments", icon: MessageSquare },
+  { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
   { id: "gallery", label: "Gallery", icon: Image },
   { id: "faq", label: "FAQ", icon: HelpCircle },
   { id: "media", label: "Media Library", icon: Image },
@@ -59,6 +62,8 @@ const AdminDashboard = () => {
         return <AdminBlogPosts />;
       case "comments":
         return <AdminComments />;
+      case "testimonials":
+        return <AdminTestimonials />;
       case "gallery":
         return <AdminGallery />;
       case "faq":
@@ -74,12 +79,10 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h1 className="font-display text-lg font-bold gradient-text">Admin Panel</h1>
@@ -116,7 +119,6 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      {/* Main */}
       <main className="flex-1 min-h-screen">
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center gap-3">
           <button className="lg:hidden text-foreground" onClick={() => setSidebarOpen(true)}>

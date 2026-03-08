@@ -346,6 +346,42 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonials: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          rating: number
+          sort_order: number
+          student_info: string
+          student_name: string
+          testimonial_text_bn: string
+          testimonial_text_en: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          rating?: number
+          sort_order?: number
+          student_info?: string
+          student_name: string
+          testimonial_text_bn?: string
+          testimonial_text_en?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          rating?: number
+          sort_order?: number
+          student_info?: string
+          student_name?: string
+          testimonial_text_bn?: string
+          testimonial_text_en?: string
+        }
+        Relationships: []
+      }
       themes: {
         Row: {
           colors: Json

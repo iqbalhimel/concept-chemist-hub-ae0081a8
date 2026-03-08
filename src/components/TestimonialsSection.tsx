@@ -1,20 +1,41 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Quote, Star } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
-const testimonials = [
-  { name: "Rafiq Ahmed", exam: "SSC 2024 · GPA 5.00", text: "Iqbal Sir's concept-based teaching completely changed how I understand Physics. Instead of memorising formulas, I actually learned the 'why' behind them." },
-  { name: "Fatima Akter", exam: "HSC 2023 · GPA 5.00", text: "Chemistry felt impossible until I joined Iqbal Sir's batch. His multimedia approach and real-life examples made even Organic Chemistry enjoyable." },
-  { name: "Tanvir Hasan", exam: "SSC 2024 · GPA 5.00", text: "The model tests and board question practice sessions were a game-changer. I went into my SSC exams feeling fully prepared and confident." },
-  { name: "Nusrat Jahan", exam: "HSC 2023 · GPA 4.92", text: "What I love most is how Sir makes sure every student understands before moving on. The small batch sizes really help with personal attention." },
-  { name: "Ariful Islam", exam: "SSC 2024 · GPA 5.00", text: "The free notes and question banks are incredibly well-organised. Iqbal Sir goes above and beyond to support his students even outside class hours." },
-];
+interface Testimonial {
+  id: string;
+  student_name: string;
+  student_info: string;
+  testimonial_text_en: string;
+  testimonial_text_bn: string;
+  rating: number;
+  sort_order: number;
+  is_active: boolean;
+}
 
 const TestimonialsSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
+  const [items, setItems] = useState<Testimonial[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase
+        .from("testimonials")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      setItems((data as Testimonial[]) || []);
+      setLoaded(true);
+    };
+    fetch();
+  }, []);
+
+  if (loaded && items.length === 0) return null;
 
   return (
     <section id="testimonials" className="section-padding section-gradient">
@@ -25,14 +46,27 @@ const TestimonialsSection = () => {
           <p className="text-muted-foreground max-w-xl mx-auto">{t.testimonials.subtitle}</p>
         </motion.div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
-          {testimonials.map((item, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.1 }} className="glass-card-hover p-6 flex flex-col gap-4">
-              <Quote size={24} className="text-primary/40" />
-              <p className="text-muted-foreground text-sm leading-relaxed flex-1">"{item.text}"</p>
-              <div className="flex items-center gap-1 text-primary">{Array.from({length:5}).map((_,s)=><Star key={s} size={14} fill="currentColor"/>)}</div>
-              <div className="border-t border-border pt-3"><p className="font-medium text-foreground text-sm">{item.name}</p><p className="text-xs text-muted-foreground">{item.exam}</p></div>
-            </motion.div>
-          ))}
+          {items.map((item, i) => {
+            const text = lang === "bn" && item.testimonial_text_bn
+              ? item.testimonial_text_bn
+              : item.testimonial_text_en || item.testimonial_text_bn;
+
+            return (
+              <motion.div key={item.id} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.1 }} className="glass-card-hover p-6 flex flex-col gap-4">
+                <Quote size={24} className="text-primary/40" />
+                <p className="text-muted-foreground text-sm leading-relaxed flex-1">"{text}"</p>
+                <div className="flex items-center gap-1 text-primary">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <Star key={s} size={14} className={s < item.rating ? "fill-current" : "opacity-20"} />
+                  ))}
+                </div>
+                <div className="border-t border-border pt-3">
+                  <p className="font-medium text-foreground text-sm">{item.student_name}</p>
+                  <p className="text-xs text-muted-foreground">{item.student_info}</p>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
