@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Clock, User, Calendar, ArrowUpRight, Share2, Link2, Check } from "lucide-react";
 import { setSeo } from "@/lib/seo";
