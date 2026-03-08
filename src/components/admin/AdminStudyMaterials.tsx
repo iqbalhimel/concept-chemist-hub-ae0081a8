@@ -204,7 +204,43 @@ const AdminStudyMaterials = () => {
   const remove = async (id: string) => {
     await supabase.from("study_materials").delete().eq("id", id);
     setItems(prev => prev.filter(n => n.id !== id));
+    setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
     toast.success("Deleted");
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const visibleIds = filteredItems.map(i => i.id);
+    const allSelected = visibleIds.every(id => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        visibleIds.forEach(id => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds(prev => new Set([...prev, ...visibleIds]));
+    }
+  };
+
+  const bulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected item(s)? This cannot be undone.`)) return;
+    setBulkDeleting(true);
+    for (const id of selectedIds) {
+      await supabase.from("study_materials").delete().eq("id", id);
+    }
+    setItems(prev => prev.filter(n => !selectedIds.has(n.id)));
+    toast.success(`${selectedIds.size} item(s) deleted`);
+    setSelectedIds(new Set());
+    setBulkDeleting(false);
   };
 
   const updateLocal = (id: string, field: string, value: string | number | boolean | null) => {
