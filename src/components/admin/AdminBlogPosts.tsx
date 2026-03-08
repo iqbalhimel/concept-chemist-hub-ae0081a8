@@ -268,8 +268,6 @@ const AdminBlogPosts = () => {
     toast.success("Order saved");
   };
 
-  if (loading) return <div className="text-muted-foreground">Loading...</div>;
-
   const categories = useMemo(() => [...new Set(posts.map(p => p.category))].sort(), [posts]);
 
   const filteredPosts = useMemo(() => {
@@ -285,6 +283,8 @@ const AdminBlogPosts = () => {
   const isFiltering = searchQuery.trim() !== "" || filterCategory !== "__all__";
 
   const editingPost = editingId ? posts.find(p => p.id === editingId) : null;
+
+  if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
   return (
     <div className="space-y-4">
