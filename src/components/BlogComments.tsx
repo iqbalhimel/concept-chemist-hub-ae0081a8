@@ -213,6 +213,17 @@ const BlogComments = ({ postId }: Props) => {
 
   useEffect(() => {
     fetchComments();
+
+    const channel = supabase
+      .channel(`comments-${postId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "blog_post_comments", filter: `post_id=eq.${postId}` },
+        () => { fetchComments(); }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [postId]);
 
   const topLevel = comments.filter(c => !c.parent_id);
