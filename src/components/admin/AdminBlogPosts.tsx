@@ -268,8 +268,8 @@ const AdminBlogPosts = () => {
             <Input value={post.category} onChange={e => updateLocal(post.id, "category", e.target.value)} placeholder="Category" />
           </div>
           <Input value={post.excerpt || ""} onChange={e => updateLocal(post.id, "excerpt", e.target.value)} placeholder="Excerpt" />
-          <RichTextEditor content={post.content || ""} onChange={(html) => updateLocal(post.id, "content", html)} placeholder="Write your blog post content..." />
-          <Input value={post.read_time || ""} onChange={e => updateLocal(post.id, "read_time", e.target.value)} placeholder="Read time (e.g. 5 min read)" />
+          <RichTextEditor content={post.content || ""} onChange={(html) => { updateLocal(post.id, "content", html); updateLocal(post.id, "read_time", calcReadTime(html)); }} placeholder="Write your blog post content..." />
+          <p className="text-xs text-muted-foreground">Estimated read time: <span className="font-medium text-foreground">{post.read_time || calcReadTime(post.content || "")}</span></p>
           <div className="flex gap-2 items-center">
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
               <input type="checkbox" checked={post.is_published} onChange={e => updateLocal(post.id, "is_published", e.target.checked)} />
