@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
-import { Bell, Calendar, Copy, X } from "lucide-react";
+import { useRef, useState, useEffect, useMemo } from "react";
+import { Bell, Calendar, Copy, Pin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -19,6 +19,7 @@ interface Notice {
   description: string | null;
   sort_order?: number;
   created_at?: string;
+  is_pinned?: boolean;
 }
 
 const fallbackNotices: Notice[] = [
@@ -59,11 +60,18 @@ const NoticesSection = () => {
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
       if (data && data.length > 0) {
-        setNotices(data);
+        setNotices(data as Notice[]);
       }
     };
     fetchNotices();
   }, []);
+
+  // Pinned notices first, then by sort_order
+  const sortedNotices = useMemo(() => {
+    const pinned = notices.filter((n) => n.is_pinned);
+    const unpinned = notices.filter((n) => !n.is_pinned);
+    return [...pinned, ...unpinned];
+  }, [notices]);
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("en-US", {
@@ -95,13 +103,13 @@ const NoticesSection = () => {
           </motion.div>
 
           <div className="max-w-3xl mx-auto space-y-4">
-            {notices.map((notice, i) => (
+            {sortedNotices.map((notice, i) => (
               <motion.div
                 key={notice.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}
-                className="glass-card-hover p-5 flex gap-4 items-start cursor-pointer transition-all hover:scale-[1.01] hover:shadow-lg active:scale-[0.99]"
+                className={`glass-card-hover p-5 flex gap-4 items-start cursor-pointer transition-all hover:scale-[1.01] hover:shadow-lg active:scale-[0.99] ${notice.is_pinned ? "ring-2 ring-primary/40" : ""}`}
                 onClick={() => setSelected(notice)}
                 role="button"
                 tabIndex={0}
@@ -110,12 +118,23 @@ const NoticesSection = () => {
                 }}
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <Bell size={20} className="text-primary" />
+                  {notice.is_pinned ? (
+                    <Pin size={20} className="text-primary fill-primary" />
+                  ) : (
+                    <Bell size={20} className="text-primary" />
+                  )}
                 </div>
-                <div className="min-w-0">
-                  <h3 className="font-display font-bold text-foreground text-base mb-1">
-                    {notice.title}
-                  </h3>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-display font-bold text-foreground text-base mb-1">
+                      {notice.title}
+                    </h3>
+                    {notice.is_pinned && (
+                      <span className="text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                        Pinned
+                      </span>
+                    )}
+                  </div>
                   <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
                     {notice.description || "No details available."}
                   </p>
@@ -130,13 +149,22 @@ const NoticesSection = () => {
         </div>
       </section>
 
-      {/* Notice Detail Modal */}
-      <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+      <Dialog
+        open={!!selected}
+        onOpenChange={(open) => !open && setSelected(null)}
+      >
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl pr-8">
-              {selected?.title}
-            </DialogTitle>
+            <div className="flex items-center gap-2 pr-8">
+              <DialogTitle className="font-display text-xl">
+                {selected?.title}
+              </DialogTitle>
+              {selected?.is_pinned && (
+                <span className="text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded shrink-0">
+                  Pinned
+                </span>
+              )}
+            </div>
             {selected && (
               <DialogDescription className="flex items-center gap-1.5 text-primary font-medium">
                 <Calendar size={14} />
@@ -145,7 +173,8 @@ const NoticesSection = () => {
             )}
           </DialogHeader>
           <div className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">
-            {selected?.description || "No additional details provided for this notice."}
+            {selected?.description ||
+              "No additional details provided for this notice."}
           </div>
           <div className="flex justify-end pt-2">
             <Button variant="outline" size="sm" onClick={handleCopyLink}>

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, GripVertical } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pin } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -30,11 +30,13 @@ const SortableNoticeCard = ({
   onUpdateLocal,
   onSave,
   onDelete,
+  onTogglePin,
 }: {
   notice: Notice;
   onUpdateLocal: (id: string, updates: Partial<Notice>) => void;
   onSave: (n: Notice) => void;
   onDelete: (id: string) => void;
+  onTogglePin: (n: Notice) => void;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: notice.id });
@@ -45,7 +47,11 @@ const SortableNoticeCard = ({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="glass-card p-4 space-y-2">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`glass-card p-4 space-y-2 ${(notice as any).is_pinned ? "ring-2 ring-primary/50" : ""}`}
+    >
       <div className="flex items-center gap-2">
         <button
           {...attributes}
@@ -60,6 +66,15 @@ const SortableNoticeCard = ({
           placeholder="Title"
           className="flex-1"
         />
+        <Button
+          size="icon"
+          variant={(notice as any).is_pinned ? "default" : "outline"}
+          className="shrink-0 h-8 w-8"
+          onClick={() => onTogglePin(notice)}
+          title={(notice as any).is_pinned ? "Unpin" : "Pin to top"}
+        >
+          <Pin size={14} className={(notice as any).is_pinned ? "fill-current" : ""} />
+        </Button>
       </div>
       <Textarea
         value={notice.description || ""}
@@ -121,7 +136,10 @@ const AdminNotices = () => {
   };
 
   const addNotice = async () => {
-    const maxOrder = notices.length > 0 ? Math.max(...notices.map((n) => n.sort_order)) + 1 : 0;
+    const maxOrder =
+      notices.length > 0
+        ? Math.max(...notices.map((n) => n.sort_order)) + 1
+        : 0;
     const { error } = await supabase.from("notices").insert({
       title: "New Notice",
       description: "",
@@ -144,10 +162,27 @@ const AdminNotices = () => {
         description: n.description,
         date: n.date,
         is_active: n.is_active,
+        is_pinned: (n as any).is_pinned,
       })
       .eq("id", n.id);
     if (error) toast.error(error.message);
     else toast.success("Updated");
+  };
+
+  const togglePin = async (n: Notice) => {
+    const newVal = !(n as any).is_pinned;
+    const { error } = await supabase
+      .from("notices")
+      .update({ is_pinned: newVal } as any)
+      .eq("id", n.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setNotices((prev) =>
+      prev.map((x) => (x.id === n.id ? { ...x, is_pinned: newVal } as any : x))
+    );
+    toast.success(newVal ? "Pinned" : "Unpinned");
   };
 
   const deleteNotice = async (id: string) => {
@@ -173,7 +208,10 @@ const AdminNotices = () => {
 
     const updates = reordered.map((n, i) => ({ id: n.id, sort_order: i }));
     for (const u of updates) {
-      await supabase.from("notices").update({ sort_order: u.sort_order }).eq("id", u.id);
+      await supabase
+        .from("notices")
+        .update({ sort_order: u.sort_order })
+        .eq("id", u.id);
     }
     toast.success("Order updated");
   };
@@ -206,6 +244,7 @@ const AdminNotices = () => {
               onUpdateLocal={updateLocal}
               onSave={updateNotice}
               onDelete={deleteNotice}
+              onTogglePin={togglePin}
             />
           ))}
         </SortableContext>
