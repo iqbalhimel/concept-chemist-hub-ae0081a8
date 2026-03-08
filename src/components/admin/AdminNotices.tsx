@@ -334,7 +334,13 @@ const AdminNotices = () => {
         <h2 className="font-display text-2xl font-bold text-foreground">
           Notices
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedIds.size > 0 && (
+            <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting} className="animate-in fade-in">
+              <Trash2 size={14} className="mr-1" />
+              {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+            </Button>
+          )}
           {orderDirty && (
             <>
               <span className="text-xs text-destructive flex items-center gap-1">
