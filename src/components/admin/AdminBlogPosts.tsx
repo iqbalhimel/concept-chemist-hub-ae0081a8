@@ -276,6 +276,7 @@ const AdminBlogPosts = () => {
               Published
             </label>
             <div className="flex-1" />
+            <Button size="sm" variant="outline" onClick={() => window.open(`/blog/${post.id}`, "_blank")}><ExternalLink size={14} className="mr-1" /> Preview</Button>
             <Button size="sm" onClick={() => update(post.id, { title: post.title, category: post.category, excerpt: post.excerpt, content: post.content, read_time: post.read_time, is_published: post.is_published, featured_image: (post as any).featured_image || null } as any)}><Save size={14} className="mr-1" /> Save</Button>
             <Button size="sm" variant="destructive" onClick={() => remove(post.id)}><Trash2 size={14} /></Button>
           </div>
