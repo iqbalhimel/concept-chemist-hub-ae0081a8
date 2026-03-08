@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, CheckSquare, Square, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2, Save, CheckSquare, Square, Eye, EyeOff, Search, X } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Post = Tables<"blog_posts">;
@@ -14,6 +15,9 @@ const AdminBlogPosts = () => {
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState("__all__");
+  const [filterStatus, setFilterStatus] = useState("__all__");
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -22,6 +26,33 @@ const AdminBlogPosts = () => {
     setPosts(data || []);
     setLoading(false);
   };
+
+  const categories = useMemo(() => {
+    const cats = [...new Set(posts.map(p => p.category))].sort();
+    return cats;
+  }, [posts]);
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of posts) counts[p.category] = (counts[p.category] || 0) + 1;
+    return counts;
+  }, [posts]);
+
+  const filteredPosts = useMemo(() => {
+    let result = posts;
+    if (filterCategory !== "__all__") result = result.filter(p => p.category === filterCategory);
+    if (filterStatus === "published") result = result.filter(p => p.is_published);
+    else if (filterStatus === "draft") result = result.filter(p => !p.is_published);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(p =>
+        p.title.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        (p.excerpt || "").toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [posts, searchQuery, filterCategory, filterStatus]);
 
   const add = async () => {
     const { error } = await supabase.from("blog_posts").insert({ title: "New Post", category: "General", excerpt: "", content: "" });
@@ -55,11 +86,11 @@ const AdminBlogPosts = () => {
   };
 
   const toggleSelectAll = () => {
-    const allIds = posts.map(p => p.id);
-    if (allIds.every(id => selectedIds.has(id))) {
-      setSelectedIds(new Set());
+    const visibleIds = filteredPosts.map(p => p.id);
+    if (visibleIds.every(id => selectedIds.has(id))) {
+      setSelectedIds(prev => { const next = new Set(prev); visibleIds.forEach(id => next.delete(id)); return next; });
     } else {
-      setSelectedIds(new Set(allIds));
+      setSelectedIds(prev => new Set([...prev, ...visibleIds]));
     }
   };
 
@@ -90,7 +121,9 @@ const AdminBlogPosts = () => {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2 -mt-2">
-        <h2 className="font-display text-2xl font-bold text-foreground">Blog Posts</h2>
+        <h2 className="font-display text-2xl font-bold text-foreground">
+          Blog Posts <span className="text-base font-normal text-muted-foreground">({posts.length})</span>
+        </h2>
         <div className="flex flex-wrap items-center gap-2">
           {selectedIds.size > 0 && (
             <>
@@ -110,10 +143,48 @@ const AdminBlogPosts = () => {
         </div>
       </div>
 
-      {posts.length > 0 && (
+      {/* Search & Filters */}
+      <div className="flex gap-2 items-center">
+        <div className="relative flex-1">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input className="pl-9 h-9" placeholder="Search by title, category, or excerpt..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          {searchQuery && (
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setSearchQuery("")}>
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger className="w-40 h-9"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All Categories</SelectItem>
+            {categories.map(cat => (
+              <SelectItem key={cat} value={cat}>{cat} ({categoryCounts[cat] || 0})</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All Status</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      {(searchQuery || filterCategory !== "__all__" || filterStatus !== "__all__") && (
+        <p className="text-xs text-muted-foreground">
+          Showing {filteredPosts.length} of {posts.length} posts
+          {searchQuery && <> matching "{searchQuery}"</>}
+          {filterCategory !== "__all__" && <> in {filterCategory}</>}
+          {filterStatus !== "__all__" && <> ({filterStatus})</>}
+        </p>
+      )}
+
+      {filteredPosts.length > 0 && (
         <div className="flex items-center gap-2">
           <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
-            {posts.every(p => selectedIds.has(p.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+            {filteredPosts.every(p => selectedIds.has(p.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
           </button>
           <span className="text-xs text-muted-foreground">
             {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}
@@ -121,13 +192,14 @@ const AdminBlogPosts = () => {
         </div>
       )}
 
-      {posts.map(post => (
+      {filteredPosts.map(post => (
         <div key={post.id} className={`glass-card p-4 space-y-2 ${selectedIds.has(post.id) ? "ring-2 ring-primary/50" : ""}`}>
           <div className="flex items-center gap-2 -mb-1">
             <button onClick={() => toggleSelect(post.id)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
               {selectedIds.has(post.id) ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
             </button>
             <span className="text-xs text-muted-foreground truncate">{post.title}</span>
+            {!post.is_published && <span className="text-[10px] font-semibold uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded">Draft</span>}
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
             <Input value={post.title} onChange={e => updateLocal(post.id, "title", e.target.value)} placeholder="Title" />
