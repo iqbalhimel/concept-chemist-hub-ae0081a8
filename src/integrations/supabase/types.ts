@@ -24,6 +24,7 @@ export type Database = {
           id: string
           is_published: boolean
           read_time: string | null
+          scheduled_at: string | null
           title: string
           updated_at: string
         }
@@ -36,6 +37,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           read_time?: string | null
+          scheduled_at?: string | null
           title: string
           updated_at?: string
         }
@@ -48,6 +50,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           read_time?: string | null
+          scheduled_at?: string | null
           title?: string
           updated_at?: string
         }
