@@ -1,23 +1,42 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
-import galleryProjector from "@/assets/gallery-projector.jpg";
-import galleryLab from "@/assets/gallery-lab.jpg";
-import galleryGroup from "@/assets/gallery-group.jpg";
-import galleryDigital from "@/assets/gallery-digital.jpg";
+import { supabase } from "@/integrations/supabase/client";
 
-
-const photos = [
-  { src: galleryProjector, alt: "Classroom teaching session", label: "Teaching Session", span: "col-span-2" },
-  { src: galleryLab, alt: "Students in science lab", label: "Lab Activity", span: "col-span-1" },
-  { src: galleryGroup, alt: "Student celebration with teacher", label: "Student Celebration", span: "col-span-1 row-span-2" },
-  { src: galleryDigital, alt: "Class party with students", label: "Class Party", span: "col-span-1" },
-];
+type GalleryItem = {
+  id: string;
+  image_url: string;
+  alt: string | null;
+  label: string | null;
+  span: string | null;
+  sort_order: number;
+};
 
 const GallerySection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<GalleryItem[]>([]);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase
+        .from("gallery")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (data) setPhotos(data);
+    };
+    fetch();
+  }, []);
+
+  if (photos.length === 0) return null;
+
+  const getSpanClass = (span: string | null, index: number) => {
+    if (span && span !== "normal") return span;
+    // Default layout pattern
+    const patterns = ["col-span-2", "col-span-1", "col-span-1 row-span-2", "col-span-1"];
+    return patterns[index % patterns.length];
+  };
 
   return (
     <>
@@ -43,16 +62,16 @@ const GallerySection = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 max-w-5xl mx-auto auto-rows-[200px] md:auto-rows-[240px]">
             {photos.map((photo, i) => (
               <motion.div
-                key={photo.label}
+                key={photo.id}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={inView ? { opacity: 1, scale: 1 } : {}}
                 transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
-                className={`${photo.span} relative rounded-xl overflow-hidden cursor-pointer group`}
-                onClick={() => setLightbox(photo.src)}
+                className={`${getSpanClass(photo.span, i)} relative rounded-xl overflow-hidden cursor-pointer group`}
+                onClick={() => setLightbox(photo.image_url)}
               >
                 <img
-                  src={photo.src}
-                  alt={photo.alt}
+                  src={photo.image_url}
+                  alt={photo.alt || photo.label || "Gallery image"}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   loading="lazy"
                 />
@@ -66,7 +85,6 @@ const GallerySection = () => {
         </div>
       </section>
 
-      {/* Lightbox */}
       {lightbox && (
         <motion.div
           initial={{ opacity: 0 }}
