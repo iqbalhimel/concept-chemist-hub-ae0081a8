@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowUpRight, Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { setSeo } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -25,6 +26,16 @@ const BlogListing = () => {
   const [page, setPage] = useState(1);
   const [categories, setCategories] = useState<string[]>([]);
   const [filterCat, setFilterCat] = useState("__all__");
+
+  useEffect(() => {
+    const cleanup = setSeo({
+      title: "Blog – Iqbal Sir | Science Education Articles & Tips",
+      description: "Browse all articles and tips on physics, chemistry, biology and SSC/HSC exam preparation by Iqbal Sir.",
+      url: "https://iqbalsir.com/blog",
+      type: "website",
+    });
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Clock, User, Calendar, ArrowUpRight } from "lucide-react";
+import { setSeo } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -24,6 +25,7 @@ const BlogPost = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cleanup: (() => void) | undefined;
     const fetchPost = async () => {
       if (!id) return;
       const { data } = await supabase
@@ -37,6 +39,13 @@ const BlogPost = () => {
       setLoading(false);
 
       if (p) {
+        cleanup = setSeo({
+          title: `${p.title} – Iqbal Sir's Blog`,
+          description: p.excerpt || `Read "${p.title}" on Iqbal Sir's blog.`,
+          url: `https://iqbalsir.com/blog/${p.id}`,
+          image: p.featured_image || undefined,
+        });
+
         const { data: rel } = await supabase
           .from("blog_posts")
           .select("*")
@@ -50,6 +59,7 @@ const BlogPost = () => {
     };
     fetchPost();
     window.scrollTo(0, 0);
+    return () => cleanup?.();
   }, [id]);
 
   if (loading) {
