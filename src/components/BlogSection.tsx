@@ -60,6 +60,13 @@ const BlogSection = () => {
                 <ArrowUpRight size={18} className="shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
               </h3>
               <p className="text-muted-foreground text-sm leading-relaxed flex-1">{post.excerpt}</p>
+              <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1"><User size={12} /> Iqbal Sir</span>
+                <span className="inline-flex items-center gap-1"><Clock size={12} /> {post.readTime}</span>
+              </div>
+              <button className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline transition-all">
+                Read Article <ArrowUpRight size={14} />
+              </button>
             </motion.article>
           ))}
         </div>
