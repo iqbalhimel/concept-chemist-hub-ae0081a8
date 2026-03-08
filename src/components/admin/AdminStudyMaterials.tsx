@@ -101,6 +101,8 @@ const AdminStudyMaterials = () => {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "all">(10);
+  const [expandedEditId, setExpandedEditId] = useState<string | null>(null);
+  const [expandedDeleteId, setExpandedDeleteId] = useState<string | null>(null);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
   const newTitleRef = useRef<HTMLInputElement | null>(null);
