@@ -28,6 +28,7 @@ const BlogListing = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [filterCat, setFilterCat] = useState("__all__");
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const cleanup = setSeo({
