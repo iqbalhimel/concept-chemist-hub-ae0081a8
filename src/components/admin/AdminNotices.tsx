@@ -362,6 +362,17 @@ const AdminNotices = () => {
           </Button>
         </div>
       </div>
+      {/* Select all toggle */}
+      {notices.length > 0 && (
+        <div className="flex items-center gap-2">
+          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+            {notices.length > 0 && notices.every((n) => selectedIds.has(n.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+          </button>
+          <span className="text-xs text-muted-foreground">
+            {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}
+          </span>
+        </div>
+      )}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -380,6 +391,8 @@ const AdminNotices = () => {
               onDelete={deleteNotice}
               onTogglePin={togglePin}
               inputRef={n.id === newNoticeId ? newTitleRef : undefined}
+              selected={selectedIds.has(n.id)}
+              onToggleSelect={toggleSelect}
             />
           ))}
         </SortableContext>
