@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowUpRight, Clock, User, ChevronLeft, ChevronRight, MessageSquare, Search, X } from "lucide-react";
+import OptimizedImage from "@/components/OptimizedImage";
 import { setSeo } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -199,14 +200,12 @@ const BlogListing = () => {
                     className="glass-card-hover group flex flex-col overflow-hidden"
                   >
                     {post.featured_image && (
-                      <div className="w-full h-44 overflow-hidden">
-                        <img
-                          src={post.featured_image}
-                          alt={post.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      </div>
+                      <OptimizedImage
+                        src={post.featured_image}
+                        alt={post.title}
+                        widths={[400, 800]}
+                        className="w-full h-44"
+                      />
                     )}
                     <div className="p-6 flex flex-col flex-1">
                       <span className="text-xs font-semibold text-accent uppercase tracking-wider mb-2">

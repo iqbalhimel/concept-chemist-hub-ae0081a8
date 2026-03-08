@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { ArrowUpRight, Clock, User, MessageSquare } from "lucide-react";
+import OptimizedImage from "@/components/OptimizedImage";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -37,7 +38,7 @@ const BlogSection = () => {
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {posts.map((post, i) => (
             <motion.article key={post.id} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 + i * 0.15 }} className="glass-card-hover group cursor-pointer flex flex-col overflow-hidden">
-              {post.featured_image && <div className="w-full h-44 overflow-hidden"><img src={post.featured_image} alt={post.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" /></div>}
+              {post.featured_image && <OptimizedImage src={post.featured_image} alt={post.title} widths={[400, 800]} className="w-full h-44" />}
               <div className="p-8 flex flex-col flex-1">
                 <span className="text-xs font-semibold text-accent uppercase tracking-wider mb-3">{post.category}</span>
                 <h3 className="font-display text-lg font-bold text-foreground mb-3 group-hover:text-primary transition-colors flex items-start gap-2">{post.title}<ArrowUpRight size={18} className="shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity text-primary" /></h3>
