@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Download, FolderOpen, FileText, Eye, X, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -21,17 +21,19 @@ const tagColors: Record<string, string> = {
   Biology: "bg-rose-500/15 text-rose-400 border-rose-500/20",
 };
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 10;
 
 const ResourcesPage = () => {
   const { t, lang } = useLanguage();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [categories, setCategories] = useState<StudyCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewTitle, setPreviewTitle] = useState("");
+
+  const activeCategorySlug = searchParams.get("category") || null;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,16 +53,30 @@ const ResourcesPage = () => {
     return categories.filter(c => materialCats.has(c.name));
   }, [categories, materials]);
 
+  const activeCategory = useMemo(() => {
+    if (!activeCategorySlug) return null;
+    return visibleCategories.find(c => c.slug === activeCategorySlug) || null;
+  }, [activeCategorySlug, visibleCategories]);
+
   const filtered = activeCategory
-    ? materials.filter(m => m.category === activeCategory)
+    ? materials.filter(m => m.category === activeCategory.name)
     : materials;
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const handleCategoryChange = (cat: string | null) => {
-    setActiveCategory(cat);
+  const handleCategoryChange = (slug: string | null) => {
+    if (slug) {
+      setSearchParams({ category: slug });
+    } else {
+      setSearchParams({});
+    }
     setPage(1);
+  };
+
+  const getTagColor = (category: string) => {
+    const colorKey = Object.keys(tagColors).find(k => category.toLowerCase().includes(k.toLowerCase()));
+    return colorKey ? tagColors[colorKey] : "bg-primary/10 text-primary border-primary/20";
   };
 
   return (
@@ -87,12 +103,11 @@ const ResourcesPage = () => {
             <div className="text-center text-muted-foreground py-12">Loading...</div>
           ) : (
             <>
-              {/* Category Filter */}
               <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-10">
                 <button
                   onClick={() => handleCategoryChange(null)}
                   className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeCategory === null
+                    !activeCategorySlug
                       ? "bg-primary text-primary-foreground glow-primary"
                       : "glass-card text-muted-foreground hover:text-foreground hover:border-primary/30"
                   }`}
@@ -102,9 +117,9 @@ const ResourcesPage = () => {
                 {visibleCategories.map((cat) => (
                   <button
                     key={cat.id}
-                    onClick={() => handleCategoryChange(cat.name)}
+                    onClick={() => handleCategoryChange(cat.slug)}
                     className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      cat.name === activeCategory
+                      cat.slug === activeCategorySlug
                         ? "bg-primary text-primary-foreground glow-primary"
                         : "glass-card text-muted-foreground hover:text-foreground hover:border-primary/30"
                     }`}
@@ -114,7 +129,6 @@ const ResourcesPage = () => {
                 ))}
               </div>
 
-              {/* Count */}
               <p className="text-center text-sm text-muted-foreground mb-6">
                 {t.resources.showing} {paginated.length} {t.resources.of} {filtered.length} {t.resources.materials}
               </p>
@@ -122,11 +136,7 @@ const ResourcesPage = () => {
               {paginated.length > 0 ? (
                 <div className="max-w-4xl mx-auto grid gap-3">
                   {paginated.map((item) => {
-                    const colorKey = Object.keys(tagColors).find((k) =>
-                      item.category.toLowerCase().includes(k.toLowerCase())
-                    );
-                    const tagColor = colorKey ? tagColors[colorKey] : "bg-primary/10 text-primary border-primary/20";
-
+                    const tagColor = getTagColor(item.category);
                     return (
                       <div key={item.id} className="glass-card-hover p-5 flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4 min-w-0">
