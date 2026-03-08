@@ -116,6 +116,12 @@ const BlogPost = () => {
 
       <Navbar />
 
+      {post && !(post as any).is_published && (
+        <div className="bg-accent/20 border-b border-accent text-accent-foreground text-center text-sm py-2 font-medium">
+          ⚠️ Draft Preview — This post is not published yet
+        </div>
+      )}
+
       <article className="pt-24 pb-16">
         {/* Hero / Featured Image */}
         {post.featured_image && (
