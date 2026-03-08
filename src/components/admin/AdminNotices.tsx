@@ -32,6 +32,8 @@ const SortableNoticeCard = ({
   onDelete,
   onTogglePin,
   inputRef,
+  selected,
+  onToggleSelect,
 }: {
   notice: Notice;
   onUpdateLocal: (id: string, updates: Record<string, any>) => void;
@@ -39,6 +41,8 @@ const SortableNoticeCard = ({
   onDelete: (id: string) => void;
   onTogglePin: (n: Notice) => void;
   inputRef?: React.RefObject<HTMLInputElement>;
+  selected: boolean;
+  onToggleSelect: (id: string) => void;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: notice.id });
