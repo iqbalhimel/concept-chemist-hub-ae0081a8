@@ -5,7 +5,7 @@ import galleryProjector from "@/assets/gallery-projector.jpg";
 import galleryLab from "@/assets/gallery-lab.jpg";
 import galleryGroup from "@/assets/gallery-group.jpg";
 import galleryDigital from "@/assets/gallery-digital.jpg";
-import gallerySuccess from "@/assets/gallery-success.jpg";
+
 
 const photos = [
   { src: galleryProjector, alt: "Classroom teaching session", label: "Teaching Session", span: "col-span-2" },
