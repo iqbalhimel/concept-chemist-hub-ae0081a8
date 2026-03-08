@@ -103,26 +103,27 @@ const GallerySection = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 max-w-5xl mx-auto auto-rows-[200px] md:auto-rows-[240px]">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 max-w-5xl mx-auto">
             {displayPhotos.map((photo, i) => (
               <motion.div
                 key={photo.id}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={inView ? { opacity: 1, scale: 1 } : {}}
                 transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
-                className={`${getSpanClass(photo.span, i)} relative rounded-xl overflow-hidden cursor-pointer group`}
+                className="relative rounded-xl overflow-hidden cursor-pointer group"
+                style={{ minHeight: "250px" }}
                 onClick={() => setLightbox(photo.image_url)}
               >
                 <img
                   src={photo.image_url}
                   alt={photo.alt || photo.label || "Gallery image"}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-background/60 backdrop-blur-sm">
                   <span className="text-sm font-medium text-foreground">{photo.label}</span>
                 </div>
-                <div className="absolute inset-0 border border-primary/0 group-hover:border-primary/40 rounded-xl transition-colors duration-300" />
               </motion.div>
             ))}
           </div>
