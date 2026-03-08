@@ -31,7 +31,6 @@ const ResourcesSection = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewTitle, setPreviewTitle] = useState("");
-  const [previewError, setPreviewError] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
