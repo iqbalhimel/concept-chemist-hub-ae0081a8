@@ -97,7 +97,8 @@
     "badge": "What Students Say",
     "title_1": "Student",
     "title_highlight": "Testimonials",
-    "subtitle": "Hear from students who improved their understanding and exam results through concept-based learning."
+    "subtitle": "Hear from students who improved their understanding and exam results through concept-based learning.",
+    "see_all": "See All Testimonials"
   },
   "notices": {
     "title_1": "Latest",
@@ -106,7 +107,8 @@
     "pinned": "Pinned",
     "no_details": "No details available.",
     "no_additional": "No additional details provided for this notice.",
-    "copy_link": "Copy Link"
+    "copy_link": "Copy Link",
+    "see_all": "See All Notices"
   },
   "resources": {
     "badge": "Free Study Materials",
