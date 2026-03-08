@@ -205,6 +205,8 @@ const AdminBlogPosts = () => {
   const [savingOrder, setSavingOrder] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("__all__");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "all">(10);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
