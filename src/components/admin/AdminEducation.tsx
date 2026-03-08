@@ -173,7 +173,7 @@ const AdminEducation = () => {
           </SortableContext>
         </DndContext>
       )}
-      <AdminPagination total={items.length} page={page} perPage={perPage} onPageChange={setPage} onPerPageChange={setPerPage} />
+      <AdminPagination total={items.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
     </div>
   );
 };
