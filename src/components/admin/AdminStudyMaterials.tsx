@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Upload, Loader2 } from "lucide-react";
+import { Plus, Trash2, Save, Upload, Loader2, FileUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Tables } from "@/integrations/supabase/types";
 import * as pdfjsLib from "pdfjs-dist";
@@ -18,13 +18,39 @@ const formatFileSize = (bytes: number): string => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
 
+const extractPdfMeta = async (file: File) => {
+  let pageCount: number | null = null;
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    pageCount = pdf.numPages;
+  } catch (err) {
+    console.warn("Could not extract PDF metadata:", err);
+  }
+  return { pageCount, fileSize: formatFileSize(file.size) };
+};
+
+const uploadToStorage = async (file: File) => {
+  const fileName = `study-materials/${Date.now()}-${file.name}`;
+  const { error } = await supabase.storage
+    .from("media")
+    .upload(fileName, file, { contentType: "application/pdf" });
+  if (error) throw error;
+  const { data: urlData } = supabase.storage.from("media").getPublicUrl(fileName);
+  return urlData.publicUrl;
+};
+
 const AdminStudyMaterials = () => {
   const [items, setItems] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [bulkDragOver, setBulkDragOver] = useState(false);
+  const [bulkUploading, setBulkUploading] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const bulkInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => { fetchItems(); }, []);
 
@@ -65,40 +91,18 @@ const AdminStudyMaterials = () => {
     setUploadingId(id);
     setUploadProgress(10);
 
-    // Extract metadata from PDF
-    let pageCount: number | null = null;
-    const fileSize = formatFileSize(file.size);
+    const { pageCount, fileSize } = await extractPdfMeta(file);
+    setUploadProgress(40);
 
     try {
-      setUploadProgress(20);
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      pageCount = pdf.numPages;
-      setUploadProgress(40);
-    } catch (err) {
-      console.warn("Could not extract PDF metadata:", err);
-    }
-
-    // Upload to storage
-    try {
-      const fileName = `study-materials/${Date.now()}-${file.name}`;
       setUploadProgress(50);
-      const { error: uploadError } = await supabase.storage
-        .from("media")
-        .upload(fileName, file, { contentType: "application/pdf" });
-
-      if (uploadError) throw uploadError;
-
+      const fileUrl = await uploadToStorage(file);
       setUploadProgress(80);
-      const { data: urlData } = supabase.storage.from("media").getPublicUrl(fileName);
-      const fileUrl = urlData.publicUrl;
 
-      // Auto-fill fields locally
       updateLocal(id, "file_url", fileUrl);
       updateLocal(id, "file_size", fileSize);
       if (pageCount !== null) updateLocal(id, "pages", pageCount);
 
-      // Also use title from filename if still default
       const currentItem = items.find(x => x.id === id);
       if (currentItem?.title === "New Material") {
         const cleanName = file.name.replace(/\.pdf$/i, "").replace(/[-_]/g, " ");
@@ -110,10 +114,55 @@ const AdminStudyMaterials = () => {
     } catch (err: any) {
       toast.error(err.message || "Upload failed");
     } finally {
-      setTimeout(() => {
-        setUploadingId(null);
-        setUploadProgress(0);
-      }, 500);
+      setTimeout(() => { setUploadingId(null); setUploadProgress(0); }, 500);
+    }
+  };
+
+  const handleBulkUpload = async (files: FileList | File[]) => {
+    const pdfFiles = Array.from(files).filter(f => f.type === "application/pdf");
+    if (pdfFiles.length === 0) {
+      toast.error("No PDF files found");
+      return;
+    }
+
+    setBulkUploading(true);
+    setBulkProgress({ current: 0, total: pdfFiles.length });
+    let successCount = 0;
+
+    for (let i = 0; i < pdfFiles.length; i++) {
+      const file = pdfFiles[i];
+      setBulkProgress({ current: i + 1, total: pdfFiles.length });
+
+      try {
+        const [{ pageCount, fileSize }, fileUrl] = await Promise.all([
+          extractPdfMeta(file),
+          uploadToStorage(file),
+        ]);
+
+        const cleanName = file.name.replace(/\.pdf$/i, "").replace(/[-_]/g, " ");
+
+        const { error } = await supabase.from("study_materials").insert({
+          title: cleanName,
+          category: "Uncategorized",
+          file_url: fileUrl,
+          file_size: fileSize,
+          pages: pageCount,
+        });
+
+        if (error) throw error;
+        successCount++;
+      } catch (err: any) {
+        console.error(`Failed to upload ${file.name}:`, err);
+        toast.error(`Failed: ${file.name}`);
+      }
+    }
+
+    setBulkUploading(false);
+    setBulkProgress({ current: 0, total: 0 });
+
+    if (successCount > 0) {
+      toast.success(`${successCount} PDF${successCount > 1 ? "s" : ""} uploaded successfully`);
+      fetchItems();
     }
   };
 
@@ -121,13 +170,67 @@ const AdminStudyMaterials = () => {
 
   return (
     <div className="space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="font-display text-2xl font-bold text-foreground">Study Materials</h2>
-        <Button onClick={add} size="sm"><Plus size={14} className="mr-1" /> Add</Button>
+        <div className="flex gap-2">
+          <Button onClick={() => bulkInputRef.current?.click()} size="sm" variant="outline" disabled={bulkUploading}>
+            <FileUp size={14} className="mr-1" /> Bulk Upload
+          </Button>
+          <Button onClick={add} size="sm"><Plus size={14} className="mr-1" /> Add</Button>
+        </div>
       </div>
+
+      {/* Bulk drop zone */}
+      <input
+        type="file"
+        accept=".pdf"
+        multiple
+        className="hidden"
+        ref={bulkInputRef}
+        onChange={e => {
+          if (e.target.files?.length) handleBulkUpload(e.target.files);
+          e.target.value = "";
+        }}
+      />
+      <div
+        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+          bulkDragOver
+            ? "border-primary bg-primary/5"
+            : "border-muted-foreground/20 hover:border-muted-foreground/40"
+        }`}
+        onDragOver={e => { e.preventDefault(); setBulkDragOver(true); }}
+        onDragLeave={() => setBulkDragOver(false)}
+        onDrop={e => {
+          e.preventDefault();
+          setBulkDragOver(false);
+          if (e.dataTransfer.files?.length) handleBulkUpload(e.dataTransfer.files);
+        }}
+      >
+        {bulkUploading ? (
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Loader2 size={16} className="animate-spin" />
+              Uploading {bulkProgress.current} of {bulkProgress.total} PDFs...
+            </div>
+            <Progress value={(bulkProgress.current / bulkProgress.total) * 100} className="h-2 max-w-xs mx-auto" />
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <FileUp size={24} className="mx-auto text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">
+              Drag & drop multiple PDFs here to bulk create study materials
+            </p>
+            <p className="text-xs text-muted-foreground/60">
+              Each PDF becomes a new entry with auto-detected title, size & pages
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Individual items */}
       {items.map(item => (
         <div key={item.id} className="glass-card p-4 space-y-3">
-          {/* PDF Upload with Drag & Drop */}
           <div
             className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
               dragOverId === item.id
@@ -174,7 +277,6 @@ const AdminStudyMaterials = () => {
             )}
           </div>
 
-          {/* Fields */}
           <div className="grid gap-2 sm:grid-cols-2">
             <Input value={item.title} onChange={e => updateLocal(item.id, "title", e.target.value)} placeholder="Title" />
             <Input value={item.category} onChange={e => updateLocal(item.id, "category", e.target.value)} placeholder="Category" />
