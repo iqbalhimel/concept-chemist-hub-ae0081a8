@@ -262,7 +262,39 @@ const AdminNotices = () => {
   const deleteNotice = async (id: string) => {
     await supabase.from("notices").delete().eq("id", id);
     setNotices((prev) => prev.filter((n) => n.id !== id));
+    setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
     toast.success("Deleted");
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const allIds = notices.map((n) => n.id);
+    const allSelected = allIds.every((id) => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(allIds));
+    }
+  };
+
+  const bulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected notice(s)? This cannot be undone.`)) return;
+    setBulkDeleting(true);
+    for (const id of selectedIds) {
+      await supabase.from("notices").delete().eq("id", id);
+    }
+    setNotices((prev) => prev.filter((n) => !selectedIds.has(n.id)));
+    toast.success(`${selectedIds.size} notice(s) deleted`);
+    setSelectedIds(new Set());
+    setBulkDeleting(false);
   };
 
   const updateLocal = (id: string, updates: Record<string, any>) => {
