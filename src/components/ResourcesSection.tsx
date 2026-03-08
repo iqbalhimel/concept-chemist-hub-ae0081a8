@@ -133,15 +133,24 @@ const ResourcesSection = () => {
                     </div>
                   </div>
                   {item.file_url ? (
-                    <a
-                      href={item.file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-shrink-0 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all glow-primary"
-                    >
-                      <Download size={14} />
-                      <span className="hidden sm:inline">Download</span>
-                    </a>
+                    <div className="flex-shrink-0 flex items-center gap-2">
+                      <button
+                        onClick={() => { setPreviewUrl(item.file_url); setPreviewTitle(item.title); setPreviewError(false); }}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-primary/30 text-primary text-sm font-medium hover:bg-primary/10 transition-all"
+                      >
+                        <Eye size={14} />
+                        <span className="hidden sm:inline">Preview</span>
+                      </button>
+                      <a
+                        href={item.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all glow-primary"
+                      >
+                        <Download size={14} />
+                        <span className="hidden sm:inline">Download</span>
+                      </a>
+                    </div>
                   ) : (
                     <span className="text-xs text-muted-foreground">Coming soon</span>
                   )}
