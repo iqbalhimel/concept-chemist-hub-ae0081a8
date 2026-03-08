@@ -116,7 +116,8 @@
     "preview": "Preview",
     "download": "Download",
     "coming_soon": "Coming soon",
-    "empty": "Study materials are being prepared. Check back soon!"
+    "empty": "Study materials are being prepared. Check back soon!",
+    "pages": "pages"
   },
   "blog": {
     "title_1": "Educational",
@@ -164,11 +165,17 @@
   },
   "blog_listing": {
     "title": "Blog",
+    "title_all": "All",
+    "title_highlight": "Blog Posts",
     "subtitle": "Articles, tips, and study guides for science students",
     "search_placeholder": "Search articles...",
     "all_categories": "All",
     "no_results": "No posts found.",
-    "back": "Back to Home"
+    "back": "Back to Home",
+    "loading": "Loading...",
+    "showing": "Showing",
+    "of": "of",
+    "posts": "posts"
   },
   "blog_post": {
     "back_blog": "Back to Blog",
@@ -176,6 +183,36 @@
     "copied": "Copied!",
     "copy_link": "Copy Link",
     "related": "Related Articles",
-    "not_found": "Post not found"
+    "more_in": "More in",
+    "not_found": "Post Not Found",
+    "not_found_desc": "This blog post doesn't exist or has been unpublished.",
+    "draft_preview": "Draft Preview — This post is not published yet",
+    "no_content": "No content available.",
+    "loading": "Loading..."
+  },
+  "comments": {
+    "title": "Comments",
+    "leave_comment": "Leave a Comment",
+    "name_placeholder": "Your name *",
+    "comment_placeholder": "Write a comment...",
+    "reply_placeholder": "Write a reply...",
+    "post_comment": "Post Comment",
+    "reply": "Reply",
+    "cancel": "Cancel",
+    "posting": "Posting...",
+    "loading": "Loading comments...",
+    "empty": "No comments yet. Be the first to comment!",
+    "name_required": "Please enter your name",
+    "name_too_long": "Name must be less than 100 characters",
+    "content_required": "Please write a comment",
+    "content_too_long": "Comment must be less than 2000 characters",
+    "post_failed": "Failed to post comment",
+    "comment_posted": "Comment posted",
+    "reply_posted": "Reply posted"
+  },
+  "not_found": {
+    "title": "404",
+    "desc": "Oops! Page not found",
+    "back": "Return to Home"
   }
 }

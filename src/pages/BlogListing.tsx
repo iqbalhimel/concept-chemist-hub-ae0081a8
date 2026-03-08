@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BlogPost {
   id: string;
@@ -21,6 +22,7 @@ interface BlogPost {
 const POSTS_PER_PAGE = 9;
 
 const BlogListing = () => {
+  const { lang, t } = useLanguage();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -69,7 +71,6 @@ const BlogListing = () => {
       setPosts((data as BlogPost[]) || []);
       setTotal(count || 0);
 
-      // Fetch comment counts
       if (data && data.length > 0) {
         const ids = data.map((d: any) => d.id);
         const { data: cData } = await supabase
@@ -105,7 +106,7 @@ const BlogListing = () => {
   const totalPages = Math.ceil(total / POSTS_PER_PAGE);
 
   const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString("en-US", {
+    new Date(date).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -120,10 +121,10 @@ const BlogListing = () => {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
-              All <span className="gradient-text">Blog Posts</span>
+              {t.blog_listing.title_all} <span className="gradient-text">{t.blog_listing.title_highlight}</span>
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Articles and tips to help students learn science more effectively
+              {t.blog_listing.subtitle}
             </p>
           </div>
 
@@ -133,7 +134,7 @@ const BlogListing = () => {
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-10 h-11 rounded-full bg-muted/50 border-border"
-                placeholder="Search articles..."
+                placeholder={t.blog_listing.search_placeholder}
                 value={searchQuery}
                 onChange={e => { setSearchQuery(e.target.value); setPage(1); }}
               />
@@ -159,7 +160,7 @@ const BlogListing = () => {
                     : "bg-muted text-muted-foreground hover:text-foreground"
                 }`}
               >
-                All
+                {t.blog_listing.all_categories}
               </button>
               {categories.map((cat) => (
                 <button
@@ -178,12 +179,12 @@ const BlogListing = () => {
           )}
 
           {loading ? (
-            <div className="text-center text-muted-foreground py-20">Loading...</div>
+            <div className="text-center text-muted-foreground py-20">{t.blog_listing.loading}</div>
           ) : posts.length === 0 ? (
             <div className="text-center text-muted-foreground py-20">
-              <p className="text-lg mb-4">No posts found.</p>
-              <Link to="/">
-                <Button variant="outline">Back to Home</Button>
+              <p className="text-lg mb-4">{t.blog_listing.no_results}</p>
+              <Link to={`/${lang}`}>
+                <Button variant="outline">{t.blog_listing.back}</Button>
               </Link>
             </div>
           ) : (
@@ -193,7 +194,7 @@ const BlogListing = () => {
                 {posts.map((post) => (
                   <Link
                     key={post.id}
-                    to={`/blog/${post.id}`}
+                    to={`/${lang}/blog/${post.id}`}
                     className="glass-card-hover group flex flex-col overflow-hidden"
                   >
                     {post.featured_image && (
@@ -219,7 +220,7 @@ const BlogListing = () => {
                       </p>
                       <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border text-xs text-muted-foreground">
                         <span className="inline-flex items-center gap-1">
-                          <User size={12} /> Iqbal Sir
+                          <User size={12} /> {t.blog.by}
                         </span>
                         {post.read_time && (
                           <span className="inline-flex items-center gap-1">
@@ -272,7 +273,7 @@ const BlogListing = () => {
               )}
 
               <p className="text-center text-xs text-muted-foreground mt-4">
-                Showing {(page - 1) * POSTS_PER_PAGE + 1}–{Math.min(page * POSTS_PER_PAGE, total)} of {total} posts
+                {t.blog_listing.showing} {(page - 1) * POSTS_PER_PAGE + 1}–{Math.min(page * POSTS_PER_PAGE, total)} {t.blog_listing.of} {total} {t.blog_listing.posts}
               </p>
             </>
           )}

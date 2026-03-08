@@ -8,8 +8,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BlogReactions from "@/components/BlogReactions";
 import BlogComments from "@/components/BlogComments";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-interface BlogPost {
+interface BlogPostType {
   id: string;
   title: string;
   category: string;
@@ -22,8 +23,9 @@ interface BlogPost {
 
 const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [related, setRelated] = useState<BlogPost[]>([]);
+  const { lang, t } = useLanguage();
+  const [post, setPost] = useState<BlogPostType | null>(null);
+  const [related, setRelated] = useState<BlogPostType[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -48,7 +50,7 @@ const BlogPost = () => {
         .select("*")
         .eq("id", id)
         .single();
-      const p = data as (BlogPost & { is_published?: boolean }) | null;
+      const p = data as (BlogPostType & { is_published?: boolean }) | null;
       setPost(p);
       setLoading(false);
 
@@ -68,7 +70,7 @@ const BlogPost = () => {
           .neq("id", p.id)
           .order("sort_order", { ascending: true })
           .limit(3);
-        setRelated((rel as BlogPost[]) || []);
+        setRelated((rel as BlogPostType[]) || []);
       }
     };
     fetchPost();
@@ -76,10 +78,17 @@ const BlogPost = () => {
     return () => cleanup?.();
   }, [id]);
 
+  const formatDate = (date: string) =>
+    new Date(date).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="text-muted-foreground">{t.blog_post.loading}</div>
       </div>
     );
   }
@@ -89,22 +98,16 @@ const BlogPost = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-32 text-center">
-          <h1 className="font-display text-3xl font-bold text-foreground mb-4">Post Not Found</h1>
-          <p className="text-muted-foreground mb-8">This blog post doesn't exist or has been unpublished.</p>
-          <Link to="/#blog">
-            <Button><ArrowLeft size={16} className="mr-2" /> Back to Blog</Button>
+          <h1 className="font-display text-3xl font-bold text-foreground mb-4">{t.blog_post.not_found}</h1>
+          <p className="text-muted-foreground mb-8">{t.blog_post.not_found_desc}</p>
+          <Link to={`/${lang}#blog`}>
+            <Button><ArrowLeft size={16} className="mr-2" /> {t.blog_post.back_blog}</Button>
           </Link>
         </div>
         <Footer />
       </div>
     );
   }
-
-  const formattedDate = new Date(post.created_at).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -120,12 +123,11 @@ const BlogPost = () => {
 
       {post && !(post as any).is_published && (
         <div className="bg-accent/20 border-b border-accent text-accent-foreground text-center text-sm py-2 font-medium">
-          ⚠️ Draft Preview — This post is not published yet
+          ⚠️ {t.blog_post.draft_preview}
         </div>
       )}
 
       <article className="pt-24 pb-16">
-        {/* Hero / Featured Image */}
         {post.featured_image && (
           <div className="w-full max-h-[400px] overflow-hidden mb-8">
             <img
@@ -137,31 +139,27 @@ const BlogPost = () => {
         )}
 
         <div className="container mx-auto px-4 max-w-3xl">
-          {/* Back link */}
           <Link
-            to="/#blog"
+            to={`/${lang}#blog`}
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors mb-8"
           >
-            <ArrowLeft size={14} /> Back to Blog
+            <ArrowLeft size={14} /> {t.blog_post.back_blog}
           </Link>
 
-          {/* Category */}
           <span className="block text-xs font-semibold text-accent uppercase tracking-wider mb-3">
             {post.category}
           </span>
 
-          {/* Title */}
           <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
             {post.title}
           </h1>
 
-          {/* Meta */}
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-10 pb-6 border-b border-border">
             <span className="inline-flex items-center gap-1.5">
-              <User size={14} /> Iqbal Sir
+              <User size={14} /> {t.blog.by}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Calendar size={14} /> {formattedDate}
+              <Calendar size={14} /> {formatDate(post.created_at)}
             </span>
             {post.read_time && (
               <span className="inline-flex items-center gap-1.5">
@@ -169,10 +167,9 @@ const BlogPost = () => {
               </span>
             )}
 
-            {/* Share buttons */}
             <div className="ml-auto flex items-center gap-1.5">
               <span className="inline-flex items-center gap-1 mr-1">
-                <Share2 size={14} /> Share
+                <Share2 size={14} /> {t.blog_post.share}
               </span>
               {(() => {
                 const shareUrl = encodeURIComponent(`https://iqbalsir.com/blog/${post.id}`);
@@ -212,7 +209,7 @@ const BlogPost = () => {
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
                       }}
-                      aria-label="Copy link"
+                      aria-label={t.blog_post.copy_link}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
                     >
                       {copied ? <Check size={14} /> : <Link2 size={14} />}
@@ -223,36 +220,32 @@ const BlogPost = () => {
             </div>
           </div>
 
-          {/* Content */}
           <div
             className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-display prose-a:text-primary prose-img:rounded-lg"
-            dangerouslySetInnerHTML={{ __html: post.content || "<p>No content available.</p>" }}
+            dangerouslySetInnerHTML={{ __html: post.content || `<p>${t.blog_post.no_content}</p>` }}
           />
 
-          {/* Reactions */}
           <div className="mt-10 pt-6 border-t border-border">
             <BlogReactions postId={post.id} />
           </div>
 
-          {/* Comments */}
           <div className="mt-10 pt-6 border-t border-border">
             <BlogComments postId={post.id} />
           </div>
         </div>
       </article>
 
-      {/* Related Posts */}
       {related.length > 0 && (
         <section className="pb-16">
           <div className="container mx-auto px-4 max-w-5xl">
             <h2 className="font-display text-2xl font-bold text-foreground mb-8">
-              More in <span className="text-primary">{post.category}</span>
+              {t.blog_post.more_in} <span className="text-primary">{post.category}</span>
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {related.map((r) => (
                 <Link
                   key={r.id}
-                  to={`/blog/${r.id}`}
+                  to={`/${lang}/blog/${r.id}`}
                   className="glass-card-hover group flex flex-col overflow-hidden"
                 >
                   {r.featured_image && (

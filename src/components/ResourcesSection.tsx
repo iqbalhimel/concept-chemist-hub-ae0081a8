@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import { Download, FolderOpen, FileText, Eye, AlertTriangle, X } from "lucide-react";
+import { Download, FolderOpen, FileText, Eye, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import PdfViewer from "@/components/PdfViewer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type StudyMaterial = Tables<"study_materials">;
 
@@ -25,6 +26,7 @@ const tagColors: Record<string, string> = {
 };
 
 const ResourcesSection = () => {
+  const { t } = useLanguage();
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [categories, setCategories] = useState<StudyCategory[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -45,7 +47,6 @@ const ResourcesSection = () => {
       setMaterials(items);
       setCategories(cats);
 
-      // Set initial active category to first that has materials
       const materialCats = new Set(items.map(m => m.category));
       const firstMatch = cats.find(c => materialCats.has(c.name));
       if (firstMatch) setActiveCategory(firstMatch.name);
@@ -56,7 +57,6 @@ const ResourcesSection = () => {
     fetchData();
   }, []);
 
-  // Only show categories that have materials
   const visibleCategories = useMemo(() => {
     const materialCats = new Set(materials.map(m => m.category));
     return categories.filter(c => materialCats.has(c.name));
@@ -73,13 +73,13 @@ const ResourcesSection = () => {
       <div className="container mx-auto">
         <div className="text-center mb-12">
           <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
-            Free Study Materials
+            {t.resources.badge}
           </span>
           <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">
-            Download <span className="gradient-text">Center</span>
+            {t.resources.title_1} <span className="gradient-text">{t.resources.title_highlight}</span>
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Access organized notes, question banks, and model tests for SSC &amp; HSC exams
+            {t.resources.subtitle}
           </p>
         </div>
 
@@ -128,7 +128,7 @@ const ResourcesSection = () => {
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {item.pages ? `${item.pages} pages · ` : ""}PDF{item.file_size ? ` · ${item.file_size}` : ""}
+                        {item.pages ? `${item.pages} ${t.resources.pages} · ` : ""}PDF{item.file_size ? ` · ${item.file_size}` : ""}
                       </p>
                     </div>
                   </div>
@@ -139,7 +139,7 @@ const ResourcesSection = () => {
                         className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-primary/30 text-primary text-sm font-medium hover:bg-primary/10 transition-all"
                       >
                         <Eye size={14} />
-                        <span className="hidden sm:inline">Preview</span>
+                        <span className="hidden sm:inline">{t.resources.preview}</span>
                       </button>
                       <a
                         href={item.file_url}
@@ -148,11 +148,11 @@ const ResourcesSection = () => {
                         className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all glow-primary"
                       >
                         <Download size={14} />
-                        <span className="hidden sm:inline">Download</span>
+                        <span className="hidden sm:inline">{t.resources.download}</span>
                       </a>
                     </div>
                   ) : (
-                    <span className="text-xs text-muted-foreground">Coming soon</span>
+                    <span className="text-xs text-muted-foreground">{t.resources.coming_soon}</span>
                   )}
                 </div>
               );
@@ -161,7 +161,7 @@ const ResourcesSection = () => {
         ) : (
           <div className="text-center py-8">
             <FileText size={48} className="text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground">Study materials are being prepared. Check back soon!</p>
+            <p className="text-muted-foreground">{t.resources.empty}</p>
           </div>
         )}
       </div>
@@ -169,7 +169,6 @@ const ResourcesSection = () => {
       {/* PDF Preview Modal */}
       <Dialog open={!!previewUrl} onOpenChange={open => { if (!open) setPreviewUrl(null); }}>
       <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 gap-0 overflow-hidden [&>button:last-child]:hidden">
-          {/* Header */}
           <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-background flex-shrink-0">
             <h3 className="font-medium text-sm text-foreground truncate flex-1 min-w-0">{previewTitle}</h3>
             {previewUrl && (
@@ -179,7 +178,7 @@ const ResourcesSection = () => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-all flex-shrink-0"
               >
-                <Download size={12} /> <span className="hidden sm:inline">Download</span>
+                <Download size={12} /> <span className="hidden sm:inline">{t.resources.download}</span>
               </a>
             )}
             <Button
@@ -191,8 +190,6 @@ const ResourcesSection = () => {
               <X size={16} />
             </Button>
           </div>
-
-          {/* PDF Viewer */}
           <div className="flex-1 overflow-hidden" style={{ height: "calc(90vh - 56px)" }}>
             {previewUrl && <PdfViewer url={previewUrl} title={previewTitle} />}
           </div>
