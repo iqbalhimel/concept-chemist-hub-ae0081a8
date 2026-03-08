@@ -50,6 +50,7 @@ const AdminStudyMaterials = () => {
   const [bulkDragOver, setBulkDragOver] = useState(false);
   const [bulkUploading, setBulkUploading] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
+  const [bulkCategory, setBulkCategory] = useState("Physics");
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
 
