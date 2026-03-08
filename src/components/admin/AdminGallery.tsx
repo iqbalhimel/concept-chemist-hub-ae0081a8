@@ -140,7 +140,7 @@ const AdminGallery = () => {
   };
 
   const update = async (item: GalleryItem) => {
-    const { error } = await supabase.from("gallery").update({ image_url: item.image_url, label: item.label, alt: item.alt }).eq("id", item.id);
+    const { error } = await supabase.from("gallery").update({ image_url: item.image_url, label: item.label, alt: item.alt, span: item.span }).eq("id", item.id);
     if (error) toast.error(error.message); else toast.success("Updated");
   };
 
