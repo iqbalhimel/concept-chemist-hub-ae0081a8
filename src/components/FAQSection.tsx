@@ -24,6 +24,18 @@ const faqs = [
     q: "Are study materials free?",
     a: "Yes, most study notes, PDF guides, and concept explanations are provided free of charge to all students. Additional premium materials and model test papers are available for enrolled batch students.",
   },
+  {
+    q: "What subjects do you teach?",
+    a: "Iqbal Sir teaches Physics, Chemistry, Mathematics, and Biology for SSC and HSC level students. The teaching approach is concept-based with multimedia aids to make complex topics easy to understand.",
+  },
+  {
+    q: "What are the batch schedules?",
+    a: "Batches run in morning, afternoon, and evening slots to suit different student schedules. SSC batches typically meet 3 days a week and HSC batches 2–3 days a week. Exact timings are shared upon enrollment — contact via WhatsApp for the latest schedule.",
+  },
+  {
+    q: "How can students download study materials?",
+    a: "Visit the Download Center section on this website. All notes, board question banks, and model tests are organized by subject and available as free PDF downloads. Simply click the Download button next to any resource.",
+  },
 ];
 
 const FAQSection = () => {
