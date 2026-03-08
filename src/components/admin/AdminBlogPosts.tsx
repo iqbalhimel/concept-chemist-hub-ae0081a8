@@ -59,6 +59,13 @@ const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string;
   );
 };
 
+const calcReadTime = (html: string): string => {
+  const text = html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  const words = text ? text.split(" ").length : 0;
+  const mins = Math.max(1, Math.ceil(words / 200));
+  return `${mins} min read`;
+};
+
 const AdminBlogPosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
