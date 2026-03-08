@@ -238,12 +238,83 @@ const AdminStudyMaterials = () => {
       <div className="flex items-center justify-between">
         <h2 className="font-display text-2xl font-bold text-foreground">Study Materials</h2>
         <div className="flex gap-2">
+          <Button onClick={() => setShowCatManager(v => !v)} size="sm" variant="outline">
+            <Tags size={14} className="mr-1" /> Categories
+          </Button>
           <Button onClick={() => bulkInputRef.current?.click()} size="sm" variant="outline" disabled={bulkUploading}>
             <FileUp size={14} className="mr-1" /> Bulk Upload
           </Button>
           <Button onClick={add} size="sm"><Plus size={14} className="mr-1" /> Add</Button>
         </div>
       </div>
+
+      {/* Category Manager */}
+      {showCatManager && (
+        <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">Manage Categories</h3>
+          <div className="space-y-2">
+            {allCategories.map(cat => {
+              const count = categoryCounts[cat] || 0;
+              const isPreset = PRESET_CATEGORIES.includes(cat);
+              return (
+                <div key={cat} className="flex items-center gap-2 text-sm">
+                  {renamingCat === cat ? (
+                    <form
+                      className="flex gap-1 flex-1"
+                      onSubmit={e => { e.preventDefault(); renameCategory(cat, renameValue); }}
+                    >
+                      <Input
+                        className="h-8 text-xs flex-1"
+                        value={renameValue}
+                        onChange={e => setRenameValue(e.target.value)}
+                        autoFocus
+                        disabled={catActionLoading}
+                      />
+                      <Button type="submit" size="sm" variant="outline" className="h-8 text-xs" disabled={catActionLoading}>
+                        {catActionLoading ? <Loader2 size={12} className="animate-spin" /> : "Save"}
+                      </Button>
+                      <Button type="button" size="sm" variant="ghost" className="h-8 text-xs" onClick={() => setRenamingCat(null)}>
+                        Cancel
+                      </Button>
+                    </form>
+                  ) : (
+                    <>
+                      <span className="flex-1">
+                        {cat}
+                        <span className="text-muted-foreground ml-1">({count})</span>
+                        {isPreset && <span className="text-xs text-muted-foreground/60 ml-1">(preset)</span>}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2"
+                        disabled={catActionLoading}
+                        onClick={() => { setRenamingCat(cat); setRenameValue(cat); }}
+                      >
+                        <Pencil size={12} />
+                      </Button>
+                      {!isPreset && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2 text-destructive hover:text-destructive"
+                          disabled={catActionLoading}
+                          onClick={() => deleteCategory(cat)}
+                        >
+                          <Trash2 size={12} />
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground/60">
+            Rename any category or delete custom ones (items move to "Uncategorized"). Preset categories can be renamed but not deleted.
+          </p>
+        </div>
+      )}
 
       {/* Bulk drop zone */}
       <input
