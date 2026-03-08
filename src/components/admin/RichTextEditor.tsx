@@ -56,7 +56,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your content..
   // Sync external content changes (e.g. switching posts)
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content, false);
+      editor.commands.setContent(content, { emitUpdate: false });
     }
   }, [content, editor]);
 
