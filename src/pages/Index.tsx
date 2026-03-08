@@ -39,21 +39,26 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
       <Navbar />
-      {show("show_hero") && <HeroSection />}
-      {show("show_about") && <AboutSection />}
-      {show("show_subjects") && <SubjectsSection />}
-      {show("show_approach") && <ApproachSection />}
-      {show("show_stats") && <StatsSection />}
-      {show("show_gallery") && <GallerySection />}
-      {show("show_testimonials") && <TestimonialsSection />}
-      {show("show_experience") && <ExperienceSection />}
-      {show("show_education") && <EducationSection />}
-      {show("show_notices") && <NoticesSection />}
-      {show("show_resources") && <ResourcesSection />}
-      {show("show_blog") && <BlogSection />}
-      {show("show_faq") && <FAQSection />}
-      {show("show_contact") && <ContactSection />}
+      <main id="main-content" role="main">
+        {show("show_hero") && <HeroSection />}
+        {show("show_about") && <AboutSection />}
+        {show("show_subjects") && <SubjectsSection />}
+        {show("show_approach") && <ApproachSection />}
+        {show("show_stats") && <StatsSection />}
+        {show("show_gallery") && <GallerySection />}
+        {show("show_testimonials") && <TestimonialsSection />}
+        {show("show_experience") && <ExperienceSection />}
+        {show("show_education") && <EducationSection />}
+        {show("show_notices") && <NoticesSection />}
+        {show("show_resources") && <ResourcesSection />}
+        {show("show_blog") && <BlogSection />}
+        {show("show_faq") && <FAQSection />}
+        {show("show_contact") && <ContactSection />}
+      </main>
       <Footer />
       <WhatsAppButton />
     </div>

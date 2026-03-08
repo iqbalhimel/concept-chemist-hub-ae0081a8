@@ -116,9 +116,10 @@ const BlogListing = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Navbar />
 
-      <div className="pt-24 pb-16">
+      <main id="main-content" className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12">
@@ -278,7 +279,7 @@ const BlogListing = () => {
             </>
           )}
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>
