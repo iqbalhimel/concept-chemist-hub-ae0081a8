@@ -76,7 +76,7 @@ const AdminExperience = () => {
   };
   const saveOrder = async () => { await Promise.all(items.map((item, i) => supabase.from("experience").update({ sort_order: i }).eq("id", item.id))); setOrderChanged(false); toast.success("Order saved!"); };
 
-  const paginated = paginateItems(items, page, perPage);
+  const paginated = paginateItems(items, page, pageSize);
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
   return (
