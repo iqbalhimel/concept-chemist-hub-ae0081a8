@@ -14,8 +14,6 @@ const tagColors: Record<string, string> = {
 };
 
 const ResourcesSection = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
