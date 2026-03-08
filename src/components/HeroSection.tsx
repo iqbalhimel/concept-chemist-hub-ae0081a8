@@ -13,7 +13,7 @@ const HeroSection = () => {
           {/* Text */}
           <div className="flex-1 text-center md:text-left">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
+              <span className="inline-block px-3 py-1 mb-4 md:mb-6 text-xs sm:text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
                 Science Educator · Kishoreganj, Bangladesh
               </span>
             </motion.div>
