@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle, CheckSquare, Square } from "lucide-react";
+import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
   DndContext,
   closestCenter,
