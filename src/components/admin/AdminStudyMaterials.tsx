@@ -131,6 +131,22 @@ const AdminStudyMaterials = () => {
     return counts;
   }, [items]);
 
+  const filteredItems = useMemo(() => {
+    let result = items;
+    if (filterCategory !== "__all__") {
+      result = result.filter(i => i.category === filterCategory);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(i =>
+        i.title.toLowerCase().includes(q) ||
+        i.category.toLowerCase().includes(q) ||
+        (i.file_url || "").toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [items, searchQuery, filterCategory]);
+
   useEffect(() => { fetchItems(); }, []);
 
   const fetchItems = async () => {
