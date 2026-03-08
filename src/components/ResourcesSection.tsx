@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { useState, useEffect, useMemo } from "react";
 import { Download, FolderOpen, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +18,7 @@ const ResourcesSection = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchMaterials = async () => {
       const { data } = await supabase
         .from("study_materials")
         .select("*")
@@ -33,7 +32,7 @@ const ResourcesSection = () => {
       }
       setLoaded(true);
     };
-    fetch();
+    fetchMaterials();
   }, []);
 
   const categories = useMemo(
@@ -47,36 +46,10 @@ const ResourcesSection = () => {
 
   if (!loaded) return null;
 
-  if (materials.length === 0) {
-    return (
-      <section id="resources" className="section-padding section-gradient">
-        <div className="container mx-auto text-center">
-          <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
-            Free Study Materials
-          </span>
-          <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">
-            Download <span className="gradient-text">Center</span>
-          </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Study materials are being prepared. Check back soon!
-          </p>
-          <div className="mt-8 flex justify-center">
-            <FileText size={48} className="text-muted-foreground/30" />
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section id="resources" className="section-padding section-gradient">
-      <div className="container mx-auto" ref={ref}>
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
+      <div className="container mx-auto">
+        <div className="text-center mb-12">
           <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
             Free Study Materials
           </span>
@@ -84,17 +57,12 @@ const ResourcesSection = () => {
             Download <span className="gradient-text">Center</span>
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Access organized notes, question banks, and model tests for SSC & HSC exams
+            Access organized notes, question banks, and model tests for SSC &amp; HSC exams
           </p>
-        </motion.div>
+        </div>
 
-        {categories.length > 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex flex-wrap justify-center gap-2 md:gap-3 mb-10"
-          >
+        {categories.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-10">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -108,59 +76,63 @@ const ResourcesSection = () => {
                 {cat}
               </button>
             ))}
-          </motion.div>
+          </div>
         )}
 
-        <div className="max-w-4xl mx-auto grid gap-3">
-          {filtered.map((item, i) => {
-            const colorKey = Object.keys(tagColors).find((k) =>
-              item.category.toLowerCase().includes(k.toLowerCase())
-            );
-            const tagColor = colorKey
-              ? tagColors[colorKey]
-              : "bg-primary/10 text-primary border-primary/20";
+        {filtered.length > 0 ? (
+          <div className="max-w-4xl mx-auto grid gap-3">
+            {filtered.map((item, i) => {
+              const colorKey = Object.keys(tagColors).find((k) =>
+                item.category.toLowerCase().includes(k.toLowerCase())
+              );
+              const tagColor = colorKey
+                ? tagColors[colorKey]
+                : "bg-primary/10 text-primary border-primary/20";
 
-            return (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.05 }}
-                className="glass-card-hover p-5 flex items-center justify-between gap-4"
-              >
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center">
-                    <FolderOpen size={18} className="text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                      <h4 className="font-medium text-foreground truncate">{item.title}</h4>
-                      <span className={`inline-flex text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${tagColor}`}>
-                        {item.category}
-                      </span>
+              return (
+                <div
+                  key={item.id}
+                  className="glass-card-hover p-5 flex items-center justify-between gap-4"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center">
+                      <FolderOpen size={18} className="text-primary" />
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {item.pages ? `${item.pages} pages · ` : ""}PDF{item.file_size ? ` · ${item.file_size}` : ""}
-                    </p>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <h4 className="font-medium text-foreground truncate">{item.title}</h4>
+                        <span className={`inline-flex text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${tagColor}`}>
+                          {item.category}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {item.pages ? `${item.pages} pages · ` : ""}PDF{item.file_size ? ` · ${item.file_size}` : ""}
+                      </p>
+                    </div>
                   </div>
+                  {item.file_url ? (
+                    <a
+                      href={item.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-shrink-0 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all glow-primary"
+                    >
+                      <Download size={14} />
+                      <span className="hidden sm:inline">Download</span>
+                    </a>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Coming soon</span>
+                  )}
                 </div>
-                {item.file_url ? (
-                  <a
-                    href={item.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-shrink-0 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all glow-primary"
-                  >
-                    <Download size={14} />
-                    <span className="hidden sm:inline">Download</span>
-                  </a>
-                ) : (
-                  <span className="text-xs text-muted-foreground">Coming soon</span>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <FileText size={48} className="text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-muted-foreground">Study materials are being prepared. Check back soon!</p>
+          </div>
+        )}
       </div>
     </section>
   );
