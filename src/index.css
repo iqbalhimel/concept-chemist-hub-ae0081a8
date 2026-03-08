@@ -209,4 +209,34 @@
   .font-display {
     font-family: 'Space Grotesk', sans-serif;
   }
+
+  /* Light mode form inputs */
+  [data-brightness="light"] input,
+  [data-brightness="light"] textarea,
+  [data-brightness="light"] select {
+    background-color: hsl(var(--secondary)) !important;
+    border-color: hsl(var(--border)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  [data-brightness="light"] input::placeholder,
+  [data-brightness="light"] textarea::placeholder {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  /* Light mode secondary/outline button contrast */
+  [data-brightness="light"] .border-border {
+    border-color: hsl(220 13% 82%);
+  }
+
+  /* Mobile touch target minimums */
+  @media (max-width: 768px) {
+    a, button {
+      min-height: 44px;
+    }
+
+    .section-padding {
+      @apply py-14 px-4;
+    }
+  }
 }
