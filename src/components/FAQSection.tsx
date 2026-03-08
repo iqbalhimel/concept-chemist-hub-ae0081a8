@@ -1,5 +1,6 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Accordion,
   AccordionContent,
@@ -7,40 +8,31 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const faqs = [
-  {
-    q: "Where are the classes held?",
-    a: "Classes are held at Zilla Smarani Girls' High School, Kishoreganj where Iqbal Sir serves as Assistant Teacher (Science). Private coaching batches are also conducted at a dedicated coaching center in Kishoreganj town.",
-  },
-  {
-    q: "Do you offer online classes?",
-    a: "Yes! Online classes are available via Zoom and Google Meet for students who cannot attend in person. Recorded lectures and digital notes are also shared with online students for revision.",
-  },
-  {
-    q: "How can students join a batch?",
-    a: "Students can join by contacting Iqbal Sir directly via WhatsApp at +8801733579100 or by calling +8801687476714. You can also use the contact form on this website to send an inquiry.",
-  },
-  {
-    q: "Are study materials free?",
-    a: "Yes, most study notes, PDF guides, and concept explanations are provided free of charge to all students. Additional premium materials and model test papers are available for enrolled batch students.",
-  },
-  {
-    q: "What subjects do you teach?",
-    a: "Iqbal Sir teaches Physics, Chemistry, Mathematics, and Biology for SSC and HSC level students. The teaching approach is concept-based with multimedia aids to make complex topics easy to understand.",
-  },
-  {
-    q: "What are the batch schedules?",
-    a: "Batches run in morning, afternoon, and evening slots to suit different student schedules. SSC batches typically meet 3 days a week and HSC batches 2–3 days a week. Exact timings are shared upon enrollment — contact via WhatsApp for the latest schedule.",
-  },
-  {
-    q: "How can students download study materials?",
-    a: "Visit the Download Center section on this website. All notes, board question banks, and model tests are organized by subject and available as free PDF downloads. Simply click the Download button next to any resource.",
-  },
-];
+interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  sort_order: number;
+}
 
 const FAQSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase
+        .from("faq")
+        .select("id, question, answer, sort_order")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      setFaqs(data || []);
+      setLoading(false);
+    };
+    fetch();
+  }, []);
 
   return (
     <section id="faq" className="section-padding">
@@ -65,22 +57,28 @@ const FAQSection = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="max-w-3xl mx-auto"
         >
-          <Accordion type="single" collapsible className="space-y-3">
-            {faqs.map((faq, i) => (
-              <AccordionItem
-                key={i}
-                value={`item-${i}`}
-                className="glass-card px-6 border-glass-border rounded-xl overflow-hidden"
-              >
-                <AccordionTrigger className="text-left font-display font-semibold text-foreground hover:text-primary transition-colors py-5 hover:no-underline">
-                  {faq.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
-                  {faq.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          {loading ? (
+            <p className="text-center text-muted-foreground">Loading...</p>
+          ) : faqs.length === 0 ? (
+            <p className="text-center text-muted-foreground">No FAQs added yet.</p>
+          ) : (
+            <Accordion type="single" collapsible className="space-y-3">
+              {faqs.map((faq) => (
+                <AccordionItem
+                  key={faq.id}
+                  value={faq.id}
+                  className="glass-card px-6 border-glass-border rounded-xl overflow-hidden"
+                >
+                  <AccordionTrigger className="text-left font-display font-semibold text-foreground hover:text-primary transition-colors py-5 hover:no-underline">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
         </motion.div>
       </div>
     </section>
