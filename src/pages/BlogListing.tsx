@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowUpRight, Clock, User, ChevronLeft, ChevronRight, MessageSquare } from "lucide-react";
+import { ArrowUpRight, Clock, User, ChevronLeft, ChevronRight, MessageSquare, Search, X } from "lucide-react";
 import { setSeo } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -27,6 +28,7 @@ const BlogListing = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [filterCat, setFilterCat] = useState("__all__");
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const cleanup = setSeo({
@@ -55,6 +57,11 @@ const BlogListing = () => {
         query = query.eq("category", filterCat);
       }
 
+      if (searchQuery.trim()) {
+        const q = `%${searchQuery.trim()}%`;
+        query = query.or(`title.ilike.${q},excerpt.ilike.${q}`);
+      }
+
       const from = (page - 1) * POSTS_PER_PAGE;
       const to = from + POSTS_PER_PAGE - 1;
       const { data, count } = await query.range(from, to);
@@ -79,7 +86,7 @@ const BlogListing = () => {
       setLoading(false);
     };
     fetchPosts();
-  }, [page, filterCat]);
+  }, [page, filterCat, searchQuery]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -118,6 +125,27 @@ const BlogListing = () => {
             <p className="text-muted-foreground max-w-xl mx-auto">
               Articles and tips to help students learn science more effectively
             </p>
+          </div>
+
+          {/* Search */}
+          <div className="max-w-md mx-auto mb-8">
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="pl-10 h-11 rounded-full bg-muted/50 border-border"
+                placeholder="Search articles..."
+                value={searchQuery}
+                onChange={e => { setSearchQuery(e.target.value); setPage(1); }}
+              />
+              {searchQuery && (
+                <button
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => { setSearchQuery(""); setPage(1); }}
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Category Filter */}
