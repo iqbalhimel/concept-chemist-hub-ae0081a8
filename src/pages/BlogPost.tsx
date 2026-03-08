@@ -32,10 +32,24 @@ const BlogPost = () => {
         .eq("id", id)
         .eq("is_published", true)
         .single();
-      setPost(data as BlogPost | null);
+      const p = data as BlogPost | null;
+      setPost(p);
       setLoading(false);
+
+      if (p) {
+        const { data: rel } = await supabase
+          .from("blog_posts")
+          .select("*")
+          .eq("is_published", true)
+          .eq("category", p.category)
+          .neq("id", p.id)
+          .order("created_at", { ascending: false })
+          .limit(3);
+        setRelated((rel as BlogPost[]) || []);
+      }
     };
     fetchPost();
+    window.scrollTo(0, 0);
   }, [id]);
 
   if (loading) {
