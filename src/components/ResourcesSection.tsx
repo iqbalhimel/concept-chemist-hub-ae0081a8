@@ -5,6 +5,15 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type StudyMaterial = Tables<"study_materials">;
 
+type StudyCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+};
+
 const tagColors: Record<string, string> = {
   Physics: "bg-blue-500/15 text-blue-400 border-blue-500/20",
   Chemistry: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
@@ -14,31 +23,39 @@ const tagColors: Record<string, string> = {
 
 const ResourcesSection = () => {
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
+  const [categories, setCategories] = useState<StudyCategory[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchMaterials = async () => {
-      const { data } = await supabase
-        .from("study_materials")
-        .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
-      const items = data || [];
+    const fetchData = async () => {
+      const [matRes, catRes] = await Promise.all([
+        supabase.from("study_materials").select("*").eq("is_active", true).order("created_at", { ascending: false }),
+        supabase.from("study_categories").select("*").eq("is_active", true).order("sort_order"),
+      ]);
+
+      const items = matRes.data || [];
+      const cats = (catRes.data || []) as StudyCategory[];
+
       setMaterials(items);
-      if (items.length > 0) {
-        const cats = [...new Set(items.map((m) => m.category))];
-        setActiveCategory(cats[0]);
-      }
+      setCategories(cats);
+
+      // Set initial active category to first that has materials
+      const materialCats = new Set(items.map(m => m.category));
+      const firstMatch = cats.find(c => materialCats.has(c.name));
+      if (firstMatch) setActiveCategory(firstMatch.name);
+      else if (cats.length > 0) setActiveCategory(cats[0].name);
+
       setLoaded(true);
     };
-    fetchMaterials();
+    fetchData();
   }, []);
 
-  const categories = useMemo(
-    () => [...new Set(materials.map((m) => m.category))],
-    [materials]
-  );
+  // Only show categories that have materials
+  const visibleCategories = useMemo(() => {
+    const materialCats = new Set(materials.map(m => m.category));
+    return categories.filter(c => materialCats.has(c.name));
+  }, [categories, materials]);
 
   const filtered = activeCategory
     ? materials.filter((m) => m.category === activeCategory)
@@ -61,19 +78,19 @@ const ResourcesSection = () => {
           </p>
         </div>
 
-        {categories.length > 0 && (
+        {visibleCategories.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-10">
-            {categories.map((cat) => (
+            {visibleCategories.map((cat) => (
               <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.name)}
                 className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  cat === activeCategory
+                  cat.name === activeCategory
                     ? "bg-primary text-primary-foreground glow-primary"
                     : "glass-card text-muted-foreground hover:text-foreground hover:border-primary/30"
                 }`}
               >
-                {cat}
+                {cat.name}
               </button>
             ))}
           </div>
@@ -81,7 +98,7 @@ const ResourcesSection = () => {
 
         {filtered.length > 0 ? (
           <div className="max-w-4xl mx-auto grid gap-3">
-            {filtered.map((item, i) => {
+            {filtered.map((item) => {
               const colorKey = Object.keys(tagColors).find((k) =>
                 item.category.toLowerCase().includes(k.toLowerCase())
               );
