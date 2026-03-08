@@ -6,8 +6,9 @@ import RichTextEditor from "@/components/admin/RichTextEditor";
 import { toast } from "sonner";
 import {
   Plus, Trash2, Save, GripVertical, Pencil, X, Loader2, ImagePlus,
-  ExternalLink, CalendarClock, Eye, EyeOff,
+  ExternalLink, CalendarClock, Search,
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent,
 } from "@dnd-kit/core";
@@ -199,6 +200,8 @@ const AdminBlogPosts = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [orderChanged, setOrderChanged] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState("__all__");
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -265,9 +268,23 @@ const AdminBlogPosts = () => {
     toast.success("Order saved");
   };
 
-  if (loading) return <div className="text-muted-foreground">Loading...</div>;
+  const categories = useMemo(() => [...new Set(posts.map(p => p.category))].sort(), [posts]);
+
+  const filteredPosts = useMemo(() => {
+    let result = posts;
+    if (filterCategory !== "__all__") result = result.filter(p => p.category === filterCategory);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(p => p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+    }
+    return result;
+  }, [posts, searchQuery, filterCategory]);
+
+  const isFiltering = searchQuery.trim() !== "" || filterCategory !== "__all__";
 
   const editingPost = editingId ? posts.find(p => p.id === editingId) : null;
+
+  if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
   return (
     <div className="space-y-4">
@@ -289,6 +306,35 @@ const AdminBlogPosts = () => {
         </div>
       </div>
 
+      {/* Search & Filter */}
+      <div className="flex gap-2 items-center">
+        <div className="relative flex-1">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input className="pl-9 h-9" placeholder="Search by title or category..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          {searchQuery && (
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setSearchQuery("")}>
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger className="w-40 h-9"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All Categories</SelectItem>
+            {categories.map(cat => (
+              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {isFiltering && (
+        <p className="text-xs text-muted-foreground">
+          Showing {filteredPosts.length} of {posts.length} posts
+          {searchQuery && <> matching "{searchQuery}"</>}
+          {filterCategory !== "__all__" && <> in {filterCategory}</>}
+        </p>
+      )}
+
       {/* Edit Panel (shown above list when editing) */}
       {editingPost && (
         <EditPanel
@@ -301,9 +347,9 @@ const AdminBlogPosts = () => {
 
       {/* Sortable List */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={posts.map(p => p.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={filteredPosts.map(p => p.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-2">
-            {posts.map(post => (
+            {filteredPosts.map(post => (
               <SortableRow
                 key={post.id}
                 post={post}
@@ -315,8 +361,10 @@ const AdminBlogPosts = () => {
         </SortableContext>
       </DndContext>
 
-      {posts.length === 0 && (
-        <p className="text-center text-muted-foreground py-10">No blog posts yet. Click "Add Post" to create one.</p>
+      {filteredPosts.length === 0 && (
+        <p className="text-center text-muted-foreground py-10">
+          {isFiltering ? "No posts match your search." : "No blog posts yet. Click \"Add Post\" to create one."}
+        </p>
       )}
     </div>
   );
