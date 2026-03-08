@@ -11,6 +11,7 @@ import StatsSection from "@/components/StatsSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import GallerySection from "@/components/GallerySection";
 
 const Index = () => {
   return (
@@ -21,6 +22,7 @@ const Index = () => {
       <SubjectsSection />
       <ApproachSection />
       <StatsSection />
+      <GallerySection />
       <ExperienceSection />
       <EducationSection />
       <ResourcesSection />
