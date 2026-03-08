@@ -1,36 +1,33 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
-import { Atom, FlaskConical, Leaf, Calculator, Binary, BookMarked, Monitor } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { Atom, FlaskConical, Leaf, Calculator, Binary, BookMarked, Monitor, BookOpen, Lightbulb } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
+
+const iconMap: Record<string, React.ElementType> = { Atom, FlaskConical, Leaf, Calculator, Binary, BookMarked, Monitor, BookOpen, Lightbulb };
 
 const SubjectsSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const [items, setItems] = useState<any[]>([]);
 
-  const subjectGroups = [
-    {
-      level: t.subjects.ssc,
-      subjects: [
-        { name: t.subjects.physics, icon: Atom },
-        { name: t.subjects.chemistry, icon: FlaskConical },
-        { name: t.subjects.biology, icon: Leaf },
-      ],
-    },
-    {
-      level: t.subjects.hsc,
-      subjects: [{ name: t.subjects.chemistry, icon: FlaskConical }],
-    },
-    {
-      level: t.subjects.class610,
-      subjects: [
-        { name: t.subjects.mathematics, icon: Calculator },
-        { name: t.subjects.higher_math, icon: Binary },
-        { name: t.subjects.general_science, icon: BookMarked },
-        { name: t.subjects.ict, icon: Monitor },
-      ],
-    },
-  ];
+  useEffect(() => {
+    supabase.from("subjects").select("*").eq("is_active", true).order("sort_order").then(({ data }) => setItems(data || []));
+  }, []);
+
+  const grouped = items.reduce<Record<string, any[]>>((acc, item) => {
+    const cat = item.category || "Other";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(item);
+    return acc;
+  }, {});
+
+  if (items.length === 0) return null;
+
+  const categoryLabels: Record<string, string> = lang === "bn"
+    ? { "SSC": "SSC স্তর", "HSC": "HSC স্তর", "Class 6-10": "৬ষ্ঠ-১০ম শ্রেণি" }
+    : { "SSC": "SSC Level", "HSC": "HSC Level", "Class 6-10": "Class 6–10" };
 
   return (
     <section id="subjects" className="section-padding">
@@ -41,20 +38,20 @@ const SubjectsSection = () => {
           </h2>
           <p className="text-center text-muted-foreground mb-16 max-w-xl mx-auto">{t.subjects.subtitle}</p>
         </motion.div>
-
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {subjectGroups.map((group, gi) => (
-            <motion.div key={gi} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 + gi * 0.15 }} className="glass-card-hover p-8">
-              <h3 className="font-display text-lg font-bold text-primary mb-6">{group.level}</h3>
+          {Object.entries(grouped).map(([cat, subs], gi) => (
+            <motion.div key={cat} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 + gi * 0.15 }} className="glass-card-hover p-8">
+              <h3 className="font-display text-lg font-bold text-primary mb-6">{categoryLabels[cat] || cat}</h3>
               <div className="space-y-4">
-                {group.subjects.map((sub, si) => (
-                  <div key={si} className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <sub.icon size={20} className="text-primary" />
+                {subs.map((sub: any) => {
+                  const Icon = iconMap[sub.icon] || BookOpen;
+                  return (
+                    <div key={sub.id} className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Icon size={20} className="text-primary" /></div>
+                      <span className="text-foreground font-medium">{lang === "bn" && sub.subject_name_bn ? sub.subject_name_bn : sub.subject_name_en}</span>
                     </div>
-                    <span className="text-foreground font-medium">{sub.name}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
           ))}
