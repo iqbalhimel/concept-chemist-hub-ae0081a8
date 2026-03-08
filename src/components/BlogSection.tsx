@@ -48,7 +48,7 @@ const BlogSection = () => {
         .from("blog_posts")
         .select("*")
         .eq("is_published", true)
-        .order("created_at", { ascending: false })
+        .order("sort_order", { ascending: true })
         .limit(3);
       if (data && data.length > 0) {
         setPosts(data as BlogPost[]);
