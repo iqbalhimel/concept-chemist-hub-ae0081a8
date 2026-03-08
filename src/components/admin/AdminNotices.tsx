@@ -296,7 +296,7 @@ const AdminNotices = () => {
         <div className="flex items-center gap-2">
           {orderDirty && (
             <>
-              <span className="text-xs text-amber-500 flex items-center gap-1">
+              <span className="text-xs text-destructive flex items-center gap-1">
                 <AlertTriangle size={12} /> Order changed
               </span>
               <Button
