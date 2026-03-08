@@ -57,6 +57,11 @@ const BlogListing = () => {
         query = query.eq("category", filterCat);
       }
 
+      if (searchQuery.trim()) {
+        const q = `%${searchQuery.trim()}%`;
+        query = query.or(`title.ilike.${q},excerpt.ilike.${q}`);
+      }
+
       const from = (page - 1) * POSTS_PER_PAGE;
       const to = from + POSTS_PER_PAGE - 1;
       const { data, count } = await query.range(from, to);
