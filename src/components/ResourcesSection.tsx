@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { Download, FolderOpen, FileText, Eye, X, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Download, FolderOpen, FileText, Eye, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import PdfViewer from "@/components/PdfViewer";
 
 type StudyMaterial = Tables<"study_materials">;
 
