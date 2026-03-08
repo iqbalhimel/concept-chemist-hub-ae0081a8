@@ -4,8 +4,8 @@ import { GraduationCap, Users, Trophy, Clock } from "lucide-react";
 
 const stats = [
   { value: 10, suffix: "+", label: "Years of Teaching Experience", icon: Clock },
-  { value: 500, suffix: "+", label: "Students Taught", icon: Users },
-  { value: 95, suffix: "%", label: "SSC & HSC Exam Success", icon: Trophy },
+  { value: 5000, suffix: "+", label: "Students Taught", icon: Users },
+  { value: 90, suffix: "%+", label: "SSC & HSC Exam Success", icon: Trophy },
   { value: 8, suffix: "+", label: "Subjects Covered", icon: GraduationCap },
 ];
 
