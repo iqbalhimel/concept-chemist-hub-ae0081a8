@@ -1,22 +1,25 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Clock, User } from "lucide-react";
 
 const posts = [
   {
     title: "Understanding Newton's Laws of Motion",
     category: "Physics",
     excerpt: "A beginner-friendly guide to the three fundamental laws that govern how objects move and interact.",
+    readTime: "5 min read",
   },
   {
     title: "The Periodic Table Made Easy",
     category: "Chemistry",
     excerpt: "Tips and tricks to memorize the periodic table and understand element properties effectively.",
+    readTime: "4 min read",
   },
   {
     title: "5 Study Strategies for Science Exams",
     category: "Study Tips",
     excerpt: "Proven techniques to improve retention, manage time, and score higher in board examinations.",
+    readTime: "6 min read",
   },
 ];
 
