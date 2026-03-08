@@ -59,6 +59,7 @@ const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string;
   );
 };
 
+const AdminBlogPosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
