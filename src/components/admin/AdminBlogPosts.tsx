@@ -10,7 +10,55 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type Post = Tables<"blog_posts">;
 
-const AdminBlogPosts = () => {
+const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string; onUpload: (url: string) => void; onClear: () => void }) => {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Only images allowed"); return; }
+    setUploading(true);
+    try {
+      const fileName = `blog-featured/${Date.now()}-${file.name}`;
+      const { error } = await supabase.storage.from("media").upload(fileName, file, { contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("media").getPublicUrl(fileName);
+      onUpload(data.publicUrl);
+      toast.success("Image uploaded");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="text-xs font-medium text-muted-foreground">Featured Image</label>
+      <input type="file" accept="image/*" className="hidden" ref={inputRef} onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.target.value = ""; }} />
+      {imageUrl ? (
+        <div className="relative group w-full max-w-xs">
+          <img src={imageUrl} alt="Featured" className="rounded-lg w-full h-32 object-cover border border-border" />
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+            <Button size="sm" variant="secondary" onClick={() => inputRef.current?.click()} disabled={uploading}>
+              {uploading ? <Loader2 size={14} className="animate-spin" /> : "Replace"}
+            </Button>
+            <Button size="sm" variant="destructive" onClick={onClear}>Remove</Button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 rounded-lg text-sm text-muted-foreground transition-colors"
+        >
+          {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+          {uploading ? "Uploading..." : "Add featured image"}
+        </button>
+      )}
+    </div>
+  );
+};
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
