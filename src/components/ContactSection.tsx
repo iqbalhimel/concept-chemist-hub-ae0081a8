@@ -3,18 +3,26 @@ import { useRef, useState } from "react";
 import { Phone, Mail, MessageCircle, Facebook, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const ContactSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const { t } = useLanguage();
+  const { get } = useSiteSettings();
+
+  const phone = get("contact", "phone", "+8801687476714");
+  const whatsapp = get("contact", "whatsapp", "+8801733579100");
+  const email = get("contact", "email", "i.h.himel@gmail.com");
+  const mapUrl = get("contact", "map_embed_url", "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29045.75!2d90.76!3d24.43!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x37564ee40fafffff%3A0x1c15f9a1e3f1a0e7!2sKishoreganj%20Sadar!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd");
+  const facebook = get("social", "facebook", "https://www.fb.com/i.h.himel");
 
   const contactInfo = [
-    { icon: Phone, label: t.contact.phone, value: "+8801687476714", href: "tel:+8801687476714" },
-    { icon: MessageCircle, label: t.contact.whatsapp, value: "+8801733579100", href: "https://wa.me/8801733579100" },
-    { icon: Mail, label: t.contact.email, value: "i.h.himel@gmail.com", href: "mailto:i.h.himel@gmail.com" },
-    { icon: Facebook, label: t.contact.facebook, value: "fb.com/i.h.himel", href: "https://www.fb.com/i.h.himel" },
+    { icon: Phone, label: t.contact.phone, value: phone, href: `tel:${phone}` },
+    { icon: MessageCircle, label: t.contact.whatsapp, value: whatsapp, href: `https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}` },
+    { icon: Mail, label: t.contact.email, value: email, href: `mailto:${email}` },
+    { icon: Facebook, label: t.contact.facebook, value: facebook.replace(/https?:\/\/(www\.)?/, ""), href: facebook.startsWith("http") ? facebook : `https://${facebook}` },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -56,7 +64,7 @@ const ContactSection = () => {
         </div>
         <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.4 }} className="max-w-5xl mx-auto mt-12">
           <div className="glass-card overflow-hidden rounded-xl">
-            <iframe title="Kishoreganj Sadar Location" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29045.75!2d90.76!3d24.43!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x37564ee40fafffff%3A0x1c15f9a1e3f1a0e7!2sKishoreganj%20Sadar!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd" width="100%" height="300" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="w-full" />
+            <iframe title="Location" src={mapUrl} width="100%" height="300" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="w-full" />
           </div>
         </motion.div>
       </div>
