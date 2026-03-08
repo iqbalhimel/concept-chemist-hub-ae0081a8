@@ -117,13 +117,33 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   html {
     scroll-behavior: smooth;
     overflow-x: hidden;
+  }
+
+  /* Bangla text rendering improvements */
+  html[lang="bn"] body {
+    font-family: 'Noto Sans Bengali', 'Inter', sans-serif;
+    line-height: 1.8;
+    word-spacing: 0.05em;
+  }
+
+  html[lang="bn"] .font-display {
+    font-family: 'Noto Sans Bengali', 'Space Grotesk', sans-serif;
+  }
+
+  html[lang="bn"] p,
+  html[lang="bn"] span,
+  html[lang="bn"] li,
+  html[lang="bn"] a {
+    line-height: 1.85;
   }
 }
 
