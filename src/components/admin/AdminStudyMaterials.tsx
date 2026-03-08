@@ -315,7 +315,42 @@ const AdminStudyMaterials = () => {
         </div>
       </div>
 
-      {/* Category Manager */}
+      {/* Search & Filter */}
+      <div className="flex gap-2 items-center">
+        <div className="relative flex-1">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            className="pl-9 h-9"
+            placeholder="Search by title, category, or URL..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setSearchQuery("")}>
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger className="w-44 h-9">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All Categories</SelectItem>
+            {allCategories.map(cat => (
+              <SelectItem key={cat} value={cat}>{cat} ({categoryCounts[cat] || 0})</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {(searchQuery || filterCategory !== "__all__") && (
+        <p className="text-xs text-muted-foreground">
+          Showing {filteredItems.length} of {items.length} items
+          {searchQuery && <> matching "{searchQuery}"</>}
+          {filterCategory !== "__all__" && <> in {filterCategory}</>}
+        </p>
+      )}
+
       {showCatManager && (
         <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-3">
           <h3 className="text-sm font-semibold text-foreground">Manage Categories</h3>
