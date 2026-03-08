@@ -49,7 +49,7 @@ const StatsSection = () => {
             Proven Results
           </span>
           <h2 className="font-display text-3xl md:text-4xl font-bold">
-            Student <span className="gradient-text">Success</span>
+            Student <span className="gradient-text">Achievements</span>
           </h2>
         </motion.div>
 
