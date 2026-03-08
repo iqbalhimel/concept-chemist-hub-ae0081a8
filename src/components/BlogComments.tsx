@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Comment {
   id: string;
@@ -22,9 +23,6 @@ interface Props {
 const sanitize = (str: string) =>
   str.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/g, "&amp;");
 
-const formatDate = (d: string) =>
-  new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-
 /* ── Comment Form ──────────────────────────── */
 
 const CommentForm = ({
@@ -40,6 +38,7 @@ const CommentForm = ({
   onCancel?: () => void;
   compact?: boolean;
 }) => {
+  const { lang, t } = useLanguage();
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -50,19 +49,19 @@ const CommentForm = ({
     const trimmedContent = content.trim();
 
     if (!trimmedName) {
-      setNameError("Please enter your name");
+      setNameError(t.comments.name_required);
       return;
     }
     if (trimmedName.length > 100) {
-      setNameError("Name must be less than 100 characters");
+      setNameError(t.comments.name_too_long);
       return;
     }
     if (!trimmedContent) {
-      toast.error("Please write a comment");
+      toast.error(t.comments.content_required);
       return;
     }
     if (trimmedContent.length > 2000) {
-      toast.error("Comment must be less than 2000 characters");
+      toast.error(t.comments.content_too_long);
       return;
     }
 
@@ -77,9 +76,9 @@ const CommentForm = ({
     });
 
     if (error) {
-      toast.error("Failed to post comment");
+      toast.error(t.comments.post_failed);
     } else {
-      toast.success(parentId ? "Reply posted" : "Comment posted");
+      toast.success(parentId ? t.comments.reply_posted : t.comments.comment_posted);
       setContent("");
       if (!parentId) setName("");
       onPosted();
@@ -91,14 +90,14 @@ const CommentForm = ({
     <div className={`space-y-2 ${compact ? "" : "border border-border rounded-lg p-4 bg-card"}`}>
       {!compact && (
         <h3 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
-          <MessageSquare size={18} /> Leave a Comment
+          <MessageSquare size={18} /> {t.comments.leave_comment}
         </h3>
       )}
       <div className={compact ? "flex gap-2 items-start" : "space-y-2"}>
         <div className={compact ? "flex-1 space-y-2" : "space-y-2"}>
           <div>
             <Input
-              placeholder="Your name *"
+              placeholder={t.comments.name_placeholder}
               value={name}
               onChange={e => { setName(e.target.value); setNameError(""); }}
               className={`h-9 ${nameError ? "border-destructive" : ""}`}
@@ -107,7 +106,7 @@ const CommentForm = ({
             {nameError && <p className="text-xs text-destructive mt-1">{nameError}</p>}
           </div>
           <Textarea
-            placeholder={parentId ? "Write a reply..." : "Write a comment..."}
+            placeholder={parentId ? t.comments.reply_placeholder : t.comments.comment_placeholder}
             value={content}
             onChange={e => setContent(e.target.value)}
             rows={compact ? 2 : 3}
@@ -115,10 +114,10 @@ const CommentForm = ({
           />
           <div className="flex items-center gap-2">
             <Button size="sm" onClick={handleSubmit} disabled={submitting}>
-              <Send size={14} className="mr-1" /> {submitting ? "Posting..." : parentId ? "Reply" : "Post Comment"}
+              <Send size={14} className="mr-1" /> {submitting ? t.comments.posting : parentId ? t.comments.reply : t.comments.post_comment}
             </Button>
             {onCancel && (
-              <Button size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+              <Button size="sm" variant="ghost" onClick={onCancel}>{t.comments.cancel}</Button>
             )}
           </div>
         </div>
@@ -140,7 +139,11 @@ const CommentCard = ({
   postId: string;
   onRefresh: () => void;
 }) => {
+  const { lang, t } = useLanguage();
   const [showReply, setShowReply] = useState(false);
+
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
   return (
     <div className="space-y-3">
@@ -157,11 +160,10 @@ const CommentCard = ({
           onClick={() => setShowReply(!showReply)}
           className="mt-2 text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
         >
-          <Reply size={12} /> Reply
+          <Reply size={12} /> {t.comments.reply}
         </button>
       </div>
 
-      {/* Replies */}
       {replies.length > 0 && (
         <div className="ml-6 sm:ml-10 space-y-2 border-l-2 border-border pl-4">
           {replies.map(reply => (
@@ -179,7 +181,6 @@ const CommentCard = ({
         </div>
       )}
 
-      {/* Reply form */}
       {showReply && (
         <div className="ml-6 sm:ml-10">
           <CommentForm
@@ -198,6 +199,7 @@ const CommentCard = ({
 /* ── Main Comments Section ─────────────────── */
 
 const BlogComments = ({ postId }: Props) => {
+  const { t } = useLanguage();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -238,15 +240,15 @@ const BlogComments = ({ postId }: Props) => {
   return (
     <div className="space-y-6">
       <h2 className="font-display text-2xl font-bold text-foreground">
-        Comments {topLevel.length > 0 && <span className="text-base font-normal text-muted-foreground">({comments.length})</span>}
+        {t.comments.title} {topLevel.length > 0 && <span className="text-base font-normal text-muted-foreground">({comments.length})</span>}
       </h2>
 
       <CommentForm postId={postId} onPosted={fetchComments} />
 
       {loading ? (
-        <p className="text-muted-foreground text-sm">Loading comments...</p>
+        <p className="text-muted-foreground text-sm">{t.comments.loading}</p>
       ) : topLevel.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No comments yet. Be the first to comment!</p>
+        <p className="text-muted-foreground text-sm">{t.comments.empty}</p>
       ) : (
         <div className="space-y-4">
           {topLevel.map(comment => (
