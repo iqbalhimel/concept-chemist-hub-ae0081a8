@@ -5,7 +5,7 @@ import { GraduationCap, Users, Trophy, Clock } from "lucide-react";
 const stats = [
   { value: 10, suffix: "+", label: "Years of Teaching Experience", icon: Clock },
   { value: 500, suffix: "+", label: "Students Taught", icon: Users },
-  { value: 95, suffix: "%", label: "Exam Preparation Success", icon: Trophy },
+  { value: 95, suffix: "%", label: "SSC & HSC Exam Success", icon: Trophy },
   { value: 8, suffix: "+", label: "Subjects Covered", icon: GraduationCap },
 ];
 
@@ -49,7 +49,7 @@ const StatsSection = () => {
             Proven Results
           </span>
           <h2 className="font-display text-3xl md:text-4xl font-bold">
-            Student <span className="gradient-text">Success</span>
+            Student <span className="gradient-text">Achievements</span>
           </h2>
         </motion.div>
 
