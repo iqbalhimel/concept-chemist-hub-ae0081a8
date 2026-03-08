@@ -45,9 +45,8 @@ const BlogPost = () => {
         .from("blog_posts")
         .select("*")
         .eq("id", id)
-        .eq("is_published", true)
         .single();
-      const p = data as BlogPost | null;
+      const p = data as (BlogPost & { is_published?: boolean }) | null;
       setPost(p);
       setLoading(false);
 
