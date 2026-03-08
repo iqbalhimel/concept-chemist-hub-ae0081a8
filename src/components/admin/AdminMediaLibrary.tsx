@@ -28,10 +28,14 @@ const AdminMediaLibrary = () => {
     setUploading(true);
 
     for (const file of Array.from(files)) {
-      const ext = file.name.split(".").pop();
+      const isImage = file.type.startsWith("image/");
+      const { blob, wasCompressed } = isImage ? await compressImage(file) : { blob: file as Blob, wasCompressed: false };
+      const ext = wasCompressed ? "jpg" : file.name.split(".").pop();
       const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage.from("media").upload(path, file);
+      const { error: uploadError } = await supabase.storage.from("media").upload(path, blob, {
+        contentType: wasCompressed ? "image/jpeg" : file.type,
+      });
       if (uploadError) { toast.error("Upload failed: " + uploadError.message); continue; }
 
       const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
