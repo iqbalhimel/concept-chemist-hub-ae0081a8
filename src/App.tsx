@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import BlogPostPage from "./pages/BlogPost";
+import BlogListing from "./pages/BlogListing";
 
 const queryClient = new QueryClient();
 
