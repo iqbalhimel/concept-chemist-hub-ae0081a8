@@ -263,8 +263,17 @@ const AdminBlogPosts = () => {
       is_published: post.is_published,
       featured_image: (post as any).featured_image || null,
       scheduled_at: (post as any).scheduled_at || null,
+      slug: (post as any).slug || null,
     } as any).eq("id", post.id);
-    if (error) toast.error(error.message); else toast.success("Post saved");
+    if (error) {
+      if (error.message.includes("blog_posts_slug_unique")) {
+        toast.error("This slug is already in use. Please choose a different one.");
+      } else {
+        toast.error(error.message);
+      }
+    } else {
+      toast.success("Post saved");
+    }
   };
 
   const remove = async (id: string) => {
