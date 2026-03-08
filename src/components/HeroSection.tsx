@@ -60,7 +60,7 @@ const HeroSection = () => {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="flex-shrink-0"
           >
-            <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80">
+            <div className="relative w-40 h-40 sm:w-56 sm:h-56 md:w-80 md:h-80">
               {/* Glow ring */}
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/40 to-accent/30 blur-2xl opacity-60" />
               {/* Glass border */}
