@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowUpRight, Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight, Clock, User, ChevronLeft, ChevronRight, MessageSquare } from "lucide-react";
 import { setSeo } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
@@ -26,6 +26,7 @@ const BlogListing = () => {
   const [page, setPage] = useState(1);
   const [categories, setCategories] = useState<string[]>([]);
   const [filterCat, setFilterCat] = useState("__all__");
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const cleanup = setSeo({
@@ -60,6 +61,21 @@ const BlogListing = () => {
 
       setPosts((data as BlogPost[]) || []);
       setTotal(count || 0);
+
+      // Fetch comment counts
+      if (data && data.length > 0) {
+        const ids = data.map((d: any) => d.id);
+        const { data: cData } = await supabase
+          .from("blog_post_comments")
+          .select("post_id")
+          .in("post_id", ids);
+        if (cData) {
+          const counts: Record<string, number> = {};
+          cData.forEach((c: any) => { counts[c.post_id] = (counts[c.post_id] || 0) + 1; });
+          setCommentCounts(counts);
+        }
+      }
+
       setLoading(false);
     };
     fetchPosts();
@@ -180,6 +196,11 @@ const BlogListing = () => {
                         {post.read_time && (
                           <span className="inline-flex items-center gap-1">
                             <Clock size={12} /> {post.read_time}
+                          </span>
+                        )}
+                        {(commentCounts[post.id] || 0) > 0 && (
+                          <span className="inline-flex items-center gap-1">
+                            <MessageSquare size={12} /> {commentCounts[post.id]}
                           </span>
                         )}
                         <span className="ml-auto">{formatDate(post.created_at)}</span>

@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { ArrowUpRight, Clock, User } from "lucide-react";
+import { ArrowUpRight, Clock, User, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -41,6 +41,7 @@ const BlogSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const [posts, setPosts] = useState<BlogPost[]>(fallbackPosts);
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -52,6 +53,17 @@ const BlogSection = () => {
         .limit(3);
       if (data && data.length > 0) {
         setPosts(data as BlogPost[]);
+        // Fetch comment counts
+        const ids = data.map((d: any) => d.id);
+        const { data: cData } = await supabase
+          .from("blog_post_comments")
+          .select("post_id")
+          .in("post_id", ids);
+        if (cData) {
+          const counts: Record<string, number> = {};
+          cData.forEach((c: any) => { counts[c.post_id] = (counts[c.post_id] || 0) + 1; });
+          setCommentCounts(counts);
+        }
       }
     };
     fetchPosts();
@@ -104,6 +116,9 @@ const BlogSection = () => {
                 <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><User size={12} /> Iqbal Sir</span>
                   <span className="inline-flex items-center gap-1"><Clock size={12} /> {post.read_time}</span>
+                  {(commentCounts[post.id] || 0) > 0 && (
+                    <span className="inline-flex items-center gap-1"><MessageSquare size={12} /> {commentCounts[post.id]}</span>
+                  )}
                 </div>
                 <Link to={`/blog/${post.id}`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline transition-all">
                   Read Article <ArrowUpRight size={14} />
