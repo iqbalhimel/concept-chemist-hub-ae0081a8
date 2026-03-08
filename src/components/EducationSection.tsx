@@ -30,26 +30,26 @@ const EducationSection = () => {
 
         <div className="max-w-3xl mx-auto relative">
           {/* Timeline line */}
-          <div className="absolute left-6 top-0 bottom-0 w-px bg-border hidden md:block" />
+          <div className="absolute left-7 top-2 bottom-2 w-px bg-border/60 hidden md:block" />
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             {education.map((edu, i) => (
               <motion.div
                 key={edu.degree}
                 initial={{ opacity: 0, y: 20 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}
-                className="glass-card-hover p-6 md:ml-14 relative"
+                className="glass-card-hover p-6 md:py-7 md:px-8 md:ml-16 relative"
               >
-                <div className="hidden md:flex absolute -left-[3.65rem] top-6 w-10 h-10 rounded-full bg-primary/20 border-2 border-primary items-center justify-center">
+                <div className="hidden md:flex absolute -left-[3.25rem] top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-primary/15 border-2 border-primary/70 items-center justify-center">
                   <GraduationCap size={18} className="text-primary" />
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-1">
-                  <h3 className="font-display font-bold text-foreground">{edu.degree}</h3>
-                  <span className="text-sm text-primary font-medium">{edu.year}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
+                  <h3 className="font-display text-base md:text-lg font-bold text-foreground">{edu.degree}</h3>
+                  <span className="text-sm text-primary font-semibold tracking-wide">{edu.year}</span>
                 </div>
-                <p className="text-muted-foreground text-sm">{edu.institution}</p>
-                <p className="text-accent text-sm font-semibold mt-1">{edu.result}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">{edu.institution}</p>
+                <p className="text-accent text-sm font-semibold mt-1.5">{edu.result}</p>
               </motion.div>
             ))}
           </div>
