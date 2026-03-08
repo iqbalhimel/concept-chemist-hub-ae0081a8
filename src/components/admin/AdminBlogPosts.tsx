@@ -6,8 +6,9 @@ import RichTextEditor from "@/components/admin/RichTextEditor";
 import { toast } from "sonner";
 import {
   Plus, Trash2, Save, GripVertical, Pencil, X, Loader2, ImagePlus,
-  ExternalLink, CalendarClock, Eye, EyeOff,
+  ExternalLink, CalendarClock, Search,
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent,
 } from "@dnd-kit/core";
