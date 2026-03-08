@@ -275,10 +275,10 @@ const AdminTestimonials = () => {
           {items.length > 10 && (
             <AdminPagination
               page={page}
-              perPage={perPage}
+              pageSize={pageSize}
               total={items.length}
               onPageChange={setPage}
-              onPerPageChange={(v) => { setPerPage(v); setPage(1); }}
+              onPageSizeChange={(v) => { setPageSize(v); setPage(1); }}
             />
           )}
         </>
