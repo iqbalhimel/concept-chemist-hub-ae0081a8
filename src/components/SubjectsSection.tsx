@@ -13,7 +13,10 @@ const SubjectsSection = () => {
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from("subjects").select("*").eq("is_active", true).order("sort_order").then(({ data }) => setItems(data || []));
+    supabase.from("subjects").select("*").eq("is_active", true).order("sort_order").then(({ data, error }) => {
+      console.log('SubjectsSection data:', data, 'error:', error);
+      setItems(data || []);
+    });
   }, []);
 
   const grouped = items.reduce<Record<string, any[]>>((acc, item) => {
