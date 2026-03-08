@@ -1,65 +1,80 @@
 import { motion } from "framer-motion";
 import { ArrowRight, MessageCircle } from "lucide-react";
+import iqbalSir from "@/assets/iqbal-sir.png";
 
 const HeroSection = () => {
   return (
     <section id="home" className="relative min-h-screen flex items-center hero-gradient overflow-hidden">
-      {/* Floating orbs */}
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse-glow" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
 
       <div className="container mx-auto px-4 pt-20 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
-              Science Educator · Kishoreganj, Bangladesh
-            </span>
-          </motion.div>
+        <div className="flex flex-col-reverse md:flex-row items-center gap-10 md:gap-16 max-w-6xl mx-auto">
+          {/* Text */}
+          <div className="flex-1 text-center md:text-left">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
+                Science Educator · Kishoreganj, Bangladesh
+              </span>
+            </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="font-display text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-6"
-          >
-            Learn Science the{" "}
-            <span className="gradient-text">Smart Way</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
-          >
-            Concept-based learning for SSC and HSC students with multimedia teaching.
-            Making science easy, engaging, and accessible.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <a
-              href="#resources"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all glow-primary"
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="font-display text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-6"
             >
-              View Study Materials
-              <ArrowRight size={18} />
-            </a>
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border border-border bg-secondary/50 text-foreground font-semibold hover:bg-secondary transition-all"
+              Learn Science the{" "}
+              <span className="gradient-text">Smart Way</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10"
             >
-              <MessageCircle size={18} />
-              Contact for Classes
-            </a>
+              Concept-based learning for SSC and HSC students with multimedia teaching.
+              Making science easy, engaging, and accessible.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col sm:flex-row items-center md:items-start justify-center md:justify-start gap-4"
+            >
+              <a href="#resources" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all glow-primary">
+                View Study Materials <ArrowRight size={18} />
+              </a>
+              <a href="#contact" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border border-border bg-secondary/50 text-foreground font-semibold hover:bg-secondary transition-all">
+                <MessageCircle size={18} /> Contact for Classes
+              </a>
+            </motion.div>
+          </div>
+
+          {/* Portrait */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="flex-shrink-0"
+          >
+            <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80">
+              {/* Glow ring */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/40 to-accent/30 blur-2xl opacity-60" />
+              {/* Glass border */}
+              <div className="relative w-full h-full rounded-full p-1 bg-gradient-to-br from-primary/50 to-accent/40">
+                <div className="w-full h-full rounded-full overflow-hidden glass-card border-0 bg-card/40 backdrop-blur-xl">
+                  <img
+                    src={iqbalSir}
+                    alt="MD. Iqbal Husen – Science Educator"
+                    className="w-full h-full object-cover object-top"
+                    loading="eager"
+                  />
+                </div>
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>
