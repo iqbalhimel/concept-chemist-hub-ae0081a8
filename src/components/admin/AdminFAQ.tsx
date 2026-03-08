@@ -4,14 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, GripVertical, Pencil, X } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Tables } from "@/integrations/supabase/types";
 
-type FAQItem = Tables<"faq">;
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+  question_bn: string;
+  answer_bn: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
 
 const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
@@ -47,17 +57,17 @@ const AdminFAQ = () => {
 
   const fetchAll = async () => {
     const { data } = await supabase.from("faq").select("*").order("sort_order");
-    setItems(data || []);
+    setItems((data as FAQItem[]) || []);
     setLoading(false);
   };
 
   const add = async () => {
-    const { data, error } = await supabase.from("faq").insert({ question: "New Question?", answer: "Answer here.", sort_order: 0 }).select().single();
+    const { data, error } = await supabase.from("faq").insert({ question: "New Question?", answer: "Answer here.", question_bn: "", answer_bn: "", sort_order: 0 }).select().single();
     if (error || !data) { toast.error(error?.message || "Failed"); return; }
     toast.success("Added");
     newIdRef.current = data.id;
     setExpandedEditId(data.id);
-    setItems(prev => [data, ...prev]);
+    setItems(prev => [data as FAQItem, ...prev]);
   };
 
   const update = async (id: string, updates: Partial<FAQItem>) => {
@@ -123,7 +133,6 @@ const AdminFAQ = () => {
           {items.length === 0 && <p className="text-muted-foreground text-sm">No FAQs added yet.</p>}
           {items.map(item => (
             <SortableRow key={item.id} id={item.id}>
-              {/* Compact row */}
               <div className="glass-card p-3">
                 {/* Desktop */}
                 <div className="hidden md:flex items-center gap-4">
@@ -155,10 +164,24 @@ const AdminFAQ = () => {
                 {/* Edit panel */}
                 {expandedEditId === item.id && (
                   <div className="mt-3 pt-3 border-t border-border space-y-3">
-                    <Input ref={titleRef} value={item.question} onChange={e => updateLocal(item.id, "question", e.target.value)} placeholder="Question" />
-                    <Textarea value={item.answer} onChange={e => updateLocal(item.id, "answer", e.target.value)} placeholder="Answer" rows={3} />
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Question (English)</Label>
+                      <Input ref={titleRef} value={item.question} onChange={e => updateLocal(item.id, "question", e.target.value)} placeholder="Question in English" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Answer (English)</Label>
+                      <Textarea value={item.answer} onChange={e => updateLocal(item.id, "answer", e.target.value)} placeholder="Answer in English" rows={3} className="mt-1" />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">প্রশ্ন (বাংলা)</Label>
+                      <Input value={item.question_bn} onChange={e => updateLocal(item.id, "question_bn", e.target.value)} placeholder="বাংলায় প্রশ্ন লিখুন" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">উত্তর (বাংলা)</Label>
+                      <Textarea value={item.answer_bn} onChange={e => updateLocal(item.id, "answer_bn", e.target.value)} placeholder="বাংলায় উত্তর লিখুন" rows={3} className="mt-1" />
+                    </div>
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={() => update(item.id, { question: item.question, answer: item.answer })}><Save size={14} className="mr-1" /> Save</Button>
+                      <Button size="sm" onClick={() => update(item.id, { question: item.question, answer: item.answer, question_bn: item.question_bn, answer_bn: item.answer_bn })}><Save size={14} className="mr-1" /> Save</Button>
                       <Button size="sm" variant="outline" onClick={() => setExpandedEditId(null)}><X size={14} className="mr-1" /> Cancel</Button>
                     </div>
                   </div>
