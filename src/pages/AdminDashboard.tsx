@@ -56,6 +56,8 @@ const AdminDashboard = () => {
         return <AdminStudyMaterials />;
       case "blog":
         return <AdminBlogPosts />;
+      case "comments":
+        return <AdminComments />;
       case "gallery":
         return <AdminGallery />;
       case "faq":
