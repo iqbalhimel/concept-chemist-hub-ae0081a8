@@ -28,6 +28,9 @@ const ResourcesSection = () => {
   const [categories, setCategories] = useState<StudyCategory[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewTitle, setPreviewTitle] = useState("");
+  const [previewError, setPreviewError] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
