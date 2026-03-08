@@ -17,7 +17,11 @@ const ExperienceSection = () => {
     });
   }, []);
 
-  if (items.length === 0) return null;
+  if (!items || items.length === 0) {
+    console.log('ExperienceSection: No items to display');
+    return null;
+  }
+  console.log('ExperienceSection rendering with items:', items.length);
 
   return (
     <section id="experience" className="section-padding">
