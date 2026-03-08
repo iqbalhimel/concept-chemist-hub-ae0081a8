@@ -59,9 +59,12 @@ const SortableNoticeCard = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`glass-card p-4 space-y-2 ${n.is_pinned ? "ring-2 ring-primary/50" : ""} ${isExpired ? "opacity-50" : ""}`}
+      className={`glass-card p-4 space-y-2 ${n.is_pinned ? "ring-2 ring-primary/50" : ""} ${isExpired ? "opacity-50" : ""} ${selected ? "ring-2 ring-primary/50" : ""}`}
     >
       <div className="flex items-center gap-2">
+        <button onClick={() => onToggleSelect(notice.id)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
+          {selected ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
+        </button>
         <button
           {...attributes}
           {...listeners}
