@@ -12,3 +12,10 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Disallow: /admin
+Disallow: /admin/login
+Disallow: /forgot-password
+Disallow: /reset-password
+
+Sitemap: https://iqbalsir.com/sitemap.xml
