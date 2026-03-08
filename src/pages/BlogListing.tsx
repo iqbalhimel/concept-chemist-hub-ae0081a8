@@ -127,6 +127,27 @@ const BlogListing = () => {
             </p>
           </div>
 
+          {/* Search */}
+          <div className="max-w-md mx-auto mb-8">
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="pl-10 h-11 rounded-full bg-muted/50 border-border"
+                placeholder="Search articles..."
+                value={searchQuery}
+                onChange={e => { setSearchQuery(e.target.value); setPage(1); }}
+              />
+              {searchQuery && (
+                <button
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => { setSearchQuery(""); setPage(1); }}
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Category Filter */}
           {categories.length > 1 && (
             <div className="flex flex-wrap justify-center gap-2 mb-10">
