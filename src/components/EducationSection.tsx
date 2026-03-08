@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { GraduationCap } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const education = [
   { degree: "B.Ed", institution: "National University", result: "CGPA 3.77", year: "2023" },
@@ -13,34 +14,23 @@ const education = [
 const EducationSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const { t } = useLanguage();
 
   return (
     <section id="education" className="section-padding section-gradient">
       <div className="container mx-auto" ref={ref}>
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">
-            Academic <span className="gradient-text">Education</span>
+            {t.education.title_1} <span className="gradient-text">{t.education.title_highlight}</span>
           </h2>
-          <p className="text-center text-muted-foreground mb-16">A strong academic foundation in science</p>
+          <p className="text-center text-muted-foreground mb-16">{t.education.subtitle}</p>
         </motion.div>
 
         <div className="max-w-3xl mx-auto relative">
-          {/* Timeline line */}
           <div className="absolute left-7 top-2 bottom-2 w-px bg-border/60 hidden md:block" />
-
           <div className="space-y-8">
             {education.map((edu, i) => (
-              <motion.div
-                key={edu.degree}
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}
-                className="glass-card-hover p-6 md:py-7 md:px-8 md:ml-16 relative"
-              >
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }} className="glass-card-hover p-6 md:py-7 md:px-8 md:ml-16 relative">
                 <div className="hidden md:flex absolute -left-[3.25rem] top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-primary/15 border-2 border-primary/70 items-center justify-center">
                   <GraduationCap size={18} className="text-primary" />
                 </div>

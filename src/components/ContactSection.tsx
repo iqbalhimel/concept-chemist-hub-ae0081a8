@@ -2,147 +2,61 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Phone, Mail, MessageCircle, Facebook, Send } from "lucide-react";
 import { toast } from "sonner";
-
-const contactInfo = [
-  { icon: Phone, label: "Phone", value: "+8801687476714", href: "tel:+8801687476714" },
-  { icon: MessageCircle, label: "WhatsApp", value: "+8801733579100", href: "https://wa.me/8801733579100" },
-  { icon: Mail, label: "Email", value: "i.h.himel@gmail.com", href: "mailto:i.h.himel@gmail.com" },
-  { icon: Facebook, label: "Facebook", value: "fb.com/i.h.himel", href: "https://www.fb.com/i.h.himel" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ContactSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const { t } = useLanguage();
+
+  const contactInfo = [
+    { icon: Phone, label: t.contact.phone, value: "+8801687476714", href: "tel:+8801687476714" },
+    { icon: MessageCircle, label: t.contact.whatsapp, value: "+8801733579100", href: "https://wa.me/8801733579100" },
+    { icon: Mail, label: t.contact.email, value: "i.h.himel@gmail.com", href: "mailto:i.h.himel@gmail.com" },
+    { icon: Facebook, label: t.contact.facebook, value: "fb.com/i.h.himel", href: "https://www.fb.com/i.h.himel" },
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
-      toast.error("Please fill in all fields.");
-      return;
-    }
-    toast.success("Message sent! Iqbal Sir will get back to you soon.");
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) { toast.error(t.contact.error_fields); return; }
+    toast.success(t.contact.success);
     setForm({ name: "", email: "", message: "" });
   };
 
   return (
     <section id="contact" className="section-padding section-gradient">
       <div className="container mx-auto" ref={ref}>
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">
-            Get in <span className="gradient-text">Touch</span>
-          </h2>
-          <p className="text-center text-muted-foreground mb-16 max-w-xl mx-auto">
-            Interested in classes or have questions? Reach out today.
-          </p>
+        <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+          <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">{t.contact.title_1} <span className="gradient-text">{t.contact.title_highlight}</span></h2>
+          <p className="text-center text-muted-foreground mb-16 max-w-xl mx-auto">{t.contact.subtitle}</p>
         </motion.div>
-
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {/* Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-4"
-          >
-            <h3 className="font-display text-xl font-bold text-foreground mb-6">Contact Information</h3>
-            {contactInfo.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glass-card-hover p-5 flex items-center gap-4 block"
-              >
-                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <item.icon size={20} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{item.label}</p>
-                  <p className="text-foreground font-medium">{item.value}</p>
-                </div>
+          <motion.div initial={{ opacity: 0, x: -30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 }} className="space-y-4">
+            <h3 className="font-display text-xl font-bold text-foreground mb-6">{t.contact.info_title}</h3>
+            {contactInfo.map(item => (
+              <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" className="glass-card-hover p-5 flex items-center gap-4 block">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0"><item.icon size={20} className="text-primary" /></div>
+                <div><p className="text-sm text-muted-foreground">{item.label}</p><p className="text-foreground font-medium">{item.value}</p></div>
               </a>
             ))}
           </motion.div>
-
-          {/* Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
+          <motion.div initial={{ opacity: 0, x: 30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.5, delay: 0.3 }}>
             <form onSubmit={handleSubmit} className="glass-card p-8 space-y-5">
-              <h3 className="font-display text-xl font-bold text-foreground mb-2">Send a Message</h3>
-              <div>
-                <label htmlFor="name" className="block text-sm text-muted-foreground mb-1.5">Your Name</label>
-                <input
-                  id="name"
-                  type="text"
-                  maxLength={100}
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                  placeholder="Enter your name"
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-sm text-muted-foreground mb-1.5">Email Address</label>
-                <input
-                  id="email"
-                  type="email"
-                  maxLength={255}
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                  placeholder="Enter your email"
-                />
-              </div>
-              <div>
-                <label htmlFor="message" className="block text-sm text-muted-foreground mb-1.5">Message</label>
-                <textarea
-                  id="message"
-                  rows={4}
-                  maxLength={1000}
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
-                  placeholder="Your message..."
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all glow-primary"
-              >
-                <Send size={18} />
-                Send Message
-              </button>
+              <h3 className="font-display text-xl font-bold text-foreground mb-2">{t.contact.form_title}</h3>
+              <div><label htmlFor="name" className="block text-sm text-muted-foreground mb-1.5">{t.contact.label_name}</label>
+                <input id="name" type="text" maxLength={100} value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder={t.contact.placeholder_name} /></div>
+              <div><label htmlFor="email" className="block text-sm text-muted-foreground mb-1.5">{t.contact.label_email}</label>
+                <input id="email" type="email" maxLength={255} value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder={t.contact.placeholder_email} /></div>
+              <div><label htmlFor="message" className="block text-sm text-muted-foreground mb-1.5">{t.contact.label_message}</label>
+                <textarea id="message" rows={4} maxLength={1000} value={form.message} onChange={e => setForm({...form, message: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none" placeholder={t.contact.placeholder_message} /></div>
+              <button type="submit" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all glow-primary"><Send size={18} />{t.contact.send}</button>
             </form>
           </motion.div>
         </div>
-
-        {/* Google Map */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="max-w-5xl mx-auto mt-12"
-        >
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.4 }} className="max-w-5xl mx-auto mt-12">
           <div className="glass-card overflow-hidden rounded-xl">
-            <iframe
-              title="Kishoreganj Sadar Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29045.75!2d90.76!3d24.43!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x37564ee40fafffff%3A0x1c15f9a1e3f1a0e7!2sKishoreganj%20Sadar!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd"
-              width="100%"
-              height="300"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="w-full"
-            />
+            <iframe title="Kishoreganj Sadar Location" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29045.75!2d90.76!3d24.43!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x37564ee40fafffff%3A0x1c15f9a1e3f1a0e7!2sKishoreganj%20Sadar!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd" width="100%" height="300" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="w-full" />
           </div>
         </motion.div>
       </div>

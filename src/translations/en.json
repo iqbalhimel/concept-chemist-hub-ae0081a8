@@ -1,0 +1,181 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "subjects": "Subjects",
+    "experience": "Experience",
+    "education": "Education",
+    "resources": "Resources",
+    "blog": "Blog",
+    "contact": "Contact"
+  },
+  "hero": {
+    "badge": "Science Educator · Kishoreganj, Bangladesh",
+    "title_1": "Learn Science the",
+    "title_highlight": "Smart Way",
+    "desc": "Concept-based learning for SSC and HSC students with multimedia teaching. Making science easy, engaging, and accessible.",
+    "cta_batch": "Join a Batch",
+    "cta_notes": "Download Free Notes",
+    "img_alt": "MD. Iqbal Husen – Science Educator"
+  },
+  "about": {
+    "title_1": "About",
+    "title_highlight": "Iqbal Sir",
+    "subtitle": "MD. IQBAL HUSEN — Assistant Teacher (Science) & Science Educator",
+    "intro": "With <strong>10+ years of teaching experience</strong> since 2014, Iqbal Sir serves as Assistant Teacher (Science) at Zilla Smarani Girls' High School, Kishoreganj.",
+    "point_1": "Specializes in <strong>concept-based learning</strong> — making complex science topics simple and intuitive",
+    "point_2": "Uses <strong>multimedia projector-based classes</strong> for engaging, visual explanations",
+    "point_3": "Teaches SSC (Physics, Chemistry, Biology), HSC Chemistry, and Classes 6–10 (Math, Higher Math, ICT)",
+    "highlight_1": "Concept-Based Learning",
+    "highlight_2": "Multimedia Classes",
+    "highlight_3": "Student-Friendly",
+    "highlight_4": "Strong Fundamentals"
+  },
+  "subjects": {
+    "title_1": "Teaching",
+    "title_highlight": "Subjects",
+    "subtitle": "Comprehensive science and mathematics education across multiple levels",
+    "ssc": "SSC Level",
+    "hsc": "HSC Level",
+    "class610": "Class 6–10",
+    "physics": "Physics",
+    "chemistry": "Chemistry",
+    "biology": "Biology",
+    "mathematics": "Mathematics",
+    "higher_math": "Higher Mathematics",
+    "general_science": "General Science",
+    "ict": "ICT"
+  },
+  "approach": {
+    "title_1": "Teaching",
+    "title_highlight": "Approach",
+    "subtitle": "A philosophy built on clarity, engagement, and student success",
+    "item_1_title": "Strong Basic Concepts",
+    "item_1_desc": "Building a solid foundation by focusing on core principles and fundamentals of every topic.",
+    "item_2_title": "Clear Explanations",
+    "item_2_desc": "Breaking down complex and difficult topics into simple, understandable language.",
+    "item_3_title": "Multimedia Classes",
+    "item_3_desc": "Using projector-based multimedia presentations for visual and engaging learning.",
+    "item_4_title": "Student-Friendly Environment",
+    "item_4_desc": "Creating a comfortable and supportive atmosphere where every student can thrive."
+  },
+  "stats": {
+    "badge": "Proven Results",
+    "title_1": "Student",
+    "title_highlight": "Achievements",
+    "years": "Years of Teaching Experience",
+    "students": "Students Taught",
+    "success": "SSC & HSC Exam Success",
+    "subjects_covered": "Subjects Covered"
+  },
+  "experience": {
+    "title_1": "Professional",
+    "title_highlight": "Experience",
+    "subtitle": "Dedicated to teaching since 2014",
+    "role_1": "Assistant Teacher (Science)",
+    "org_1": "Zilla Smarani Girls' High School, Kishoreganj",
+    "period_1": "2021 – Present",
+    "desc_1": "Teaching science subjects with multimedia and concept-based learning methods.",
+    "role_2": "Private Tutor",
+    "org_2": "SSC & HSC Students",
+    "period_2": "2014 – Present",
+    "desc_2": "Over a decade of private tutoring experience across Physics, Chemistry, Biology, and Mathematics."
+  },
+  "education": {
+    "title_1": "Academic",
+    "title_highlight": "Education",
+    "subtitle": "A strong academic foundation in science"
+  },
+  "gallery": {
+    "badge": "Inside the Classroom",
+    "title_1": "Classroom",
+    "title_highlight": "Gallery",
+    "subtitle": "A glimpse into our interactive and engaging learning environment",
+    "empty": "Photos coming soon! Check back later for a glimpse into our interactive learning environment."
+  },
+  "testimonials": {
+    "badge": "What Students Say",
+    "title_1": "Student",
+    "title_highlight": "Testimonials",
+    "subtitle": "Hear from students who improved their understanding and exam results through concept-based learning."
+  },
+  "notices": {
+    "title_1": "Latest",
+    "title_highlight": "Notices",
+    "subtitle": "New batch announcements & important updates",
+    "pinned": "Pinned",
+    "no_details": "No details available.",
+    "no_additional": "No additional details provided for this notice.",
+    "copy_link": "Copy Link"
+  },
+  "resources": {
+    "badge": "Free Study Materials",
+    "title_1": "Download",
+    "title_highlight": "Center",
+    "subtitle": "Access organized notes, question banks, and model tests for SSC & HSC exams",
+    "preview": "Preview",
+    "download": "Download",
+    "coming_soon": "Coming soon",
+    "empty": "Study materials are being prepared. Check back soon!"
+  },
+  "blog": {
+    "title_1": "Educational",
+    "title_highlight": "Blog",
+    "subtitle": "Articles and tips to help students learn science more effectively",
+    "read_article": "Read Article",
+    "view_all": "View All Posts",
+    "by": "Iqbal Sir"
+  },
+  "faq": {
+    "badge": "Common Questions",
+    "title_1": "Frequently Asked",
+    "title_highlight": "Questions",
+    "loading": "Loading...",
+    "empty": "No FAQs added yet."
+  },
+  "contact": {
+    "title_1": "Get in",
+    "title_highlight": "Touch",
+    "subtitle": "Interested in classes or have questions? Reach out today.",
+    "info_title": "Contact Information",
+    "form_title": "Send a Message",
+    "label_name": "Your Name",
+    "label_email": "Email Address",
+    "label_message": "Message",
+    "placeholder_name": "Enter your name",
+    "placeholder_email": "Enter your email",
+    "placeholder_message": "Your message...",
+    "send": "Send Message",
+    "error_fields": "Please fill in all fields.",
+    "success": "Message sent! Iqbal Sir will get back to you soon.",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "email": "Email",
+    "facebook": "Facebook"
+  },
+  "footer": {
+    "tagline": "Making Science Easy for Students. Concept-based learning for SSC and HSC students in Kishoreganj, Bangladesh.",
+    "quick_links": "Quick Links",
+    "contact": "Contact",
+    "rights": "All rights reserved."
+  },
+  "whatsapp": {
+    "tooltip": "Chat on WhatsApp"
+  },
+  "blog_listing": {
+    "title": "Blog",
+    "subtitle": "Articles, tips, and study guides for science students",
+    "search_placeholder": "Search articles...",
+    "all_categories": "All",
+    "no_results": "No posts found.",
+    "back": "Back to Home"
+  },
+  "blog_post": {
+    "back_blog": "Back to Blog",
+    "share": "Share",
+    "copied": "Copied!",
+    "copy_link": "Copy Link",
+    "related": "Related Articles",
+    "not_found": "Post not found"
+  }
+}
