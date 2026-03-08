@@ -20,7 +20,7 @@ const fallbackPhotos: GalleryItem[] = [
 
 const GallerySection = () => {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const inView = useInView(ref, { once: true, margin: "0px" });
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [photos, setPhotos] = useState<GalleryItem[]>([]);
   const [loaded, setLoaded] = useState(false);
