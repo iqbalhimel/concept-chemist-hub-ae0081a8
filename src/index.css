@@ -239,4 +239,20 @@
       @apply py-14 px-4;
     }
   }
+
+  /* Skip to content link */
+  .skip-to-content {
+    @apply fixed top-0 left-1/2 -translate-x-1/2 -translate-y-full z-[100]
+           px-6 py-3 bg-primary text-primary-foreground font-semibold text-sm
+           rounded-b-lg shadow-lg transition-transform duration-200;
+  }
+  .skip-to-content:focus {
+    @apply translate-y-0;
+  }
+
+  /* Enhanced focus indicators */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+    outline-style: solid;
+  }
 }
