@@ -20,6 +20,7 @@ interface Notice {
   sort_order?: number;
   created_at?: string;
   is_pinned?: boolean;
+  expires_at?: string | null;
 }
 
 const fallbackNotices: Notice[] = [
@@ -66,10 +67,14 @@ const NoticesSection = () => {
     fetchNotices();
   }, []);
 
-  // Pinned notices first, then by sort_order
+  // Filter out expired, then pinned first
   const sortedNotices = useMemo(() => {
-    const pinned = notices.filter((n) => n.is_pinned);
-    const unpinned = notices.filter((n) => !n.is_pinned);
+    const today = new Date().toISOString().split("T")[0];
+    const active = notices.filter(
+      (n) => !n.expires_at || n.expires_at >= today
+    );
+    const pinned = active.filter((n) => n.is_pinned);
+    const unpinned = active.filter((n) => !n.is_pinned);
     return [...pinned, ...unpinned];
   }, [notices]);
 

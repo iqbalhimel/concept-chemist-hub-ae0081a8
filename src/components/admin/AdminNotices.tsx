@@ -33,7 +33,7 @@ const SortableNoticeCard = ({
   onTogglePin,
 }: {
   notice: Notice;
-  onUpdateLocal: (id: string, updates: Partial<Notice>) => void;
+  onUpdateLocal: (id: string, updates: Record<string, any>) => void;
   onSave: (n: Notice) => void;
   onDelete: (id: string) => void;
   onTogglePin: (n: Notice) => void;
@@ -46,11 +46,14 @@ const SortableNoticeCard = ({
     transition,
   };
 
+  const n = notice as any;
+  const isExpired = n.expires_at && new Date(n.expires_at) < new Date();
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`glass-card p-4 space-y-2 ${(notice as any).is_pinned ? "ring-2 ring-primary/50" : ""}`}
+      className={`glass-card p-4 space-y-2 ${n.is_pinned ? "ring-2 ring-primary/50" : ""} ${isExpired ? "opacity-50" : ""}`}
     >
       <div className="flex items-center gap-2">
         <button
@@ -68,12 +71,12 @@ const SortableNoticeCard = ({
         />
         <Button
           size="icon"
-          variant={(notice as any).is_pinned ? "default" : "outline"}
+          variant={n.is_pinned ? "default" : "outline"}
           className="shrink-0 h-8 w-8"
           onClick={() => onTogglePin(notice)}
-          title={(notice as any).is_pinned ? "Unpin" : "Pin to top"}
+          title={n.is_pinned ? "Unpin" : "Pin to top"}
         >
-          <Pin size={14} className={(notice as any).is_pinned ? "fill-current" : ""} />
+          <Pin size={14} className={n.is_pinned ? "fill-current" : ""} />
         </Button>
       </div>
       <Textarea
@@ -83,20 +86,39 @@ const SortableNoticeCard = ({
         }
         placeholder="Description"
       />
-      <div className="flex items-center gap-4">
-        <Input
-          type="date"
-          value={notice.date}
-          onChange={(e) => onUpdateLocal(notice.id, { date: e.target.value })}
-          className="w-auto"
-        />
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-4">
+        <label className="text-xs text-muted-foreground">
+          Date
+          <Input
+            type="date"
+            value={notice.date}
+            onChange={(e) => onUpdateLocal(notice.id, { date: e.target.value })}
+            className="w-auto mt-1"
+          />
+        </label>
+        <label className="text-xs text-muted-foreground">
+          Expires
+          <Input
+            type="date"
+            value={n.expires_at || ""}
+            onChange={(e) =>
+              onUpdateLocal(notice.id, {
+                expires_at: e.target.value || null,
+              })
+            }
+            className="w-auto mt-1"
+          />
+        </label>
+        <label className="flex items-center gap-2 text-sm text-muted-foreground pt-4">
           <Switch
             checked={notice.is_active}
             onCheckedChange={(v) => onUpdateLocal(notice.id, { is_active: v })}
           />
           Active
         </label>
+        {isExpired && (
+          <span className="text-xs font-semibold text-destructive pt-4">Expired</span>
+        )}
       </div>
       <div className="flex gap-2">
         <Button size="sm" onClick={() => onSave(notice)}>
@@ -155,6 +177,7 @@ const AdminNotices = () => {
   };
 
   const updateNotice = async (n: Notice) => {
+    const a = n as any;
     const { error } = await supabase
       .from("notices")
       .update({
@@ -162,8 +185,9 @@ const AdminNotices = () => {
         description: n.description,
         date: n.date,
         is_active: n.is_active,
-        is_pinned: (n as any).is_pinned,
-      })
+        is_pinned: a.is_pinned,
+        expires_at: a.expires_at || null,
+      } as any)
       .eq("id", n.id);
     if (error) toast.error(error.message);
     else toast.success("Updated");
@@ -180,7 +204,9 @@ const AdminNotices = () => {
       return;
     }
     setNotices((prev) =>
-      prev.map((x) => (x.id === n.id ? { ...x, is_pinned: newVal } as any : x))
+      prev.map((x) =>
+        x.id === n.id ? ({ ...x, is_pinned: newVal } as any) : x
+      )
     );
     toast.success(newVal ? "Pinned" : "Unpinned");
   };
@@ -191,9 +217,9 @@ const AdminNotices = () => {
     toast.success("Deleted");
   };
 
-  const updateLocal = (id: string, updates: Partial<Notice>) => {
+  const updateLocal = (id: string, updates: Record<string, any>) => {
     setNotices((prev) =>
-      prev.map((x) => (x.id === id ? { ...x, ...updates } : x))
+      prev.map((x) => (x.id === id ? ({ ...x, ...updates } as any) : x))
     );
   };
 
