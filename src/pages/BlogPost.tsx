@@ -222,7 +222,7 @@ const BlogPost = () => {
                     </a>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`https://iqbalsir.com/blog/${post.id}`);
+                        navigator.clipboard.writeText(`https://iqbalsir.com/blog/${post.slug || post.id}`);
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
                       }}
