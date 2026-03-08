@@ -228,6 +228,16 @@ const BlogPost = () => {
             className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-display prose-a:text-primary prose-img:rounded-lg"
             dangerouslySetInnerHTML={{ __html: post.content || "<p>No content available.</p>" }}
           />
+
+          {/* Reactions */}
+          <div className="mt-10 pt-6 border-t border-border">
+            <BlogReactions postId={post.id} />
+          </div>
+
+          {/* Comments */}
+          <div className="mt-10 pt-6 border-t border-border">
+            <BlogComments postId={post.id} />
+          </div>
         </div>
       </article>
 
