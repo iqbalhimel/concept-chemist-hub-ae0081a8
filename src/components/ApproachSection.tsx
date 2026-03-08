@@ -19,7 +19,11 @@ const ApproachSection = () => {
     });
   }, []);
 
-  if (items.length === 0) return null;
+  if (!items || items.length === 0) {
+    console.log('ApproachSection: No items to display');
+    return null;
+  }
+  console.log('ApproachSection rendering with items:', items.length);
 
   return (
     <section className="section-padding section-gradient">
