@@ -137,8 +137,29 @@ const EditPanel = ({
     />
 
     <div className="grid gap-2 sm:grid-cols-2">
-      <Input value={post.title} onChange={e => onUpdateLocal(post.id, "title", e.target.value)} placeholder="Title" />
+      <div className="space-y-1">
+        <Input value={post.title} onChange={e => {
+          onUpdateLocal(post.id, "title", e.target.value);
+          // Auto-generate slug if slug is empty or was auto-generated
+          const currentSlug = (post as any).slug || "";
+          const oldAutoSlug = slugify(post.title);
+          if (!currentSlug || currentSlug === oldAutoSlug) {
+            onUpdateLocal(post.id, "slug", slugify(e.target.value));
+          }
+        }} placeholder="Title" />
+      </div>
       <Input value={post.category} onChange={e => onUpdateLocal(post.id, "category", e.target.value)} placeholder="Category" />
+    </div>
+
+    <div className="space-y-1">
+      <label className="text-xs font-medium text-muted-foreground">URL Slug</label>
+      <div className="flex gap-2">
+        <Input value={(post as any).slug || ""} onChange={e => onUpdateLocal(post.id, "slug", slugify(e.target.value))} placeholder="auto-generated-from-title" className="font-mono text-sm" />
+        <Button size="sm" variant="outline" type="button" onClick={() => onUpdateLocal(post.id, "slug", slugify(post.title))}>
+          Auto
+        </Button>
+      </div>
+      <p className="text-[11px] text-muted-foreground">/blog/{(post as any).slug || "..."}</p>
     </div>
 
     <Input value={post.excerpt || ""} onChange={e => onUpdateLocal(post.id, "excerpt", e.target.value)} placeholder="Excerpt" />
