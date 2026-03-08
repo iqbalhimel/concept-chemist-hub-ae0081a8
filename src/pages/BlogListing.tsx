@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowUpRight, Clock, User, ChevronLeft, ChevronRight, MessageSquare, Search, X } from "lucide-react";
 import { setSeo } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
