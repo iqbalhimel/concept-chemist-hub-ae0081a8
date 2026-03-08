@@ -19,9 +19,9 @@ const iconOptions = ["Lightbulb", "Target", "MonitorPlay", "Heart", "BookOpen", 
 const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   return (
-    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }}>
-      <div className="flex items-start">
-        <button {...attributes} {...listeners} className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground touch-none pt-3.5 pl-3 pr-1"><GripVertical size={16} /></button>
+    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="w-full max-w-full overflow-hidden">
+      <div className="flex items-start w-full max-w-full">
+        <button {...attributes} {...listeners} className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground touch-none pt-3.5 pl-1 pr-1"><GripVertical size={16} /></button>
         <div className="flex-1 min-w-0">{children}</div>
       </div>
     </div>
@@ -95,7 +95,7 @@ const AdminApproach = () => {
       {items.length === 0 ? <p className="text-muted-foreground text-center py-8">No approach items added yet.</p> : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-2">
+            <div className="space-y-2 w-full max-w-full overflow-hidden">
               {paginated.map(item => (
                 <SortableRow key={item.id} id={item.id}>
                   <div className="glass-card p-2.5 sm:p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
