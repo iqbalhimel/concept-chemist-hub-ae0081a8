@@ -198,6 +198,11 @@ const BlogListing = () => {
                             <Clock size={12} /> {post.read_time}
                           </span>
                         )}
+                        {(commentCounts[post.id] || 0) > 0 && (
+                          <span className="inline-flex items-center gap-1">
+                            <MessageSquare size={12} /> {commentCounts[post.id]}
+                          </span>
+                        )}
                         <span className="ml-auto">{formatDate(post.created_at)}</span>
                       </div>
                     </div>
