@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, MessageCircle } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
 import iqbalSir from "@/assets/iqbal-sir.png";
 
 const HeroSection = () => {
@@ -44,11 +44,11 @@ const HeroSection = () => {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-center md:items-start justify-center md:justify-start gap-4"
             >
-              <a href="#resources" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all glow-primary">
-                View Study Materials <ArrowRight size={18} />
+              <a href="#contact" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all glow-primary">
+                Join a Batch <ArrowRight size={18} />
               </a>
-              <a href="#contact" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border border-border bg-secondary/50 text-foreground font-semibold hover:bg-secondary transition-all">
-                <MessageCircle size={18} /> Contact for Classes
+              <a href="#resources" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border border-border bg-secondary/50 text-foreground font-semibold hover:bg-secondary transition-all">
+                <Download size={18} /> Download Free Notes
               </a>
             </motion.div>
           </div>
