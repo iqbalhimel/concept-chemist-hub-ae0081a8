@@ -22,7 +22,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-display text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-6"
+              className="font-display text-3xl sm:text-4xl md:text-7xl font-bold leading-tight mb-4 md:mb-6"
             >
               Learn Science the{" "}
               <span className="gradient-text">Smart Way</span>
