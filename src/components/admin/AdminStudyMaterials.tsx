@@ -23,7 +23,7 @@ const AdminStudyMaterials = () => {
   const [loading, setLoading] = useState(true);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   useEffect(() => { fetchItems(); }, []);
 
