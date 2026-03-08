@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Upload, Loader2, FileUp } from "lucide-react";
+import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Tables } from "@/integrations/supabase/types";
 import * as pdfjsLib from "pdfjs-dist";
@@ -52,7 +52,11 @@ const AdminStudyMaterials = () => {
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [bulkCategory, setBulkCategory] = useState("Physics");
   const [customCatInput, setCustomCatInput] = useState("");
-  const [showCustomCatFor, setShowCustomCatFor] = useState<string | null>(null); // "bulk" or item id
+  const [showCustomCatFor, setShowCustomCatFor] = useState<string | null>(null);
+  const [showCatManager, setShowCatManager] = useState(false);
+  const [renamingCat, setRenamingCat] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [catActionLoading, setCatActionLoading] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bulkInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -62,6 +66,18 @@ const AdminStudyMaterials = () => {
     const fromItems = items.map(i => i.category).filter(Boolean);
     const merged = new Set([...PRESET_CATEGORIES, ...fromItems]);
     return Array.from(merged).sort();
+  }, [items]);
+
+  const customCategories = useMemo(() => {
+    return allCategories.filter(c => !PRESET_CATEGORIES.includes(c));
+  }, [allCategories]);
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const item of items) {
+      counts[item.category] = (counts[item.category] || 0) + 1;
+    }
+    return counts;
   }, [items]);
 
   useEffect(() => { fetchItems(); }, []);
@@ -92,6 +108,42 @@ const AdminStudyMaterials = () => {
 
   const updateLocal = (id: string, field: string, value: string | number | null) => {
     setItems(prev => prev.map(x => x.id === id ? { ...x, [field]: value } : x));
+  };
+
+  const renameCategory = async (oldName: string, newName: string) => {
+    if (!newName.trim() || newName.trim() === oldName) { setRenamingCat(null); return; }
+    setCatActionLoading(true);
+    const affected = items.filter(i => i.category === oldName);
+    let success = 0;
+    for (const item of affected) {
+      const { error } = await supabase.from("study_materials").update({ category: newName.trim() }).eq("id", item.id);
+      if (!error) success++;
+    }
+    if (bulkCategory === oldName) setBulkCategory(newName.trim());
+    toast.success(`Renamed "${oldName}" → "${newName.trim()}" (${success} item${success !== 1 ? "s" : ""})`);
+    setRenamingCat(null);
+    setCatActionLoading(false);
+    fetchItems();
+  };
+
+  const deleteCategory = async (catName: string) => {
+    const affected = items.filter(i => i.category === catName);
+    if (affected.length === 0) {
+      toast.info("No materials in this category");
+      return;
+    }
+    const confirmed = window.confirm(
+      `Move ${affected.length} item${affected.length !== 1 ? "s" : ""} from "${catName}" to "Uncategorized"?`
+    );
+    if (!confirmed) return;
+    setCatActionLoading(true);
+    for (const item of affected) {
+      await supabase.from("study_materials").update({ category: "Uncategorized" }).eq("id", item.id);
+    }
+    if (bulkCategory === catName) setBulkCategory("Physics");
+    toast.success(`Deleted "${catName}" — ${affected.length} item${affected.length !== 1 ? "s" : ""} moved to Uncategorized`);
+    setCatActionLoading(false);
+    fetchItems();
   };
 
   const handleFileUpload = async (id: string, file: File) => {
@@ -186,12 +238,83 @@ const AdminStudyMaterials = () => {
       <div className="flex items-center justify-between">
         <h2 className="font-display text-2xl font-bold text-foreground">Study Materials</h2>
         <div className="flex gap-2">
+          <Button onClick={() => setShowCatManager(v => !v)} size="sm" variant="outline">
+            <Tags size={14} className="mr-1" /> Categories
+          </Button>
           <Button onClick={() => bulkInputRef.current?.click()} size="sm" variant="outline" disabled={bulkUploading}>
             <FileUp size={14} className="mr-1" /> Bulk Upload
           </Button>
           <Button onClick={add} size="sm"><Plus size={14} className="mr-1" /> Add</Button>
         </div>
       </div>
+
+      {/* Category Manager */}
+      {showCatManager && (
+        <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">Manage Categories</h3>
+          <div className="space-y-2">
+            {allCategories.map(cat => {
+              const count = categoryCounts[cat] || 0;
+              const isPreset = PRESET_CATEGORIES.includes(cat);
+              return (
+                <div key={cat} className="flex items-center gap-2 text-sm">
+                  {renamingCat === cat ? (
+                    <form
+                      className="flex gap-1 flex-1"
+                      onSubmit={e => { e.preventDefault(); renameCategory(cat, renameValue); }}
+                    >
+                      <Input
+                        className="h-8 text-xs flex-1"
+                        value={renameValue}
+                        onChange={e => setRenameValue(e.target.value)}
+                        autoFocus
+                        disabled={catActionLoading}
+                      />
+                      <Button type="submit" size="sm" variant="outline" className="h-8 text-xs" disabled={catActionLoading}>
+                        {catActionLoading ? <Loader2 size={12} className="animate-spin" /> : "Save"}
+                      </Button>
+                      <Button type="button" size="sm" variant="ghost" className="h-8 text-xs" onClick={() => setRenamingCat(null)}>
+                        Cancel
+                      </Button>
+                    </form>
+                  ) : (
+                    <>
+                      <span className="flex-1">
+                        {cat}
+                        <span className="text-muted-foreground ml-1">({count})</span>
+                        {isPreset && <span className="text-xs text-muted-foreground/60 ml-1">(preset)</span>}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2"
+                        disabled={catActionLoading}
+                        onClick={() => { setRenamingCat(cat); setRenameValue(cat); }}
+                      >
+                        <Pencil size={12} />
+                      </Button>
+                      {!isPreset && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2 text-destructive hover:text-destructive"
+                          disabled={catActionLoading}
+                          onClick={() => deleteCategory(cat)}
+                        >
+                          <Trash2 size={12} />
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground/60">
+            Rename any category or delete custom ones (items move to "Uncategorized"). Preset categories can be renamed but not deleted.
+          </p>
+        </div>
+      )}
 
       {/* Bulk drop zone */}
       <input
