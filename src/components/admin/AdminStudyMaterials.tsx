@@ -516,7 +516,7 @@ const AdminStudyMaterials = () => {
         <SortableContext items={filteredItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
       {filteredItems.map(item => (
         <SortableItem key={item.id} id={item.id}>
-        <div className="glass-card p-4 space-y-3">
+        <div className={`glass-card p-4 space-y-3 transition-opacity ${item.is_active ? "" : "opacity-50"}`}>
           <div
             className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
               dragOverId === item.id
@@ -613,9 +613,30 @@ const AdminStudyMaterials = () => {
             <Input value={item.file_url || ""} onChange={e => updateLocal(item.id, "file_url", e.target.value)} placeholder="File URL (auto-filled on upload)" />
             <Input value={item.file_size || ""} onChange={e => updateLocal(item.id, "file_size", e.target.value)} placeholder="File Size (auto-detected)" />
             <Input type="number" value={item.pages || ""} onChange={e => updateLocal(item.id, "pages", e.target.value ? parseInt(e.target.value) : null)} placeholder="Pages (auto-detected)" />
-            <div className="flex gap-2 items-end">
-              <Button size="sm" onClick={() => update(item.id, { title: item.title, category: item.category, file_url: item.file_url, file_size: item.file_size, pages: item.pages })}><Save size={14} className="mr-1" /> Save</Button>
-              <Button size="sm" variant="destructive" onClick={() => remove(item.id)}><Trash2 size={14} /></Button>
+            <div className="flex gap-2 items-center justify-between">
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={item.is_active}
+                    onChange={async () => {
+                      const newVal = !item.is_active;
+                      updateLocal(item.id, "is_active", newVal as any);
+                      const { error } = await supabase.from("study_materials").update({ is_active: newVal }).eq("id", item.id);
+                      if (error) toast.error(error.message);
+                      else toast.success(newVal ? "Activated" : "Hidden from public site");
+                    }}
+                    className="accent-primary h-3.5 w-3.5"
+                  />
+                  <span className={item.is_active ? "text-foreground" : "text-muted-foreground"}>
+                    {item.is_active ? "Active" : "Inactive"}
+                  </span>
+                </label>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => update(item.id, { title: item.title, category: item.category, file_url: item.file_url, file_size: item.file_size, pages: item.pages })}><Save size={14} className="mr-1" /> Save</Button>
+                <Button size="sm" variant="destructive" onClick={() => remove(item.id)}><Trash2 size={14} /></Button>
+              </div>
             </div>
           </div>
         </div>
