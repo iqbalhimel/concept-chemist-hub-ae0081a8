@@ -14,6 +14,7 @@ import AdminGallery from "@/components/admin/AdminGallery";
 import AdminFAQ from "@/components/admin/AdminFAQ";
 import AdminMediaLibrary from "@/components/admin/AdminMediaLibrary";
 import AdminThemes from "@/components/admin/AdminThemes";
+import AdminComments from "@/components/admin/AdminComments";
 
 type Tab =
   | "dashboard"
@@ -21,6 +22,7 @@ type Tab =
   | "notices"
   | "study-materials"
   | "blog"
+  | "comments"
   | "gallery"
   | "faq"
   | "media"
