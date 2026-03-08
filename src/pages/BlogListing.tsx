@@ -279,7 +279,7 @@ const BlogListing = () => {
             </>
           )}
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>
