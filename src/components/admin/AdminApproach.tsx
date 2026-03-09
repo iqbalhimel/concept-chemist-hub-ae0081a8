@@ -71,7 +71,8 @@ const AdminApproach = () => {
   const fetchAll = async () => { const { data } = await supabase.from("teaching_approach").select("*").order("sort_order"); setItems((data as Approach[]) || []); setLoading(false); };
 
   const handleSave = async () => {
-    if (!form.title_en.trim()) { toast.error("Title (EN) is required"); return; }
+    if (!form.title_en.trim() && !form.title_bn.trim()) { toast.error("Title (EN or BN) is required"); return; }
+    if (!form.icon) { toast.error("Icon is required"); return; }
     if (editing) { const { error } = await supabase.from("teaching_approach").update(form).eq("id", editing); if (error) { toast.error(error.message); return; } toast.success("Updated!"); }
     else { const { error } = await supabase.from("teaching_approach").insert({ ...form, sort_order: items.length }); if (error) { toast.error(error.message); return; } toast.success("Added!"); }
     setEditing(null); setAdding(false); setForm(empty); fetchAll();

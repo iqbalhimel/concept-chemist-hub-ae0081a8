@@ -43,7 +43,9 @@ const AdminSubjects = () => {
   const fetchAll = async () => { const { data } = await supabase.from("subjects").select("*").order("sort_order"); setItems((data as Subject[]) || []); setLoading(false); };
 
   const handleSave = async () => {
-    if (!form.subject_name_en.trim()) { toast.error("Subject name (EN) is required"); return; }
+    if (!form.subject_name_en.trim() && !form.subject_name_bn.trim()) { toast.error("Subject name (EN or BN) is required"); return; }
+    if (!form.category) { toast.error("Category is required"); return; }
+    if (!form.icon) { toast.error("Icon is required"); return; }
     if (editing) { const { error } = await supabase.from("subjects").update(form).eq("id", editing); if (error) { toast.error(error.message); return; } toast.success("Updated!"); }
     else { const { error } = await supabase.from("subjects").insert({ ...form, sort_order: items.length }); if (error) { toast.error(error.message); return; } toast.success("Added!"); }
     setEditing(null); setAdding(false); setForm(empty); fetchAll();
@@ -104,7 +106,7 @@ const AdminSubjects = () => {
                 <SortableRow key={item.id} id={item.id}>
                   <div className="glass-card p-4 flex items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground truncate">{item.subject_name_en || "Untitled"}</p>
+                      <p className="font-medium text-foreground truncate">{item.subject_name_en || item.subject_name_bn || "Untitled"}</p>
                       <p className="text-sm text-muted-foreground">{item.category}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">

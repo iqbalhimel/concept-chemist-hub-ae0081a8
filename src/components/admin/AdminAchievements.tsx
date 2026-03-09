@@ -66,7 +66,8 @@ const AdminAchievements = () => {
   const fetchAll = async () => { const { data } = await supabase.from("achievements").select("*").order("sort_order"); setItems((data as Achievement[]) || []); setLoading(false); };
 
   const handleSave = async () => {
-    if (!form.title_en.trim() || !form.value.trim()) { toast.error("Title and value are required"); return; }
+    if ((!form.title_en.trim() && !form.title_bn.trim()) || !form.value.trim()) { toast.error("Title (EN or BN) and value are required"); return; }
+    if (isNaN(Number(form.value.replace(/[^0-9.]/g, ""))) && !/^\d/.test(form.value)) { toast.error("Value must start with a number (e.g. 10, 500+, 95%)"); return; }
     if (editing) { const { error } = await supabase.from("achievements").update(form).eq("id", editing); if (error) { toast.error(error.message); return; } toast.success("Updated!"); }
     else { const { error } = await supabase.from("achievements").insert({ ...form, sort_order: items.length }); if (error) { toast.error(error.message); return; } toast.success("Added!"); }
     setEditing(null); setAdding(false); setForm(empty); fetchAll();

@@ -51,7 +51,7 @@ const AdminExperience = () => {
   const fetchAll = async () => { const { data } = await supabase.from("experience").select("*").order("sort_order"); setItems((data as Experience[]) || []); setLoading(false); };
 
   const handleSave = async () => {
-    if (!form.job_title_en.trim()) { toast.error("Job title (EN) is required"); return; }
+    if (!form.job_title_en.trim() && !form.job_title_bn.trim()) { toast.error("Job title (EN or BN) is required"); return; }
     if (editing) {
       const { error } = await supabase.from("experience").update(form).eq("id", editing);
       if (error) { toast.error(error.message); return; }
