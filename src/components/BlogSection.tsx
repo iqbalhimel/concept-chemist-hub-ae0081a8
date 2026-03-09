@@ -1,5 +1,5 @@
-import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { ArrowUpRight, Clock, User, MessageSquare } from "lucide-react";
 import OptimizedImage from "@/components/OptimizedImage";
 import { Link } from "react-router-dom";
@@ -8,9 +8,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BlogPost { id: string; title: string; category: string; excerpt: string | null; read_time: string | null; featured_image?: string | null; slug?: string | null; }
 
+const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
+const vp = { once: true, amount: 0.15 as const };
+
 const BlogSection = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
   const { lang, t } = useLanguage();
@@ -30,14 +31,14 @@ const BlogSection = () => {
 
   return (
     <section id="blog" className="section-padding section-gradient">
-      <div className="container mx-auto" ref={ref}>
-        <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+      <div className="container mx-auto">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.6 }}>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">{t.blog.title_1} <span className="gradient-text">{t.blog.title_highlight}</span></h2>
           <p className="text-center text-muted-foreground mb-16 max-w-xl mx-auto">{t.blog.subtitle}</p>
         </motion.div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {posts.map((post, i) => (
-            <motion.article key={post.id} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 + i * 0.15 }} className="glass-card-hover group cursor-pointer flex flex-col overflow-hidden">
+            <motion.article key={post.id} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.1 + i * 0.1 }} className="glass-card-hover group cursor-pointer flex flex-col overflow-hidden">
               {post.featured_image && <OptimizedImage src={post.featured_image} alt={post.title} widths={[400, 800]} className="w-full h-44" />}
               <div className="p-8 flex flex-col flex-1">
                 <span className="text-xs font-semibold text-accent uppercase tracking-wider mb-3">{post.category}</span>

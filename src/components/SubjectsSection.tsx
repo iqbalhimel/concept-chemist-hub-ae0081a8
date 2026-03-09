@@ -1,32 +1,23 @@
-import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Atom, FlaskConical, Leaf, Calculator, Binary, BookMarked, Monitor, BookOpen, Lightbulb } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 
 const iconMap: Record<string, React.ElementType> = { Atom, FlaskConical, Leaf, Calculator, Binary, BookMarked, Monitor, BookOpen, Lightbulb };
 
+const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
+const vp = { once: true, amount: 0.15 as const };
+
 const SubjectsSection = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
   const { t, lang } = useLanguage();
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const { data, error } = await supabase.from("subjects").select("*").eq("is_active", true).order("sort_order");
-        if (error) { console.error("SubjectsSection error:", error); return; }
-        if (!Array.isArray(data)) { console.warn("SubjectsSection: non-array data", data); return; }
-        const valid = data.filter(item => item && typeof item === "object" && item.id);
-        console.log("SubjectsSection: loaded", valid.length, "items");
-        setItems(valid);
-      } catch (e) { console.error("SubjectsSection exception:", e); }
-    };
-    fetch();
+    supabase.from("subjects").select("*").eq("is_active", true).order("sort_order").then(({ data }) => setItems(data || []));
   }, []);
 
-  if (!Array.isArray(items) || items.length === 0) return null;
+  if (items.length === 0) return null;
 
   const grouped = items.reduce<Record<string, any[]>>((acc, item) => {
     const cat = (item.category || "Other").trim();
@@ -41,8 +32,8 @@ const SubjectsSection = () => {
 
   return (
     <section id="subjects" className="section-padding">
-      <div className="container mx-auto" ref={ref}>
-        <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+      <div className="container mx-auto">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.6 }}>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">
             {t.subjects?.title_1 ?? ""} <span className="gradient-text">{t.subjects?.title_highlight ?? ""}</span>
           </h2>
@@ -50,7 +41,7 @@ const SubjectsSection = () => {
         </motion.div>
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {Object.entries(grouped).map(([cat, subs], gi) => (
-            <motion.div key={cat} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 + gi * 0.15 }} className="glass-card-hover p-8">
+            <motion.div key={cat} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.1 + gi * 0.1 }} className="glass-card-hover p-8">
               <h3 className="font-display text-lg font-bold text-primary mb-6">{categoryLabels[cat] || cat}</h3>
               <div className="space-y-4">
                 {subs.map((sub: any) => {

@@ -1,35 +1,26 @@
-import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Briefcase } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 
+const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
+const vp = { once: true, amount: 0.15 as const };
+
 const ExperienceSection = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
   const { t, lang } = useLanguage();
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const { data, error } = await supabase.from("experience").select("*").eq("is_active", true).order("sort_order");
-        if (error) { console.error("ExperienceSection error:", error); return; }
-        if (!Array.isArray(data)) { console.warn("ExperienceSection: non-array data", data); return; }
-        const valid = data.filter(item => item && typeof item === "object" && item.id);
-        console.log("ExperienceSection: loaded", valid.length, "items");
-        setItems(valid);
-      } catch (e) { console.error("ExperienceSection exception:", e); }
-    };
-    fetch();
+    supabase.from("experience").select("*").eq("is_active", true).order("sort_order").then(({ data }) => setItems(data || []));
   }, []);
 
-  if (!Array.isArray(items) || items.length === 0) return null;
+  if (items.length === 0) return null;
 
   return (
     <section id="experience" className="section-padding">
-      <div className="container mx-auto" ref={ref}>
-        <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+      <div className="container mx-auto">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.6 }}>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">
             {t.experience?.title_1 ?? ""} <span className="gradient-text">{t.experience?.title_highlight ?? ""}</span>
           </h2>
@@ -37,20 +28,12 @@ const ExperienceSection = () => {
         </motion.div>
         <div className="max-w-3xl mx-auto space-y-6">
           {items.map((exp, i) => {
-            const jobTitle = lang === "bn"
-              ? (exp?.job_title_bn || exp?.job_title_en || "Position")
-              : (exp?.job_title_en || exp?.job_title_bn || "Position");
-            const institution = lang === "bn"
-              ? (exp?.institution_bn || exp?.institution_en || "")
-              : (exp?.institution_en || exp?.institution_bn || "");
-            const duration = lang === "bn"
-              ? (exp?.duration_bn || exp?.duration_en || "")
-              : (exp?.duration_en || exp?.duration_bn || "");
-            const desc = lang === "bn"
-              ? (exp?.description_bn || exp?.description_en || "")
-              : (exp?.description_en || exp?.description_bn || "");
+            const jobTitle = lang === "bn" ? (exp?.job_title_bn || exp?.job_title_en || "Position") : (exp?.job_title_en || exp?.job_title_bn || "Position");
+            const institution = lang === "bn" ? (exp?.institution_bn || exp?.institution_en || "") : (exp?.institution_en || exp?.institution_bn || "");
+            const duration = lang === "bn" ? (exp?.duration_bn || exp?.duration_en || "") : (exp?.duration_en || exp?.duration_bn || "");
+            const desc = lang === "bn" ? (exp?.description_bn || exp?.description_en || "") : (exp?.description_en || exp?.description_bn || "");
             return (
-              <motion.div key={exp.id} initial={{ opacity: 0, x: -30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 + i * 0.15 }} className="glass-card-hover p-8 flex gap-6">
+              <motion.div key={exp.id} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.1 + i * 0.1 }} className="glass-card-hover p-8 flex gap-6">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0"><Briefcase size={24} className="text-primary" /></div>
                 <div>
                   <h3 className="font-display text-lg font-bold text-foreground">{jobTitle}</h3>

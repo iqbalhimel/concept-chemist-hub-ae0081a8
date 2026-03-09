@@ -1,4 +1,4 @@
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { BookOpen, Monitor, Users, Lightbulb, MapPin, Calendar, Clock, UsersRound, GraduationCap, Languages } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -7,9 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 type CoachingInfo = Record<string, string>;
 
+const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
+const vp = { once: true, amount: 0.15 as const };
+
 const AboutSection = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
   const { t, lang } = useLanguage();
   const { get } = useSiteSettings();
   const [coaching, setCoaching] = useState<CoachingInfo | null>(null);
@@ -52,8 +53,8 @@ const AboutSection = () => {
 
   return (
     <section id="about" className="section-padding section-gradient">
-      <div className="container mx-auto" ref={ref}>
-        <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }} className="max-w-4xl mx-auto">
+      <div className="container mx-auto">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.6 }} className="max-w-4xl mx-auto">
           <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">
             {t.about.title_1} <span className="gradient-text">{t.about.title_highlight}</span>
           </h2>
@@ -79,8 +80,7 @@ const AboutSection = () => {
 
           {coachingItems.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
+              variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp}
               transition={{ duration: 0.5, delay: 0.15 }}
               className="glass-card p-6 md:p-8 mb-10"
             >
@@ -103,7 +103,7 @@ const AboutSection = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {highlights.map((item, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }} className="glass-card-hover p-5 text-center">
+              <motion.div key={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.4, delay: 0.1 + i * 0.1 }} className="glass-card-hover p-5 text-center">
                 <item.icon className="mx-auto mb-3 text-primary" size={28} />
                 <p className="text-sm font-medium text-foreground">{item.label}</p>
               </motion.div>

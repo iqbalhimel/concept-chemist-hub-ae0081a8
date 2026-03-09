@@ -1,5 +1,5 @@
-import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,9 +13,10 @@ interface FAQ {
   sort_order: number;
 }
 
+const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
+const vp = { once: true, amount: 0.15 as const };
+
 const FAQSection = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
   const { lang, t } = useLanguage();
@@ -35,12 +36,12 @@ const FAQSection = () => {
 
   return (
     <section id="faq" className="section-padding">
-      <div className="container mx-auto" ref={ref}>
-        <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }} className="text-center mb-12">
+      <div className="container mx-auto">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.6 }} className="text-center mb-12">
           <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">{t.faq.badge}</span>
           <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">{t.faq.title_1} <span className="gradient-text">{t.faq.title_highlight}</span></h2>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 }} className="max-w-3xl mx-auto">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.1 }} className="max-w-3xl mx-auto">
           {loading ? <p className="text-center text-muted-foreground">{t.faq.loading}</p>
           : faqs.length === 0 ? <p className="text-center text-muted-foreground">{t.faq.empty}</p>
           : <Accordion type="single" collapsible className="space-y-3">
