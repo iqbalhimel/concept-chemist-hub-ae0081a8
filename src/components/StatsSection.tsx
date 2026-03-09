@@ -26,38 +26,45 @@ const StatsSection = () => {
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from("achievements").select("*").eq("is_active", true).order("sort_order").then(({ data, error }) => {
-      console.log('StatsSection data:', data, 'error:', error);
-      setItems(data || []);
-    });
+    const fetch = async () => {
+      try {
+        const { data, error } = await supabase.from("achievements").select("*").eq("is_active", true).order("sort_order");
+        if (error) { console.error("StatsSection error:", error); return; }
+        if (!Array.isArray(data)) { console.warn("StatsSection: non-array data", data); return; }
+        const valid = data.filter(item => item && typeof item === "object" && item.id && item.value);
+        console.log("StatsSection: loaded", valid.length, "items");
+        setItems(valid);
+      } catch (e) { console.error("StatsSection exception:", e); }
+    };
+    fetch();
   }, []);
 
-  if (!items || items.length === 0) {
-    console.log('StatsSection: No items to display');
-    return null;
-  }
-  console.log('StatsSection rendering with items:', items.length);
+  if (!Array.isArray(items) || items.length === 0) return null;
 
   return (
     <section id="student-success" className="section-padding section-gradient">
       <div className="container mx-auto" ref={ref}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5 }} className="text-center mb-12">
-          <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">{t.stats.badge}</span>
+          <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">{t.stats?.badge ?? ""}</span>
           <h2 className="font-display text-3xl md:text-4xl font-bold">
-            {t.stats.title_1} <span className="gradient-text">{t.stats.title_highlight}</span>
+            {t.stats?.title_1 ?? ""} <span className="gradient-text">{t.stats?.title_highlight ?? ""}</span>
           </h2>
         </motion.div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
           {items.map((stat, i) => {
-            const Icon = iconMap[stat.icon] || Trophy;
-            const numMatch = stat.value.match(/^(\d+)/);
-            const num = numMatch ? parseInt(numMatch[1]) : 0;
-            const suffix = stat.value.replace(/^\d+/, "");
+            const Icon = iconMap[stat?.icon ?? ""] || Trophy;
+            const valueStr = String(stat?.value ?? "0");
+            const numMatch = valueStr.match(/^(\d+)/);
+            const num = numMatch ? parseInt(numMatch[1], 10) : 0;
+            const suffix = valueStr.replace(/^\d+/, "");
+            const title = lang === "bn"
+              ? (stat?.title_bn || stat?.title_en || "Achievement")
+              : (stat?.title_en || stat?.title_bn || "Achievement");
             return (
               <motion.div key={stat.id} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.1 }} className="glass-card-hover p-6 md:p-8 text-center flex flex-col items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-1"><Icon size={24} className="text-primary" /></div>
                 <AnimatedCounter target={num} suffix={suffix} inView={inView} />
-                <p className="text-muted-foreground text-sm font-medium">{(lang === "bn" && stat.title_bn) ? stat.title_bn : (stat.title_en || "Achievement")}</p>
+                <p className="text-muted-foreground text-sm font-medium">{title}</p>
               </motion.div>
             );
           })}
