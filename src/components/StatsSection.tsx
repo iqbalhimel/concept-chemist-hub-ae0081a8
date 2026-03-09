@@ -1,14 +1,51 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { GraduationCap, Users, Trophy, Clock, Star, Award, Target, BookOpen } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import CountUp from "react-countup";
 
 const iconMap: Record<string, React.ElementType> = { Trophy, Clock, Users, GraduationCap, Star, Award, Target, BookOpen };
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const vp = { once: true, amount: 0.15 as const };
+
+const AnimatedCounter = ({ end, suffix }: { end: number; suffix: string }) => {
+  const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  const animate = useCallback(() => {
+    if (hasAnimated || end === 0) { setCount(end); return; }
+    setHasAnimated(true);
+    const duration = 2000;
+    const startTime = performance.now();
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * end));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [end, hasAnimated]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { animate(); observer.disconnect(); } },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [animate]);
+
+  return (
+    <span ref={ref} className="font-display text-4xl md:text-5xl font-bold gradient-text">
+      {count.toLocaleString()}{suffix}
+    </span>
+  );
+};
 
 const StatsSection = () => {
   const { t, lang } = useLanguage();
@@ -40,9 +77,7 @@ const StatsSection = () => {
             return (
               <motion.div key={stat.id} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: i * 0.1 }} className="glass-card-hover p-6 md:p-8 text-center flex flex-col items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-1"><Icon size={24} className="text-primary" /></div>
-                <span className="font-display text-4xl md:text-5xl font-bold gradient-text">
-                  <CountUp start={0} end={num} duration={2} enableScrollSpy scrollSpyOnce />{suffix}
-                </span>
+                <AnimatedCounter end={num} suffix={suffix} />
                 <p className="text-muted-foreground text-sm font-medium">{title}</p>
               </motion.div>
             );
