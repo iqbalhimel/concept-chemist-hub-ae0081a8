@@ -13,24 +13,27 @@ const SubjectsSection = () => {
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from("subjects").select("*").eq("is_active", true).order("sort_order").then(({ data, error }) => {
-      console.log('SubjectsSection data:', data, 'error:', error);
-      setItems(data || []);
-    });
+    const fetch = async () => {
+      try {
+        const { data, error } = await supabase.from("subjects").select("*").eq("is_active", true).order("sort_order");
+        if (error) { console.error("SubjectsSection error:", error); return; }
+        if (!Array.isArray(data)) { console.warn("SubjectsSection: non-array data", data); return; }
+        const valid = data.filter(item => item && typeof item === "object" && item.id);
+        console.log("SubjectsSection: loaded", valid.length, "items");
+        setItems(valid);
+      } catch (e) { console.error("SubjectsSection exception:", e); }
+    };
+    fetch();
   }, []);
 
+  if (!Array.isArray(items) || items.length === 0) return null;
+
   const grouped = items.reduce<Record<string, any[]>>((acc, item) => {
-    const cat = item.category || "Other";
+    const cat = (item.category || "Other").trim();
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(item);
     return acc;
   }, {});
-
-  if (!items || items.length === 0) {
-    console.log('SubjectsSection: No items to display');
-    return null;
-  }
-  console.log('SubjectsSection rendering with items:', items.length);
 
   const categoryLabels: Record<string, string> = lang === "bn"
     ? { "SSC": "SSC স্তর", "HSC": "HSC স্তর", "Class 6-10": "৬ষ্ঠ-১০ম শ্রেণি" }
@@ -41,9 +44,9 @@ const SubjectsSection = () => {
       <div className="container mx-auto" ref={ref}>
         <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">
-            {t.subjects.title_1} <span className="gradient-text">{t.subjects.title_highlight}</span>
+            {t.subjects?.title_1 ?? ""} <span className="gradient-text">{t.subjects?.title_highlight ?? ""}</span>
           </h2>
-          <p className="text-center text-muted-foreground mb-16 max-w-xl mx-auto">{t.subjects.subtitle}</p>
+          <p className="text-center text-muted-foreground mb-16 max-w-xl mx-auto">{t.subjects?.subtitle ?? ""}</p>
         </motion.div>
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {Object.entries(grouped).map(([cat, subs], gi) => (
@@ -51,12 +54,15 @@ const SubjectsSection = () => {
               <h3 className="font-display text-lg font-bold text-primary mb-6">{categoryLabels[cat] || cat}</h3>
               <div className="space-y-4">
                 {subs.map((sub: any) => {
-                  const Icon = iconMap[sub.icon] || BookOpen;
+                  const Icon = iconMap[sub?.icon ?? ""] || BookOpen;
+                  const name = lang === "bn"
+                    ? (sub?.subject_name_bn || sub?.subject_name_en || "Untitled")
+                    : (sub?.subject_name_en || sub?.subject_name_bn || "Untitled");
                   return (
-                <div key={sub.id} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Icon size={20} className="text-primary" /></div>
-                  <span className="text-foreground font-medium">{(lang === "bn" && sub.subject_name_bn) ? sub.subject_name_bn : (sub.subject_name_en || "Untitled")}</span>
-                </div>
+                    <div key={sub.id} className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Icon size={20} className="text-primary" /></div>
+                      <span className="text-foreground font-medium">{name}</span>
+                    </div>
                   );
                 })}
               </div>
