@@ -1,13 +1,14 @@
-import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { useState } from "react";
 import { Phone, Mail, MessageCircle, Facebook, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
+const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
+const vp = { once: true, amount: 0.15 as const };
+
 const ContactSection = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sending, setSending] = useState(false);
   const { t } = useLanguage();
@@ -31,33 +32,13 @@ const ContactSection = () => {
     const name = form.name.trim();
     const emailVal = form.email.trim();
     const message = form.message.trim();
-
-    if (!name || !emailVal || !message) {
-      toast.error(t.contact.error_fields);
-      return;
-    }
-
-    // Validate email format
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-      toast.error(t.contact.error_fields);
-      return;
-    }
-
-    // Validate lengths
-    if (name.length > 100 || emailVal.length > 255 || message.length > 1000) {
-      toast.error(t.contact.error_fields);
-      return;
-    }
-
+    if (!name || !emailVal || !message) { toast.error(t.contact.error_fields); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) { toast.error(t.contact.error_fields); return; }
+    if (name.length > 100 || emailVal.length > 255 || message.length > 1000) { toast.error(t.contact.error_fields); return; }
     setSending(true);
-
-    // Send via WhatsApp as the delivery mechanism
     const waNumber = whatsapp.replace(/[^0-9]/g, "");
-    const waText = encodeURIComponent(
-      `📩 New Contact Form Message\n\nName: ${name}\nEmail: ${emailVal}\n\nMessage:\n${message}`
-    );
+    const waText = encodeURIComponent(`📩 New Contact Form Message\n\nName: ${name}\nEmail: ${emailVal}\n\nMessage:\n${message}`);
     window.open(`https://wa.me/${waNumber}?text=${waText}`, "_blank");
-
     toast.success(t.contact.success);
     setForm({ name: "", email: "", message: "" });
     setSending(false);
@@ -65,13 +46,13 @@ const ContactSection = () => {
 
   return (
     <section id="contact" className="section-padding section-gradient">
-      <div className="container mx-auto" ref={ref}>
-        <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+      <div className="container mx-auto">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.6 }}>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">{t.contact.title_1} <span className="gradient-text">{t.contact.title_highlight}</span></h2>
           <p className="text-center text-muted-foreground mb-16 max-w-xl mx-auto">{t.contact.subtitle}</p>
         </motion.div>
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, x: -30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 }} className="space-y-4">
+          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.1 }} className="space-y-4">
             <h3 className="font-display text-xl font-bold text-foreground mb-6">{t.contact.info_title}</h3>
             {contactInfo.map(item => (
               <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" className="glass-card-hover p-5 flex items-center gap-4 block">
@@ -80,7 +61,7 @@ const ContactSection = () => {
               </a>
             ))}
           </motion.div>
-          <motion.div initial={{ opacity: 0, x: 30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.5, delay: 0.3 }}>
+          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.2 }}>
             <form onSubmit={handleSubmit} className="glass-card p-8 space-y-5">
               <h3 className="font-display text-xl font-bold text-foreground mb-2">{t.contact.form_title}</h3>
               <div><label htmlFor="name" className="block text-sm text-muted-foreground mb-1.5">{t.contact.label_name}</label>
@@ -93,7 +74,7 @@ const ContactSection = () => {
             </form>
           </motion.div>
         </div>
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.4 }} className="max-w-5xl mx-auto mt-12">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.3 }} className="max-w-5xl mx-auto mt-12">
           <div className="glass-card overflow-hidden rounded-xl">
             <iframe title="Location" src={mapUrl} width="100%" height="300" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="w-full" />
           </div>

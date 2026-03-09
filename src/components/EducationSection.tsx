@@ -1,12 +1,13 @@
-import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { GraduationCap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 
+const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
+const vp = { once: true, amount: 0.15 as const };
+
 const EducationSection = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
   const { t, lang } = useLanguage();
   const [items, setItems] = useState<any[]>([]);
 
@@ -18,8 +19,8 @@ const EducationSection = () => {
 
   return (
     <section id="education" className="section-padding section-gradient">
-      <div className="container mx-auto" ref={ref}>
-        <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+      <div className="container mx-auto">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.6 }}>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">
             {t.education.title_1} <span className="gradient-text">{t.education.title_highlight}</span>
           </h2>
@@ -29,7 +30,7 @@ const EducationSection = () => {
           <div className="absolute left-7 top-2 bottom-2 w-px bg-border/60 hidden md:block" />
           <div className="space-y-8">
             {items.map((edu, i) => (
-              <motion.div key={edu.id} initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }} className="glass-card-hover p-6 md:py-7 md:px-8 md:ml-16 relative">
+              <motion.div key={edu.id} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.4, delay: 0.1 + i * 0.1 }} className="glass-card-hover p-6 md:py-7 md:px-8 md:ml-16 relative">
                 <div className="hidden md:flex absolute -left-[3.25rem] top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-primary/15 border-2 border-primary/70 items-center justify-center">
                   <GraduationCap size={18} className="text-primary" />
                 </div>

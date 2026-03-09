@@ -1,5 +1,5 @@
-import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect, useMemo } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect, useMemo } from "react";
 import { Bell, Calendar, Copy, Pin, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -11,10 +11,10 @@ import { Link } from "react-router-dom";
 interface Notice { id: string; title: string; date: string; description: string | null; sort_order?: number; is_pinned?: boolean; expires_at?: string | null; created_at: string; }
 
 const HOMEPAGE_LIMIT = 5;
+const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
+const vp = { once: true, amount: 0.15 as const };
 
 const NoticesSection = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
   const [notices, setNotices] = useState<Notice[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [selected, setSelected] = useState<Notice | null>(null);
@@ -43,14 +43,14 @@ const NoticesSection = () => {
   return (
     <>
       <section id="notices" className="section-padding">
-        <div className="container mx-auto" ref={ref}>
-          <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+        <div className="container mx-auto">
+          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.6 }}>
             <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">{t.notices.title_1} <span className="gradient-text">{t.notices.title_highlight}</span></h2>
             <p className="text-center text-muted-foreground mb-12">{t.notices.subtitle}</p>
           </motion.div>
           <div className="max-w-3xl mx-auto space-y-4">
             {sortedNotices.map((notice, i) => (
-              <motion.div key={notice.id} initial={{ opacity: 0, x: -20 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}
+              <motion.div key={notice.id} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
                 className={`glass-card-hover p-5 flex gap-4 items-start cursor-pointer transition-all hover:scale-[1.01] ${notice.is_pinned ? "ring-2 ring-primary/40" : ""}`}
                 onClick={() => setSelected(notice)} role="button" tabIndex={0} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") setSelected(notice); }}>
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -68,13 +68,9 @@ const NoticesSection = () => {
             ))}
           </div>
           {totalCount > HOMEPAGE_LIMIT && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.6 }} className="text-center mt-10">
-              <Link
-                to={`/${lang}/notices`}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all glow-primary"
-              >
-                {t.notices.see_all}
-                <ArrowRight size={16} />
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.3 }} className="text-center mt-10">
+              <Link to={`/${lang}/notices`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all glow-primary">
+                {t.notices.see_all} <ArrowRight size={16} />
               </Link>
             </motion.div>
           )}

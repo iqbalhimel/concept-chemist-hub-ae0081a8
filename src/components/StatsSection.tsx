@@ -6,6 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 const iconMap: Record<string, React.ElementType> = { Trophy, Clock, Users, GraduationCap, Star, Award, Target, BookOpen };
 
+const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
+const vp = { once: true, amount: 0.15 as const };
+
 const AnimatedCounter = ({ target, suffix, inView }: { target: number; suffix: string; inView: boolean }) => {
   const [count, setCount] = useState(0);
   useEffect(() => {
@@ -21,30 +24,20 @@ const AnimatedCounter = ({ target, suffix, inView }: { target: number; suffix: s
 
 const StatsSection = () => {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-50px" });
+  const inView = useInView(ref, { once: true, amount: 0.15 });
   const { t, lang } = useLanguage();
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const { data, error } = await supabase.from("achievements").select("*").eq("is_active", true).order("sort_order");
-        if (error) { console.error("StatsSection error:", error); return; }
-        if (!Array.isArray(data)) { console.warn("StatsSection: non-array data", data); return; }
-        const valid = data.filter(item => item && typeof item === "object" && item.id && item.value);
-        console.log("StatsSection: loaded", valid.length, "items");
-        setItems(valid);
-      } catch (e) { console.error("StatsSection exception:", e); }
-    };
-    fetch();
+    supabase.from("achievements").select("*").eq("is_active", true).order("sort_order").then(({ data }) => setItems(data || []));
   }, []);
 
-  if (!Array.isArray(items) || items.length === 0) return null;
+  if (items.length === 0) return null;
 
   return (
     <section id="student-success" className="section-padding section-gradient">
       <div className="container mx-auto" ref={ref}>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5 }} className="text-center mb-12">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5 }} className="text-center mb-12">
           <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">{t.stats?.badge ?? ""}</span>
           <h2 className="font-display text-3xl md:text-4xl font-bold">
             {t.stats?.title_1 ?? ""} <span className="gradient-text">{t.stats?.title_highlight ?? ""}</span>
@@ -57,11 +50,9 @@ const StatsSection = () => {
             const numMatch = valueStr.match(/^(\d+)/);
             const num = numMatch ? parseInt(numMatch[1], 10) : 0;
             const suffix = valueStr.replace(/^\d+/, "");
-            const title = lang === "bn"
-              ? (stat?.title_bn || stat?.title_en || "Achievement")
-              : (stat?.title_en || stat?.title_bn || "Achievement");
+            const title = lang === "bn" ? (stat?.title_bn || stat?.title_en || "Achievement") : (stat?.title_en || stat?.title_bn || "Achievement");
             return (
-              <motion.div key={stat.id} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.1 }} className="glass-card-hover p-6 md:p-8 text-center flex flex-col items-center gap-3">
+              <motion.div key={stat.id} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: i * 0.1 }} className="glass-card-hover p-6 md:p-8 text-center flex flex-col items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-1"><Icon size={24} className="text-primary" /></div>
                 <AnimatedCounter target={num} suffix={suffix} inView={inView} />
                 <p className="text-muted-foreground text-sm font-medium">{title}</p>
