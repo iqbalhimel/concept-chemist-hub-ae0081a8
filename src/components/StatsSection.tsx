@@ -1,26 +1,14 @@
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { GraduationCap, Users, Trophy, Clock, Star, Award, Target, BookOpen } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
+import CountUp from "react-countup";
 
 const iconMap: Record<string, React.ElementType> = { Trophy, Clock, Users, GraduationCap, Star, Award, Target, BookOpen };
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const vp = { once: true, amount: 0.15 as const };
-
-const AnimatedCounter = ({ target, suffix, inView }: { target: number; suffix: string; inView: boolean }) => {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const duration = 2000;
-    const stepTime = Math.max(Math.floor(duration / target), 16);
-    const timer = setInterval(() => { start += 1; setCount(start); if (start >= target) clearInterval(timer); }, stepTime);
-    return () => clearInterval(timer);
-  }, [inView, target]);
-  return <span className="font-display text-4xl md:text-5xl font-bold gradient-text">{count}{suffix}</span>;
-};
 
 const StatsSection = () => {
   const ref = useRef(null);
