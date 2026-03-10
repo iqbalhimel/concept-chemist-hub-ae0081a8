@@ -26,13 +26,14 @@ const tagColors: Record<string, string> = {
   Biology: "bg-rose-500/15 text-rose-400 border-rose-500/20",
 };
 
-const ITEMS_PER_CATEGORY = 3;
+const ITEMS_TO_SHOW = 5;
 
 const ResourcesSection = () => {
   const { t, lang } = useLanguage();
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [categories, setCategories] = useState<StudyCategory[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewTitle, setPreviewTitle] = useState("");
 
@@ -49,23 +50,29 @@ const ResourcesSection = () => {
     fetchData();
   }, []);
 
-  // Group materials by category, only categories that have materials
-  const groupedByCategory = useMemo(() => {
-    const materialsByCat = new Map<string, StudyMaterial[]>();
-    for (const m of materials) {
-      const list = materialsByCat.get(m.category) || [];
-      list.push(m);
-      materialsByCat.set(m.category, list);
-    }
-    return categories
-      .filter(c => materialsByCat.has(c.name))
-      .map(c => ({
-        category: c,
-        items: materialsByCat.get(c.name)!,
-      }));
+  const visibleCategories = useMemo(() => {
+    const materialCats = new Set(materials.map(m => m.category));
+    return categories.filter(c => materialCats.has(c.name));
   }, [categories, materials]);
 
-  if (!loaded || groupedByCategory.length === 0) return loaded ? null : null;
+  // Set first category as active once loaded
+  useEffect(() => {
+    if (visibleCategories.length > 0 && !activeCategory) {
+      setActiveCategory(visibleCategories[0].name);
+    }
+  }, [visibleCategories, activeCategory]);
+
+  const filtered = useMemo(() => {
+    if (!activeCategory) return materials;
+    return materials.filter(m => m.category === activeCategory);
+  }, [materials, activeCategory]);
+
+  const visible = filtered.slice(0, ITEMS_TO_SHOW);
+  const hasMore = filtered.length > ITEMS_TO_SHOW;
+
+  const activeCategoryObj = visibleCategories.find(c => c.name === activeCategory);
+
+  if (!loaded || visibleCategories.length === 0) return null;
 
   const getTagColor = (category: string) => {
     const colorKey = Object.keys(tagColors).find(k => category.toLowerCase().includes(k.toLowerCase()));
@@ -87,78 +94,85 @@ const ResourcesSection = () => {
           </p>
         </div>
 
-        <div className="space-y-12">
-          {groupedByCategory.map(({ category, items }) => {
-            const visible = items.slice(0, ITEMS_PER_CATEGORY);
-            const hasMore = items.length > ITEMS_PER_CATEGORY;
+        {/* Tab-style category navigation */}
+        <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-10">
+          {visibleCategories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.name)}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                cat.name === activeCategory
+                  ? "bg-primary text-primary-foreground glow-primary"
+                  : "glass-card text-muted-foreground hover:text-foreground hover:border-primary/30"
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
 
+        {/* Compact list-style cards */}
+        <div className="max-w-4xl mx-auto grid gap-3">
+          {visible.map((item) => {
+            const tagColor = getTagColor(item.category);
             return (
-              <div key={category.id}>
-                <h3 className="font-display text-xl md:text-2xl font-bold mb-5 text-foreground">
-                  {category.name}
-                </h3>
-                <div className="max-w-4xl mx-auto grid gap-3">
-                  {visible.map((item) => {
-                    const tagColor = getTagColor(item.category);
-                    return (
-                      <div key={item.id} className="glass-card-hover p-5 flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-4 min-w-0">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center">
-                            <FolderOpen size={18} className="text-primary" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                              <h4 className="font-medium text-foreground truncate">{item.title}</h4>
-                              <span className={`inline-flex text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${tagColor}`}>
-                                {item.category}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              {item.pages ? `${item.pages} ${t.resources.pages} · ` : ""}PDF{item.file_size ? ` · ${item.file_size}` : ""}
-                            </p>
-                          </div>
-                        </div>
-                        {item.file_url ? (
-                          <div className="flex-shrink-0 flex items-center gap-2">
-                            <button
-                              onClick={() => { setPreviewUrl(item.file_url); setPreviewTitle(item.title); }}
-                              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-primary/30 text-primary text-sm font-medium hover:bg-primary/10 transition-all"
-                            >
-                              <Eye size={14} />
-                              <span className="hidden sm:inline">{t.resources.preview}</span>
-                            </button>
-                            <a
-                              href={item.file_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all glow-primary"
-                            >
-                              <Download size={14} />
-                              <span className="hidden sm:inline">{t.resources.download}</span>
-                            </a>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">{t.resources.coming_soon}</span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                {hasMore && (
-                  <div className="text-center mt-4">
-                    <Link
-                      to={`/${lang}/resources?category=${encodeURIComponent(category.slug)}`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all glow-primary"
-                    >
-                      {t.resources.see_all_category}
-                      <ArrowRight size={16} />
-                    </Link>
+              <div key={item.id} className="glass-card-hover p-5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center">
+                    <FolderOpen size={18} className="text-primary" />
                   </div>
+                  <div className="min-w-0">
+                    <h4 className="font-medium text-foreground truncate mb-0.5">{item.title}</h4>
+                    <p className="text-xs text-muted-foreground">
+                      {item.pages ? `${item.pages} ${t.resources.pages} · ` : ""}PDF{item.file_size ? ` · ${item.file_size}` : ""}
+                    </p>
+                  </div>
+                </div>
+                {item.file_url ? (
+                  <div className="flex-shrink-0 flex items-center gap-2">
+                    <button
+                      onClick={() => { setPreviewUrl(item.file_url); setPreviewTitle(item.title); }}
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-primary/30 text-primary text-sm font-medium hover:bg-primary/10 transition-all"
+                    >
+                      <Eye size={14} />
+                      <span className="hidden sm:inline">{t.resources.preview}</span>
+                    </button>
+                    <a
+                      href={item.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all glow-primary"
+                    >
+                      <Download size={14} />
+                      <span className="hidden sm:inline">{t.resources.download}</span>
+                    </a>
+                  </div>
+                ) : (
+                  <span className="text-xs text-muted-foreground">{t.resources.coming_soon}</span>
                 )}
               </div>
             );
           })}
         </div>
+
+        {visible.length === 0 && (
+          <div className="text-center py-8">
+            <FileText size={48} className="text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-muted-foreground">{t.resources.empty}</p>
+          </div>
+        )}
+
+        {hasMore && activeCategoryObj && (
+          <div className="text-center mt-6">
+            <Link
+              to={`/${lang}/resources?category=${encodeURIComponent(activeCategoryObj.slug)}`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all glow-primary"
+            >
+              {t.resources.see_all_category}
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* PDF Preview Modal */}
