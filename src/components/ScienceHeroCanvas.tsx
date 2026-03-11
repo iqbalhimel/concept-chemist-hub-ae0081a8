@@ -2,8 +2,7 @@ import { useEffect, useRef } from "react";
 import { getTimeOfDay, timeColors, type TimeOfDay } from "@/lib/atmosphere";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
-const DESKTOP_COUNT = 9;
-const MOBILE_COUNT = 5;
+// Desktop: all 9, Mobile: 6 selected elements
 
 interface ScienceElement {
   x: number;
