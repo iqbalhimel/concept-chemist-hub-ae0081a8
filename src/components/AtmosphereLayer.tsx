@@ -39,7 +39,7 @@ const AtmosphereLayer = forwardRef<HTMLDivElement>(function AtmosphereLayer(_pro
 
   if (!enabled) {
     return showDebug ? (
-      <div className="fixed bottom-4 right-4 z-50 pointer-events-auto rounded-lg border border-border bg-card/90 backdrop-blur-sm px-3 py-2 text-xs text-muted-foreground shadow-lg">
+      <div className="fixed bottom-20 right-4 z-50 pointer-events-auto rounded-lg border border-border bg-card/90 backdrop-blur-sm px-3 py-2 text-xs text-muted-foreground shadow-lg">
         Atmosphere <span className="text-destructive font-medium">OFF</span>
       </div>
     ) : null;
