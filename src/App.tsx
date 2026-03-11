@@ -89,6 +89,8 @@ const AppRoutes = () => (
   </>
 );
 
+const AtmosphereDebugBadge = lazy(() => import("@/components/AtmosphereDebugBadge"));
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -102,6 +104,9 @@ const App = () => (
               <AppRoutes />
             </LanguageProvider>
           </BrowserRouter>
+          <Suspense fallback={null}>
+            <AtmosphereDebugBadge />
+          </Suspense>
         </AuthProvider>
       </BrightnessProvider>
     </TooltipProvider>
