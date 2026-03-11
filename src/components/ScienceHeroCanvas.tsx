@@ -9,6 +9,8 @@ interface ScienceElement {
   y: number;
   anchorX: number;
   anchorY: number;
+  vx: number;
+  vy: number;
   type: "atom" | "solar" | "wave" | "benzene" | "water" | "network" | "dna" | "neuron" | "cell";
   size: number;
   rotation: number;
@@ -36,22 +38,21 @@ const PLACEMENT_ORDER: ScienceElement["type"][] = [
   "water", "cell", "neuron",
 ];
 
-// Mobile: show 6 elements with good coverage
-const MOBILE_INDICES = [0, 2, 3, 5, 7, 8]; // solar, dna, wave, benzene, cell, neuron
+// Mobile: 6 specific elements: solar, atom, benzene, dna, water, neuron
+const MOBILE_TYPES: ScienceElement["type"][] = ["solar", "atom", "benzene", "dna", "water", "neuron"];
+const MOBILE_INDICES = [0, 1, 5, 2, 6, 8]; // indices into PLACEMENT_ORDER for grid fallback
 
-function createElement(w: number, h: number, gridIndex: number): ScienceElement {
+function createElement(w: number, h: number, gridIndex: number, isMobile: boolean): ScienceElement {
   const type = PLACEMENT_ORDER[gridIndex];
   const isBio = BIOLOGY_TYPES.has(type);
   const col = gridIndex % 3;
   const row = Math.floor(gridIndex / 3);
 
-  // Margins to keep elements inside viewport
   const mx = w * 0.12;
   const my = h * 0.08;
   const usableW = w - mx * 2;
   const usableH = h - my * 2;
 
-  // Position at center of each grid cell
   const cellW = usableW / 3;
   const cellH = usableH / 3;
   const anchorX = mx + cellW * col + cellW * 0.5;
@@ -60,11 +61,19 @@ function createElement(w: number, h: number, gridIndex: number): ScienceElement 
   const baseSize = isBio ? rand(72, 88) : rand(55, 72);
   const floatRadius = rand(18, 35);
 
+  // Mobile: random starting position + velocity for free roaming
+  const startX = isMobile ? rand(mx + 30, w - mx - 30) : anchorX;
+  const startY = isMobile ? rand(my + 30, h - my - 30) : anchorY;
+  const speed = 0.3;
+  const angle = rand(0, Math.PI * 2);
+
   return {
-    x: anchorX,
-    y: anchorY,
+    x: startX,
+    y: startY,
     anchorX,
     anchorY,
+    vx: isMobile ? Math.cos(angle) * speed : 0,
+    vy: isMobile ? Math.sin(angle) * speed : 0,
     type,
     size: baseSize,
     rotation: rand(0, 360),
@@ -72,6 +81,40 @@ function createElement(w: number, h: number, gridIndex: number): ScienceElement 
     opacity: isBio ? rand(0.55, 0.72) : rand(0.38, 0.58),
     phase: rand(0, Math.PI * 2),
     floatRadius,
+  };
+}
+
+function createMobileElement(w: number, h: number, type: ScienceElement["type"], index: number, total: number): ScienceElement {
+  const isBio = BIOLOGY_TYPES.has(type);
+  const mx = 50;
+  const my = 50;
+
+  // Distribute starting positions evenly using a 2x3 grid
+  const col = index % 2;
+  const row = Math.floor(index / 2);
+  const cellW = (w - mx * 2) / 2;
+  const cellH = (h - my * 2) / 3;
+  const startX = mx + cellW * col + rand(cellW * 0.3, cellW * 0.7);
+  const startY = my + cellH * row + rand(cellH * 0.3, cellH * 0.7);
+
+  const speed = rand(0.2, 0.4);
+  const angle = rand(0, Math.PI * 2);
+  const baseSize = isBio ? rand(72, 88) : rand(55, 72);
+
+  return {
+    x: startX,
+    y: startY,
+    anchorX: startX,
+    anchorY: startY,
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed,
+    type,
+    size: baseSize,
+    rotation: rand(0, 360),
+    rotSpeed: isBio ? rand(-0.12, 0.12) : rand(-0.2, 0.2),
+    opacity: isBio ? rand(0.55, 0.72) : rand(0.38, 0.58),
+    phase: rand(0, Math.PI * 2),
+    floatRadius: rand(18, 35),
   };
 }
 
@@ -419,10 +462,13 @@ const ScienceHeroCanvas = () => {
     };
     resize();
 
-    // Create elements: all 9 on desktop, 6 on mobile
-    const indices = isMobile ? MOBILE_INDICES : Array.from({ length: 9 }, (_, i) => i);
-    const elements: ScienceElement[] = indices.map(i => createElement(w, h, i));
+    // Create elements: all 9 on desktop, 6 specific on mobile
+    const elements: ScienceElement[] = isMobile
+      ? MOBILE_TYPES.map((type, i) => createMobileElement(w, h, type, i, MOBILE_TYPES.length))
+      : Array.from({ length: 9 }, (_, i) => createElement(w, h, i, false));
     let tick = 0;
+
+    const MIN_DIST = 80; // minimum distance between mobile elements
 
     const getColors = () => {
       const valid = ["morning", "noon", "evening", "night"];
@@ -450,10 +496,49 @@ const ScienceHeroCanvas = () => {
       });
 
       for (const el of sorted) {
-        // Bounded floating: orbit around anchor point
-        const t = tick * 0.008 + el.phase;
-        el.x = el.anchorX + Math.sin(t) * el.floatRadius;
-        el.y = el.anchorY + Math.cos(t * 0.7) * el.floatRadius * 0.7;
+        if (isMobile) {
+          // Free-roaming: update position with velocity
+          el.x += el.vx;
+          el.y += el.vy;
+
+          // Boundary bounce with margin
+          const margin = el.size * 0.5 + 10;
+          if (el.x < margin) { el.x = margin; el.vx = Math.abs(el.vx); }
+          if (el.x > w - margin) { el.x = w - margin; el.vx = -Math.abs(el.vx); }
+          if (el.y < margin) { el.y = margin; el.vy = Math.abs(el.vy); }
+          if (el.y > h - margin) { el.y = h - margin; el.vy = -Math.abs(el.vy); }
+
+          // Gentle repulsion from other elements
+          for (const other of elements) {
+            if (other === el) continue;
+            const dx = el.x - other.x;
+            const dy = el.y - other.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < MIN_DIST && dist > 0) {
+              const force = (MIN_DIST - dist) / MIN_DIST * 0.05;
+              el.vx += (dx / dist) * force;
+              el.vy += (dy / dist) * force;
+            }
+          }
+
+          // Clamp speed
+          const speed = Math.sqrt(el.vx * el.vx + el.vy * el.vy);
+          const maxSpeed = 0.5;
+          const minSpeed = 0.15;
+          if (speed > maxSpeed) { el.vx = (el.vx / speed) * maxSpeed; el.vy = (el.vy / speed) * maxSpeed; }
+          if (speed < minSpeed) { el.vx = (el.vx / speed) * minSpeed; el.vy = (el.vy / speed) * minSpeed; }
+
+          // Slight random direction drift for natural motion
+          if (tick % 60 === 0) {
+            el.vx += rand(-0.05, 0.05);
+            el.vy += rand(-0.05, 0.05);
+          }
+        } else {
+          // Desktop: bounded floating around anchor
+          const t = tick * 0.008 + el.phase;
+          el.x = el.anchorX + Math.sin(t) * el.floatRadius;
+          el.y = el.anchorY + Math.cos(t * 0.7) * el.floatRadius * 0.7;
+        }
         el.rotation += el.rotSpeed;
 
         // Gentle mouse parallax (shift, don't displace permanently)
