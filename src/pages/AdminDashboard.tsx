@@ -58,6 +58,7 @@ const AdminDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case "analytics": return <AdminAnalytics />;
       case "site-settings": return <AdminSiteSettings />;
       case "notices": return <AdminNotices />;
       case "study-materials": return <AdminStudyMaterials />;
