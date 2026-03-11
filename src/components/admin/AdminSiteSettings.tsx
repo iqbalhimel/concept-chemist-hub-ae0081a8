@@ -138,7 +138,7 @@ const sections: SectionDef[] = [
         { value: "night", label: "Night" },
       ]},
       { name: "season_override", label: "Manual Season Override", type: "select", options: [
-        { value: "", label: "Auto (detect)" },
+        { value: "auto", label: "Auto (detect)" },
         { value: "spring", label: "Spring" },
         { value: "summer", label: "Summer" },
         { value: "autumn", label: "Autumn" },
