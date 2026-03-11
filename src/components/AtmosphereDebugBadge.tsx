@@ -1,10 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
-import { getTimeOfDay, getSeason, timeGradients, type TimeOfDay, type Season } from "@/lib/atmosphere";
+import { useState, useEffect } from "react";
+import { getTimeOfDay, type TimeOfDay } from "@/lib/atmosphere";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useAuth } from "@/contexts/AuthContext";
 
 const timeEmoji: Record<TimeOfDay, string> = { morning: "🌅", noon: "☀️", evening: "🌇", night: "🌙" };
-const seasonEmoji: Record<Season, string> = { spring: "🌸", summer: "🔆", autumn: "🍂", winter: "❄️" };
 
 const AtmosphereDebugBadge = () => {
   const { get, loaded } = useSiteSettings();
@@ -12,13 +11,9 @@ const AtmosphereDebugBadge = () => {
   const isPreview = typeof window !== "undefined" && window.location.hostname.includes("lovable");
 
   const [time, setTime] = useState<TimeOfDay>(getTimeOfDay());
-  const [season, setSeason] = useState<Season>(getSeason());
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(getTimeOfDay());
-      setSeason(getSeason());
-    }, 60_000);
+    const interval = setInterval(() => setTime(getTimeOfDay()), 60_000);
     return () => clearInterval(interval);
   }, []);
 
@@ -27,12 +22,9 @@ const AtmosphereDebugBadge = () => {
 
   const enabled = get("atmosphere", "enabled", "true") !== "false";
   const timeOverride = get("atmosphere", "time_override", "");
-  const seasonOverride = get("atmosphere", "season_override", "");
 
   const validTimes = ["morning", "noon", "evening", "night"];
-  const validSeasons = ["spring", "summer", "autumn", "winter"];
   const activeTime: TimeOfDay = validTimes.includes(timeOverride) ? (timeOverride as TimeOfDay) : time;
-  const activeSeason: Season = validSeasons.includes(seasonOverride) ? (seasonOverride as Season) : season;
 
   return (
     <div
@@ -41,8 +33,6 @@ const AtmosphereDebugBadge = () => {
     >
       <div className="font-medium text-foreground">
         {timeEmoji[activeTime]} <span className="capitalize">{activeTime}</span>
-        {" • "}
-        {seasonEmoji[activeSeason]} <span className="capitalize">{activeSeason}</span>
       </div>
       <div className={`font-medium ${enabled ? "text-primary" : "text-destructive"}`}>
         Atmosphere {enabled ? "Active" : "OFF"}
