@@ -23,8 +23,10 @@ const AtmosphereLayer = memo(() => {
     return () => clearInterval(interval);
   }, [enabled]);
 
-  const activeTime = (timeOverride && timeOverride !== "auto") ? timeOverride : time;
-  const activeSeason = (seasonOverride && seasonOverride !== "auto") ? seasonOverride : season;
+  const validTimes: string[] = ["morning", "noon", "evening", "night"];
+  const validSeasons: string[] = ["spring", "summer", "autumn", "winter"];
+  const activeTime: TimeOfDay = validTimes.includes(timeOverride) ? (timeOverride as TimeOfDay) : time;
+  const activeSeason: Season = validSeasons.includes(seasonOverride) ? (seasonOverride as Season) : season;
 
   const gradient = useMemo(() => timeGradients[activeTime], [activeTime]);
   const tint = useMemo(() => (seasonEnabled ? seasonTints[activeSeason] : "transparent"), [seasonEnabled, activeSeason]);
