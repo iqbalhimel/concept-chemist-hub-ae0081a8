@@ -24,11 +24,12 @@ import AdminAchievements from "@/components/admin/AdminAchievements";
 import AdminApproach from "@/components/admin/AdminApproach";
 import AdminSubjects from "@/components/admin/AdminSubjects";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
+import AdminAtmosphere from "@/components/admin/AdminAtmosphere";
 
 type Tab =
   | "dashboard" | "analytics" | "site-settings" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
-  | "media" | "themes" | "education" | "experience"
+  | "media" | "themes" | "atmosphere" | "education" | "experience"
   | "achievements" | "approach" | "subjects";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
