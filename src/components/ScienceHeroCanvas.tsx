@@ -2,8 +2,8 @@ import { useEffect, useRef } from "react";
 import { getTimeOfDay, timeColors, type TimeOfDay } from "@/lib/atmosphere";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
-const DESKTOP_COUNT = 21;
-const MOBILE_COUNT = 9;
+const DESKTOP_COUNT = 18;
+const MOBILE_COUNT = 6;
 
 interface ScienceElement {
   x: number;
@@ -19,6 +19,7 @@ interface ScienceElement {
   label?: string;
   orbitRadius?: number;
   electrons?: number;
+  depth: number; // 0=far/blurred, 1=mid, 2=near/sharp
 }
 
 const FORMULAS = ["E=mc²", "π", "λ", "∑", "H₂O", "CO₂", "NaCl", "ΔG", "∫", "∇"];
@@ -26,37 +27,58 @@ const CHEM_LABELS = ["H₂O", "CO₂", "NaCl", "C₆H₆", "O₂", "N₂"];
 
 function rand(a: number, b: number) { return a + Math.random() * (b - a); }
 
-function createElement(w: number, h: number): ScienceElement {
+function createElement(w: number, h: number, index: number): ScienceElement {
   const types: ScienceElement["type"][] = ["atom", "molecule", "dna", "formula", "bond", "cell"];
   const type = types[Math.floor(Math.random() * types.length)];
+  const depth = index % 3;
+
+  // Distribute across zones
+  let x: number, y: number;
+  const zone = index % 5;
+  switch (zone) {
+    case 0: x = rand(0, w * 0.3); y = rand(0, h * 0.35); break;
+    case 1: x = rand(w * 0.7, w); y = rand(0, h * 0.35); break;
+    case 2: x = rand(w * 0.3, w * 0.7); y = rand(h * 0.25, h * 0.6); break;
+    case 3: x = rand(w * 0.3, w * 0.7); y = rand(h * 0.25, h * 0.6); break;
+    default: x = rand(0, w); y = rand(h * 0.55, h); break;
+  }
+
+  const ds = depth === 0 ? 0.7 : depth === 1 ? 1 : 1.3;
   const base: ScienceElement = {
-    x: rand(0, w), y: rand(0, h),
-    vx: rand(-0.15, 0.15), vy: rand(-0.12, 0.12),
-    type, size: rand(12, 28), rotation: rand(0, 360),
-    rotSpeed: rand(-0.3, 0.3), opacity: rand(0.15, 0.45),
-    phase: rand(0, Math.PI * 2),
+    x, y,
+    vx: rand(-0.22, 0.22), vy: rand(-0.18, 0.18),
+    type, size: rand(22, 48) * ds, rotation: rand(0, 360),
+    rotSpeed: rand(-0.5, 0.5),
+    opacity: depth === 0 ? rand(0.18, 0.3) : depth === 1 ? rand(0.3, 0.5) : rand(0.45, 0.65),
+    phase: rand(0, Math.PI * 2), depth,
   };
-  if (type === "atom") { base.orbitRadius = rand(10, 22); base.electrons = Math.floor(rand(2, 4)); base.size = rand(16, 30); }
-  if (type === "formula") { base.label = FORMULAS[Math.floor(Math.random() * FORMULAS.length)]; base.size = rand(10, 14); }
-  if (type === "molecule") { base.label = CHEM_LABELS[Math.floor(Math.random() * CHEM_LABELS.length)]; }
-  if (type === "dna") { base.size = rand(20, 35); }
-  if (type === "cell") { base.size = rand(14, 24); }
+  if (type === "atom") { base.orbitRadius = rand(18, 36); base.electrons = Math.floor(rand(2, 4)); base.size = rand(28, 50) * ds; }
+  if (type === "formula") { base.label = FORMULAS[Math.floor(Math.random() * FORMULAS.length)]; base.size = rand(14, 20) * ds; }
+  if (type === "molecule") { base.label = CHEM_LABELS[Math.floor(Math.random() * CHEM_LABELS.length)]; base.size = rand(28, 44) * ds; }
+  if (type === "dna") { base.size = rand(36, 55) * ds; }
+  if (type === "cell") { base.size = rand(22, 38) * ds; }
   return base;
 }
 
 function drawAtom(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number, colors: typeof timeColors.morning) {
-  const { x, y, orbitRadius = 15, electrons = 3, rotation, size } = el;
+  const { x, y, orbitRadius = 24, electrons = 3, rotation, size } = el;
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate((rotation * Math.PI) / 180);
 
+  // Glow
+  const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.6);
+  grad.addColorStop(0, colors.glow.replace("0.5)", "0.12)").replace("0.6)", "0.12)"));
+  grad.addColorStop(1, "transparent");
+  ctx.fillStyle = grad;
+  ctx.fillRect(-size, -size, size * 2, size * 2);
+
   // Nucleus
   ctx.beginPath();
-  ctx.arc(0, 0, size * 0.15, 0, Math.PI * 2);
+  ctx.arc(0, 0, size * 0.18, 0, Math.PI * 2);
   ctx.fillStyle = colors.primary;
   ctx.fill();
 
-  // Orbits
   for (let i = 0; i < electrons; i++) {
     const angle = (Math.PI * 2 * i) / electrons;
     ctx.save();
@@ -64,15 +86,14 @@ function drawAtom(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: numbe
     ctx.beginPath();
     ctx.ellipse(0, 0, orbitRadius, orbitRadius * 0.35, 0, 0, Math.PI * 2);
     ctx.strokeStyle = colors.secondary;
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 0.8;
     ctx.stroke();
 
-    // Electron
     const eAngle = tick * 0.02 + el.phase + i * 2;
     const ex = Math.cos(eAngle) * orbitRadius;
     const ey = Math.sin(eAngle) * orbitRadius * 0.35;
     ctx.beginPath();
-    ctx.arc(ex, ey, 1.5, 0, Math.PI * 2);
+    ctx.arc(ex, ey, 2.5, 0, Math.PI * 2);
     ctx.fillStyle = colors.glow;
     ctx.fill();
     ctx.restore();
@@ -86,7 +107,6 @@ function drawMolecule(ctx: CanvasRenderingContext2D, el: ScienceElement, colors:
   ctx.translate(x, y);
   ctx.rotate((rotation * Math.PI) / 180);
 
-  // Hexagonal benzene-like structure
   const r = size * 0.5;
   ctx.beginPath();
   for (let i = 0; i < 6; i++) {
@@ -97,21 +117,20 @@ function drawMolecule(ctx: CanvasRenderingContext2D, el: ScienceElement, colors:
   }
   ctx.closePath();
   ctx.strokeStyle = colors.secondary;
-  ctx.lineWidth = 0.7;
+  ctx.lineWidth = 1;
   ctx.stroke();
 
-  // Nodes
   for (let i = 0; i < 6; i++) {
     const a = (Math.PI * 2 * i) / 6 - Math.PI / 2;
     ctx.beginPath();
-    ctx.arc(Math.cos(a) * r, Math.sin(a) * r, 2, 0, Math.PI * 2);
+    ctx.arc(Math.cos(a) * r, Math.sin(a) * r, 3, 0, Math.PI * 2);
     ctx.fillStyle = colors.primary;
     ctx.fill();
   }
 
   if (el.label) {
     ctx.fillStyle = colors.glow;
-    ctx.font = `${size * 0.3}px monospace`;
+    ctx.font = `bold ${size * 0.32}px monospace`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(el.label, 0, 0);
@@ -124,30 +143,27 @@ function drawDNA(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number
   ctx.save();
   ctx.translate(x, y);
 
-  const steps = 12;
-  const stepH = size * 0.12;
+  const steps = 14;
+  const stepH = size * 0.13;
   for (let i = 0; i < steps; i++) {
     const t = tick * 0.015 + phase + i * 0.5;
-    const ox = Math.sin(t) * size * 0.3;
+    const ox = Math.sin(t) * size * 0.35;
     const py = (i - steps / 2) * stepH;
 
-    // Left strand
     ctx.beginPath();
-    ctx.arc(-ox, py, 1.2, 0, Math.PI * 2);
+    ctx.arc(-ox, py, 2, 0, Math.PI * 2);
     ctx.fillStyle = colors.primary;
     ctx.fill();
-    // Right strand
     ctx.beginPath();
-    ctx.arc(ox, py, 1.2, 0, Math.PI * 2);
+    ctx.arc(ox, py, 2, 0, Math.PI * 2);
     ctx.fillStyle = colors.secondary;
     ctx.fill();
-    // Bond
     if (i % 2 === 0) {
       ctx.beginPath();
       ctx.moveTo(-ox, py);
       ctx.lineTo(ox, py);
       ctx.strokeStyle = colors.glow;
-      ctx.lineWidth = 0.4;
+      ctx.lineWidth = 0.6;
       ctx.stroke();
     }
   }
@@ -159,14 +175,14 @@ function drawFormula(ctx: CanvasRenderingContext2D, el: ScienceElement, colors: 
   ctx.translate(el.x, el.y);
   ctx.rotate((el.rotation * Math.PI) / 180);
   ctx.fillStyle = colors.primary;
-  ctx.font = `${el.size}px monospace`;
+  ctx.font = `bold ${el.size}px monospace`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(el.label || "π", 0, 0);
   ctx.restore();
 }
 
-function drawBond(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number, colors: typeof timeColors.morning) {
+function drawBond(ctx: CanvasRenderingContext2D, el: ScienceElement, _tick: number, colors: typeof timeColors.morning) {
   ctx.save();
   ctx.translate(el.x, el.y);
   ctx.rotate((el.rotation * Math.PI) / 180);
@@ -175,11 +191,10 @@ function drawBond(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: numbe
   ctx.moveTo(-len / 2, 0);
   ctx.lineTo(len / 2, 0);
   ctx.strokeStyle = colors.secondary;
-  ctx.lineWidth = 0.6;
+  ctx.lineWidth = 0.9;
   ctx.stroke();
-  // Endpoints
-  ctx.beginPath(); ctx.arc(-len / 2, 0, 2.5, 0, Math.PI * 2); ctx.fillStyle = colors.primary; ctx.fill();
-  ctx.beginPath(); ctx.arc(len / 2, 0, 2.5, 0, Math.PI * 2); ctx.fillStyle = colors.glow; ctx.fill();
+  ctx.beginPath(); ctx.arc(-len / 2, 0, 3.5, 0, Math.PI * 2); ctx.fillStyle = colors.primary; ctx.fill();
+  ctx.beginPath(); ctx.arc(len / 2, 0, 3.5, 0, Math.PI * 2); ctx.fillStyle = colors.glow; ctx.fill();
   ctx.restore();
 }
 
@@ -187,25 +202,22 @@ function drawCell(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: numbe
   ctx.save();
   ctx.translate(el.x, el.y);
   const r = el.size * 0.5;
-  // Membrane
   ctx.beginPath();
   ctx.arc(0, 0, r, 0, Math.PI * 2);
   ctx.strokeStyle = colors.secondary;
-  ctx.lineWidth = 0.7;
+  ctx.lineWidth = 1;
   ctx.stroke();
-  // Nucleus
   ctx.beginPath();
   ctx.arc(0, 0, r * 0.35, 0, Math.PI * 2);
   ctx.fillStyle = colors.primary;
   ctx.fill();
-  // Neuron-like dendrites
   for (let i = 0; i < 4; i++) {
     const a = (Math.PI * 2 * i) / 4 + tick * 0.005 + el.phase;
     ctx.beginPath();
     ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
     ctx.lineTo(Math.cos(a) * r * 1.5, Math.sin(a) * r * 1.5);
     ctx.strokeStyle = colors.glow;
-    ctx.lineWidth = 0.4;
+    ctx.lineWidth = 0.6;
     ctx.stroke();
   }
   ctx.restore();
@@ -243,7 +255,7 @@ const ScienceHeroCanvas = () => {
     };
     resize();
 
-    const elements: ScienceElement[] = Array.from({ length: count }, () => createElement(w, h));
+    const elements: ScienceElement[] = Array.from({ length: count }, (_, i) => createElement(w, h, i));
     let tick = 0;
 
     const getColors = () => {
@@ -268,29 +280,38 @@ const ScienceHeroCanvas = () => {
       const my = mouseRef.current.y;
 
       for (const el of elements) {
-        // Parallax
+        // Parallax — depth-aware
         if (mx >= 0 && my >= 0 && !isMobile) {
           const dx = el.x - mx;
           const dy = el.y - my;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            const force = (120 - dist) / 120 * 0.3;
+          const range = 140;
+          if (dist < range) {
+            const force = (range - dist) / range * (0.2 + el.depth * 0.15);
             el.x += (dx / dist) * force;
             el.y += (dy / dist) * force;
           }
         }
 
-        el.x += el.vx + Math.sin(tick * 0.008 + el.phase) * 0.08;
-        el.y += el.vy + Math.cos(tick * 0.006 + el.phase) * 0.06;
+        // Slightly more noticeable floating
+        el.x += el.vx + Math.sin(tick * 0.008 + el.phase) * 0.14;
+        el.y += el.vy + Math.cos(tick * 0.006 + el.phase) * 0.1;
         el.rotation += el.rotSpeed;
 
         // Wrap
-        if (el.x < -40) el.x = w + 40;
-        if (el.x > w + 40) el.x = -40;
-        if (el.y < -40) el.y = h + 40;
-        if (el.y > h + 40) el.y = -40;
+        if (el.x < -60) el.x = w + 60;
+        if (el.x > w + 60) el.x = -60;
+        if (el.y < -60) el.y = h + 60;
+        if (el.y > h + 60) el.y = -60;
 
         ctx.globalAlpha = el.opacity;
+
+        // Depth blur for far elements
+        if (el.depth === 0) {
+          ctx.filter = "blur(1.5px)";
+        } else {
+          ctx.filter = "none";
+        }
 
         switch (el.type) {
           case "atom": drawAtom(ctx, el, tick, colors); break;
@@ -302,6 +323,7 @@ const ScienceHeroCanvas = () => {
         }
       }
 
+      ctx.filter = "none";
       ctx.globalAlpha = 1;
       animRef.current = requestAnimationFrame(draw);
     };
