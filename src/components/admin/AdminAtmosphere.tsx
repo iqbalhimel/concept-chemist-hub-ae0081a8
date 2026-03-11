@@ -168,7 +168,7 @@ const AdminAtmosphere = () => {
             {saving ? "Saving..." : "Save Atmosphere Settings"}
           </Button>
           {verified === true && (
-            <span className="flex items-center gap-1 text-xs text-green-500">
+            <span className="flex items-center gap-1 text-xs text-primary">
               <CheckCircle2 size={14} /> Atmosphere system verified and running correctly.
             </span>
           )}
