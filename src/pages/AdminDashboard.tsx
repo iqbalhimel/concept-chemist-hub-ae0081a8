@@ -99,7 +99,7 @@ const AdminDashboard = () => {
             </button>
           ))}
         </nav>
-        <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-border shrink-0">
           <div className="text-xs text-muted-foreground mb-2 truncate px-3">{user?.email}</div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex-1" onClick={() => window.open("/", "_blank")}>
