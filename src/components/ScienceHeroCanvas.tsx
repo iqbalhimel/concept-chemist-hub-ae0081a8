@@ -38,8 +38,9 @@ const PLACEMENT_ORDER: ScienceElement["type"][] = [
   "water", "cell", "neuron",
 ];
 
-// Mobile: show 6 elements with good coverage
-const MOBILE_INDICES = [0, 2, 3, 5, 7, 8]; // solar, dna, wave, benzene, cell, neuron
+// Mobile: 6 specific elements: solar, atom, benzene, dna, water, neuron
+const MOBILE_TYPES: ScienceElement["type"][] = ["solar", "atom", "benzene", "dna", "water", "neuron"];
+const MOBILE_INDICES = [0, 1, 5, 2, 6, 8]; // indices into PLACEMENT_ORDER for grid fallback
 
 function createElement(w: number, h: number, gridIndex: number): ScienceElement {
   const type = PLACEMENT_ORDER[gridIndex];
