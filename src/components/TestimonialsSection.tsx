@@ -17,7 +17,7 @@ interface Testimonial {
   created_at: string;
 }
 
-const HOMEPAGE_LIMIT = 5;
+const HOMEPAGE_LIMIT = 3;
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const vp = { once: true, amount: 0.15 as const };
 
@@ -70,13 +70,11 @@ const TestimonialsSection = () => {
             );
           })}
         </div>
-        {totalCount > HOMEPAGE_LIMIT && (
-          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.3 }} className="text-center mt-10">
-            <Link to={`/${lang}/testimonials`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all glow-primary">
-              {t.testimonials.see_all} <ArrowRight size={16} />
-            </Link>
-          </motion.div>
-        )}
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.3 }} className="text-center mt-10">
+          <Link to={`/${lang}/testimonials`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all glow-primary">
+            {t.testimonials.see_all} <ArrowRight size={16} />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );
