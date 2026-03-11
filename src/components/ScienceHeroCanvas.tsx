@@ -8,14 +8,15 @@ const MOBILE_COUNT = 5;
 interface ScienceElement {
   x: number;
   y: number;
-  vx: number;
-  vy: number;
+  anchorX: number;
+  anchorY: number;
   type: "atom" | "solar" | "wave" | "benzene" | "water" | "network" | "dna" | "neuron" | "cell";
   size: number;
   rotation: number;
   rotSpeed: number;
   opacity: number;
   phase: number;
+  floatRadius: number;
 }
 
 function rand(a: number, b: number) { return a + Math.random() * (b - a); }
@@ -26,52 +27,52 @@ const ELEMENT_TYPES: ScienceElement["type"][] = [
 
 const BIOLOGY_TYPES = new Set<ScienceElement["type"]>(["dna", "neuron", "cell"]);
 
-function createElement(w: number, h: number, index: number, isMobile: boolean): ScienceElement {
-  const type = ELEMENT_TYPES[index % ELEMENT_TYPES.length];
+// Fixed 3x3 grid placement for all 9 elements
+// Row 0: solar(top-left), atom(top-center), dna(top-right)
+// Row 1: wave(mid-left), network(center), benzene(mid-right)
+// Row 2: water(bot-left), cell(bot-center), neuron(bot-right)
+const PLACEMENT_ORDER: ScienceElement["type"][] = [
+  "solar", "atom", "dna",
+  "wave", "network", "benzene",
+  "water", "cell", "neuron",
+];
+
+// Mobile: show 6 elements with good coverage
+const MOBILE_INDICES = [0, 2, 3, 5, 7, 8]; // solar, dna, wave, benzene, cell, neuron
+
+function createElement(w: number, h: number, gridIndex: number): ScienceElement {
+  const type = PLACEMENT_ORDER[gridIndex];
   const isBio = BIOLOGY_TYPES.has(type);
+  const col = gridIndex % 3;
+  const row = Math.floor(gridIndex / 3);
 
-  // Biology elements get specific visible placement
-  let x: number, y: number;
-  if (isBio) {
-    if (type === "dna") {
-      // top-right area
-      x = rand(w * 0.68, w * 0.88);
-      y = rand(h * 0.08, h * 0.3);
-    } else if (type === "neuron") {
-      // bottom-right area
-      x = rand(w * 0.65, w * 0.85);
-      y = rand(h * 0.6, h * 0.8);
-    } else {
-      // cell → bottom-center
-      x = rand(w * 0.35, w * 0.6);
-      y = rand(h * 0.65, h * 0.85);
-    }
-  } else {
-    // Grid distribution for physics & chemistry
-    const physChemIndex = index < 6 ? index : 0;
-    const cols = 3;
-    const row = Math.floor(physChemIndex / cols);
-    const col = physChemIndex % cols;
-    const cellW = w / cols;
-    const cellH = h / 2.5;
-    x = cellW * col + rand(cellW * 0.15, cellW * 0.85);
-    y = cellH * row + rand(cellH * 0.15, cellH * 0.85);
-  }
+  // Margins to keep elements inside viewport
+  const mx = w * 0.12;
+  const my = h * 0.08;
+  const usableW = w - mx * 2;
+  const usableH = h - my * 2;
 
-  // Biology elements: larger, more opaque
-  const baseSize = isBio ? rand(70, 90) : rand(50, 70);
-  const baseOpacity = isBio ? rand(0.55, 0.75) : rand(0.35, 0.6);
+  // Position at center of each grid cell
+  const cellW = usableW / 3;
+  const cellH = usableH / 3;
+  const anchorX = mx + cellW * col + cellW * 0.5;
+  const anchorY = my + cellH * row + cellH * 0.5;
+
+  const baseSize = isBio ? rand(72, 88) : rand(55, 72);
+  const floatRadius = rand(18, 35);
 
   return {
-    x, y,
-    vx: rand(-0.12, 0.12),
-    vy: rand(-0.1, 0.1),
+    x: anchorX,
+    y: anchorY,
+    anchorX,
+    anchorY,
     type,
-    size: isMobile ? baseSize * 1.1 : baseSize,
+    size: baseSize,
     rotation: rand(0, 360),
-    rotSpeed: isBio ? rand(-0.15, 0.15) : rand(-0.3, 0.3),
-    opacity: baseOpacity,
+    rotSpeed: isBio ? rand(-0.12, 0.12) : rand(-0.2, 0.2),
+    opacity: isBio ? rand(0.55, 0.72) : rand(0.38, 0.58),
     phase: rand(0, Math.PI * 2),
+    floatRadius,
   };
 }
 
