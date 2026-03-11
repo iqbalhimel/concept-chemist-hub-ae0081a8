@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Phone, Mail, MessageCircle, Facebook, Send } from "lucide-react";
 import { toast } from "sonner";
+const LocationMap = lazy(() => import("@/components/LocationMap"));
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -17,7 +18,7 @@ const ContactSection = () => {
   const phone = get("contact", "phone", "+8801687476714");
   const whatsapp = get("contact", "whatsapp", "+8801733579100");
   const email = get("contact", "email", "i.h.himel@gmail.com");
-  const mapUrl = get("contact", "map_embed_url", "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29045.75!2d90.76!3d24.43!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x37564ee40fafffff%3A0x1c15f9a1e3f1a0e7!2sKishoreganj%20Sadar!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd");
+  
   const facebook = get("social", "facebook", "https://www.fb.com/i.h.himel");
 
   const contactInfo = [
@@ -75,9 +76,9 @@ const ContactSection = () => {
           </motion.div>
         </div>
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.3 }} className="max-w-5xl mx-auto mt-12">
-          <div className="glass-card overflow-hidden rounded-xl">
-            <iframe title="Location" src={mapUrl} width="100%" height="300" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="w-full" />
-          </div>
+          <Suspense fallback={<div className="glass-card rounded-2xl h-[360px] animate-pulse" />}>
+            <LocationMap />
+          </Suspense>
         </motion.div>
       </div>
     </section>
