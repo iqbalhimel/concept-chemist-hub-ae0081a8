@@ -76,9 +76,9 @@ const ContactSection = () => {
           </motion.div>
         </div>
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.3 }} className="max-w-5xl mx-auto mt-12">
-          <div className="glass-card overflow-hidden rounded-xl">
-            <iframe title="Location" src={mapUrl} width="100%" height="300" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="w-full" />
-          </div>
+          <Suspense fallback={<div className="glass-card rounded-2xl h-[360px] animate-pulse" />}>
+            <LocationMap />
+          </Suspense>
         </motion.div>
       </div>
     </section>
