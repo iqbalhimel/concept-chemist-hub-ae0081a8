@@ -83,10 +83,10 @@ const ResourcesSection = () => {
     <section id="resources" className="section-padding section-gradient">
       <div className="container mx-auto">
         <div className="text-center mb-12">
-          <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
+          <span className="badge-soft text-primary border border-primary/20 mb-5">
             {t.resources.badge}
           </span>
-          <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">
+          <h2 className="font-display text-3xl md:text-5xl font-bold mb-4 tracking-tight">
             {t.resources.title_1} <span className="gradient-text">{t.resources.title_highlight}</span>
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
@@ -126,13 +126,16 @@ const ResourcesSection = () => {
                     <p className="text-xs text-muted-foreground">
                       {item.pages ? `${item.pages} ${t.resources.pages} · ` : ""}PDF{item.file_size ? ` · ${item.file_size}` : ""}
                     </p>
+                    <span className={`inline-flex items-center mt-2 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${tagColor}`}>
+                      {item.category}
+                    </span>
                   </div>
                 </div>
                 {item.file_url ? (
                   <div className="flex-shrink-0 flex items-center gap-2">
                     <button
                       onClick={() => { setPreviewUrl(item.file_url); setPreviewTitle(item.title); }}
-                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-primary/30 text-primary text-sm font-medium hover:bg-primary/10 transition-all"
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-primary/30 text-primary text-sm font-semibold hover:bg-primary/10 transition-colors"
                     >
                       <Eye size={14} />
                       <span className="hidden sm:inline">{t.resources.preview}</span>
@@ -141,7 +144,7 @@ const ResourcesSection = () => {
                       href={item.file_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all glow-primary"
+                      className="btn-shine inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all glow-primary"
                     >
                       <Download size={14} />
                       <span className="hidden sm:inline">{t.resources.download}</span>

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import AboutSection from "@/components/AboutSection";
 import SubjectsSection from "@/components/SubjectsSection";
@@ -13,8 +12,6 @@ import BlogSection from "@/components/BlogSection";
 import StatsSection from "@/components/StatsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import ContactSection from "@/components/ContactSection";
-import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import GallerySection from "@/components/GallerySection";
 import FAQSection from "@/components/FAQSection";
 
@@ -38,12 +35,7 @@ const Index = () => {
   const show = (key: string) => vis === null || vis[key] !== "false";
 
   return (
-    <div className="min-h-screen bg-background">
-      <a href="#main-content" className="skip-to-content">
-        Skip to main content
-      </a>
-      <Navbar />
-      <main id="main-content" role="main">
+    <main id="main-content" role="main">
         {show("show_hero") && <HeroSection />}
         {show("show_about") && <AboutSection />}
         {show("show_subjects") && <SubjectsSection />}
@@ -58,10 +50,7 @@ const Index = () => {
         {show("show_blog") && <BlogSection />}
         {show("show_faq") && <FAQSection />}
         {show("show_contact") && <ContactSection />}
-      </main>
-      <Footer />
-      <WhatsAppButton />
-    </div>
+    </main>
   );
 };
 

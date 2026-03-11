@@ -6,8 +6,6 @@ import OptimizedImage from "@/components/OptimizedImage";
 import { setSeo } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BlogPost {
@@ -115,11 +113,7 @@ const BlogListing = () => {
     });
 
   return (
-    <div className="min-h-screen bg-background">
-      <a href="#main-content" className="skip-to-content">Skip to main content</a>
-      <Navbar />
-
-      <main id="main-content" className="pt-24 pb-16">
+    <main id="main-content" className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12">
@@ -279,10 +273,7 @@ const BlogListing = () => {
             </>
           )}
         </div>
-      </main>
-
-      <Footer />
-    </div>
+    </main>
   );
 };
 

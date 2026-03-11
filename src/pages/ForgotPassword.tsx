@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { KeyRound, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import PageShell from "@/components/PageShell";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -28,8 +29,9 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="glass-card w-full max-w-md p-8">
+    <PageShell>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="glass-card w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-4">
             <KeyRound className="text-primary" size={28} />
@@ -69,8 +71,9 @@ const ForgotPassword = () => {
             <ArrowLeft size={14} /> Back to login
           </Link>
         </div>
+        </div>
       </div>
-    </div>
+    </PageShell>
   );
 };
 

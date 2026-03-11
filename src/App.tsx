@@ -11,6 +11,7 @@ import ThemeLoader from "@/components/ThemeLoader";
 import HreflangTags from "@/components/HreflangTags";
 import LanguageRedirect from "@/components/LanguageRedirect";
 import { lazy, Suspense } from "react";
+import PublicLayout from "@/layouts/PublicLayout";
 
 // Eagerly loaded (homepage critical path)
 import Index from "./pages/Index";
@@ -50,13 +51,24 @@ const AppRoutes = () => (
     <LanguageRedirect />
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* Lang-prefixed public routes */}
-        <Route path="/:lang" element={<Index />} />
-        <Route path="/:lang/blog" element={<BlogListing />} />
-        <Route path="/:lang/blog/:id" element={<BlogPostPage />} />
-        <Route path="/:lang/testimonials" element={<TestimonialsPage />} />
-        <Route path="/:lang/notices" element={<NoticesPage />} />
-        <Route path="/:lang/resources" element={<ResourcesPage />} />
+        {/* Public routes (Navbar/Footer rendered once in layout) */}
+        <Route element={<PublicLayout />}>
+          {/* Lang-prefixed */}
+          <Route path="/:lang" element={<Index />} />
+          <Route path="/:lang/blog" element={<BlogListing />} />
+          <Route path="/:lang/blog/:id" element={<BlogPostPage />} />
+          <Route path="/:lang/testimonials" element={<TestimonialsPage />} />
+          <Route path="/:lang/notices" element={<NoticesPage />} />
+          <Route path="/:lang/resources" element={<ResourcesPage />} />
+
+          {/* Legacy routes (redirect handled via LanguageRedirect) */}
+          <Route path="/" element={<Index />} />
+          <Route path="/blog" element={<BlogListing />} />
+          <Route path="/blog/:id" element={<BlogPostPage />} />
+          <Route path="/testimonials" element={<TestimonialsPage />} />
+          <Route path="/notices" element={<NoticesPage />} />
+          <Route path="/resources" element={<ResourcesPage />} />
+        </Route>
 
         {/* Admin routes (no lang prefix) */}
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -70,14 +82,6 @@ const AppRoutes = () => (
             </ProtectedRoute>
           }
         />
-
-        {/* Legacy routes (redirect via LanguageRedirect) */}
-        <Route path="/" element={<Index />} />
-        <Route path="/blog" element={<BlogListing />} />
-        <Route path="/blog/:id" element={<BlogPostPage />} />
-        <Route path="/testimonials" element={<TestimonialsPage />} />
-        <Route path="/notices" element={<NoticesPage />} />
-        <Route path="/resources" element={<ResourcesPage />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

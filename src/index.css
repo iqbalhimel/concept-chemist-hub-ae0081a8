@@ -56,6 +56,12 @@
     --glass-highlight-opacity: 0.05;
     --glass-hover-shadow-color: rgba(124, 77, 255, 0.15);
     --glass-hover-highlight-opacity: 0.08;
+
+    /* Elevation + subtle rings */
+    --shadow-color: 220 40% 2%;
+    --shadow-elev-1: 0 1px 2px hsl(var(--shadow-color) / 0.35), 0 8px 24px hsl(var(--shadow-color) / 0.35);
+    --shadow-elev-2: 0 2px 6px hsl(var(--shadow-color) / 0.35), 0 16px 48px hsl(var(--shadow-color) / 0.35);
+    --ring-soft: 0 0 0 1px hsl(var(--border) / 0.8);
   }
 
   /* ── Light mode defaults (fallback before DB theme loads) ── */
@@ -107,6 +113,11 @@
     --glass-highlight-opacity: 0;
     --glass-hover-shadow-color: rgba(99, 102, 241, 0.12);
     --glass-hover-highlight-opacity: 0;
+
+    --shadow-color: 222 47% 11%;
+    --shadow-elev-1: 0 1px 2px rgba(2, 6, 23, 0.06), 0 12px 28px rgba(2, 6, 23, 0.08);
+    --shadow-elev-2: 0 2px 6px rgba(2, 6, 23, 0.08), 0 20px 60px rgba(2, 6, 23, 0.12);
+    --ring-soft: 0 0 0 1px rgba(2, 6, 23, 0.08);
   }
 }
 
@@ -115,12 +126,17 @@
     @apply border-border;
   }
 
+  section[id] {
+    scroll-margin-top: 96px;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
   }
 
   html {
@@ -147,11 +163,20 @@
   }
 }
 
+@layer base {
+  ::selection {
+    background: hsl(var(--primary) / 0.25);
+  }
+
+  a {
+    text-underline-offset: 4px;
+  }
+}
+
 @layer components {
   .glass-card {
     @apply bg-card/60 backdrop-blur-xl border border-glass-border rounded-xl;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, var(--glass-shadow-opacity)),
-                inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight-opacity));
+    box-shadow: var(--shadow-elev-1), inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight-opacity));
   }
 
   [data-brightness="light"] .glass-card {
@@ -165,9 +190,57 @@
 
   .glass-card-hover:hover {
     @apply border-primary/40;
-    box-shadow: 0 12px 40px var(--glass-hover-shadow-color),
-                inset 0 1px 0 rgba(255, 255, 255, var(--glass-hover-highlight-opacity));
+    box-shadow: var(--shadow-elev-2), 0 12px 40px var(--glass-hover-shadow-color),
+      inset 0 1px 0 rgba(255, 255, 255, var(--glass-hover-highlight-opacity));
     transform: translateY(-4px);
+  }
+
+  .app-shell {
+    @apply min-h-screen bg-background;
+    background-image:
+      radial-gradient(900px 500px at 15% 10%, hsl(var(--primary) / 0.10), transparent 55%),
+      radial-gradient(900px 500px at 85% 25%, hsl(var(--accent) / 0.08), transparent 60%),
+      radial-gradient(900px 500px at 55% 95%, hsl(var(--primary) / 0.06), transparent 60%);
+  }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.6) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.6) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 40%, transparent 80%);
+    opacity: 0.18;
+  }
+
+  .section-shell {
+    @apply relative overflow-hidden;
+  }
+
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--border)), transparent);
+  }
+
+  .badge-soft {
+    @apply inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium;
+    background: linear-gradient(180deg, hsl(var(--primary) / 0.14), hsl(var(--primary) / 0.06));
+    box-shadow: var(--ring-soft);
+  }
+
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    inset: -120% -60%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+    transform: rotate(18deg) translateX(-40%);
+    transition: transform 650ms ease;
+  }
+  .btn-shine:hover::after {
+    transform: rotate(18deg) translateX(40%);
   }
 
   [data-brightness="light"] .glass-card-hover:hover {

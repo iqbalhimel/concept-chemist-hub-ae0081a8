@@ -4,8 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Clock, User, Calendar, ArrowUpRight, Share2, Link2, Check } from "lucide-react";
 import { setSeo } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import BlogReactions from "@/components/BlogReactions";
 import BlogComments from "@/components/BlogComments";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -111,32 +109,24 @@ const BlogPost = () => {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container mx-auto px-4 py-32 text-center">
+      <main id="main-content" className="pt-24 pb-16">
+        <div className="container mx-auto px-4 py-24 text-center">
           <h1 className="font-display text-3xl font-bold text-foreground mb-4">{t.blog_post.not_found}</h1>
           <p className="text-muted-foreground mb-8">{t.blog_post.not_found_desc}</p>
           <Link to={`/${lang}#blog`}>
             <Button><ArrowLeft size={16} className="mr-2" /> {t.blog_post.back_blog}</Button>
           </Link>
         </div>
-        <Footer />
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <a href="#main-content" className="skip-to-content">Skip to main content</a>
+    <>
       {/* Reading progress bar */}
       <div className="fixed top-0 left-0 w-full h-1 z-[60] bg-muted/30">
-        <div
-          className="h-full bg-primary transition-[width] duration-100 ease-out"
-          style={{ width: `${progress}%` }}
-        />
+        <div className="h-full bg-primary transition-[width] duration-100 ease-out" style={{ width: `${progress}%` }} />
       </div>
-
-      <Navbar />
 
       {post && !(post as any).is_published && (
         <div className="bg-accent/20 border-b border-accent text-accent-foreground text-center text-sm py-2 font-medium">
@@ -298,8 +288,7 @@ const BlogPost = () => {
         </section>
       )}
 
-      <Footer />
-    </div>
+    </>
   );
 };
 

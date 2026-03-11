@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import PageShell from "@/components/PageShell";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -53,20 +54,23 @@ const ResetPassword = () => {
 
   if (!ready) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="glass-card w-full max-w-md p-8 text-center">
-          <p className="text-muted-foreground">Invalid or expired reset link. Please request a new one.</p>
-          <Button className="mt-4" onClick={() => navigate("/forgot-password")}>
-            Request New Link
-          </Button>
+      <PageShell>
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <div className="glass-card w-full max-w-md p-8 text-center">
+            <p className="text-muted-foreground">Invalid or expired reset link. Please request a new one.</p>
+            <Button className="mt-4" onClick={() => navigate("/forgot-password")}>
+              Request New Link
+            </Button>
+          </div>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="glass-card w-full max-w-md p-8">
+    <PageShell>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="glass-card w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-4">
             <ShieldCheck className="text-primary" size={28} />
@@ -106,8 +110,9 @@ const ResetPassword = () => {
             {submitting ? "Updating..." : "Update Password"}
           </Button>
         </form>
+        </div>
       </div>
-    </div>
+    </PageShell>
   );
 };
 

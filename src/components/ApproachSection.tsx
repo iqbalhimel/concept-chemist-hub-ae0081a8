@@ -20,24 +20,39 @@ const ApproachSection = () => {
   if (items.length === 0) return null;
 
   return (
-    <section className="section-padding section-gradient">
+    <section id="approach" className="section-padding section-gradient section-shell">
       <div className="container mx-auto">
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.6 }}>
-          <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">
+          <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4 tracking-tight">
             {t.approach?.title_1 ?? ""} <span className="gradient-text">{t.approach?.title_highlight ?? ""}</span>
           </h2>
-          <p className="text-center text-muted-foreground mb-16 max-w-xl mx-auto">{t.approach?.subtitle ?? ""}</p>
+          <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto">{t.approach?.subtitle ?? ""}</p>
         </motion.div>
-        <div className="grid sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
           {items.map((item, i) => {
             const Icon = iconMap[item?.icon ?? ""] || Lightbulb;
             const title = lang === "bn" ? (item?.title_bn || item?.title_en || "Untitled") : (item?.title_en || item?.title_bn || "Untitled");
             const desc = lang === "bn" ? (item?.description_bn || item?.description_en || "") : (item?.description_en || item?.description_bn || "");
             return (
-              <motion.div key={item.id} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.1 + i * 0.1 }} className="glass-card-hover p-8">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4"><Icon size={24} className="text-primary" /></div>
-                <h3 className="font-display text-lg font-bold text-foreground mb-2">{title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{desc}</p>
+              <motion.div
+                key={item.id}
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={vp}
+                transition={{ duration: 0.5, delay: 0.08 + i * 0.06 }}
+                className="glass-card-hover p-6 md:p-7"
+              >
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Icon size={22} className="text-primary" />
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground bg-secondary/40 border border-border rounded-full px-3 py-1">
+                    {(i + 1).toString().padStart(2, "0")}
+                  </span>
+                </div>
+                <h3 className="font-display text-lg font-bold text-foreground mb-2 tracking-tight">{title}</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">{desc}</p>
               </motion.div>
             );
           })}

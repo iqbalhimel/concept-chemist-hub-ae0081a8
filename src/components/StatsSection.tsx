@@ -41,7 +41,7 @@ const AnimatedCounter = ({ end, suffix }: { end: number; suffix: string }) => {
   }, [animate]);
 
   return (
-    <span ref={ref} className="font-display text-4xl md:text-5xl font-bold gradient-text">
+    <span ref={ref} className="font-display text-4xl md:text-5xl font-bold tracking-tight gradient-text">
       {count.toLocaleString()}{suffix}
     </span>
   );
@@ -61,8 +61,8 @@ const StatsSection = () => {
     <section id="student-success" className="section-padding section-gradient">
       <div className="container mx-auto">
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5 }} className="text-center mb-12">
-          <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">{t.stats?.badge ?? ""}</span>
-          <h2 className="font-display text-3xl md:text-4xl font-bold">
+          <span className="badge-soft text-primary border border-primary/20 mb-5">{t.stats?.badge ?? ""}</span>
+          <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight">
             {t.stats?.title_1 ?? ""} <span className="gradient-text">{t.stats?.title_highlight ?? ""}</span>
           </h2>
         </motion.div>
@@ -75,8 +75,18 @@ const StatsSection = () => {
             const suffix = valueStr.replace(/^\d+/, "");
             const title = lang === "bn" ? (stat?.title_bn || stat?.title_en || "Achievement") : (stat?.title_en || stat?.title_bn || "Achievement");
             return (
-              <motion.div key={stat.id} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: i * 0.1 }} className="glass-card-hover p-6 md:p-8 text-center flex flex-col items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-1"><Icon size={24} className="text-primary" /></div>
+              <motion.div
+                key={stat.id}
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={vp}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="glass-card-hover p-6 md:p-8 text-center flex flex-col items-center gap-3"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-1">
+                  <Icon size={24} className="text-primary" />
+                </div>
                 <AnimatedCounter end={num} suffix={suffix} />
                 <p className="text-muted-foreground text-sm font-medium">{title}</p>
               </motion.div>

@@ -33,16 +33,38 @@ const BlogSection = () => {
     <section id="blog" className="section-padding section-gradient">
       <div className="container mx-auto">
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.6 }}>
-          <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4">{t.blog.title_1} <span className="gradient-text">{t.blog.title_highlight}</span></h2>
+          <div className="text-center mb-5">
+            <span className="badge-soft text-primary border border-primary/20">{t.blog.badge ?? t.nav.blog}</span>
+          </div>
+          <h2 className="font-display text-3xl md:text-5xl font-bold text-center mb-4 tracking-tight">{t.blog.title_1} <span className="gradient-text">{t.blog.title_highlight}</span></h2>
           <p className="text-center text-muted-foreground mb-16 max-w-xl mx-auto">{t.blog.subtitle}</p>
         </motion.div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {posts.map((post, i) => (
-            <motion.article key={post.id} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.1 + i * 0.1 }} className="glass-card-hover group cursor-pointer flex flex-col overflow-hidden">
-              {post.featured_image && <OptimizedImage src={post.featured_image} alt={post.title} widths={[400, 800]} className="w-full h-44" />}
-              <div className="p-8 flex flex-col flex-1">
-                <span className="text-xs font-semibold text-accent uppercase tracking-wider mb-3">{post.category}</span>
-                <h3 className="font-display text-lg font-bold text-foreground mb-3 group-hover:text-primary transition-colors flex items-start gap-2">{post.title}<ArrowUpRight size={18} className="shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity text-primary" /></h3>
+            <motion.article
+              key={post.id}
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={vp}
+              transition={{ duration: 0.5, delay: 0.08 + i * 0.08 }}
+              className="glass-card-hover group cursor-pointer flex flex-col overflow-hidden"
+            >
+              {post.featured_image && (
+                <div className="relative">
+                  <OptimizedImage src={post.featured_image} alt={post.title} widths={[400, 800]} className="w-full h-48" />
+                  <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
+              <div className="p-7 flex flex-col flex-1">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <span className="text-[11px] font-semibold text-accent uppercase tracking-wider">{post.category}</span>
+                  <span className="text-[11px] text-muted-foreground">{post.read_time || ""}</span>
+                </div>
+                <h3 className="font-display text-lg font-bold text-foreground mb-3 group-hover:text-primary transition-colors flex items-start gap-2 tracking-tight">
+                  {post.title}
+                  <ArrowUpRight size={18} className="shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+                </h3>
                 <p className="text-muted-foreground text-sm leading-relaxed flex-1">{post.excerpt}</p>
                 <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><User size={12} /> {t.blog.by}</span>
@@ -55,7 +77,9 @@ const BlogSection = () => {
           ))}
         </div>
         <div className="text-center mt-10">
-          <Link to={`/${lang}/blog`} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/10 text-primary font-semibold hover:bg-primary/20 transition-colors">{t.blog.view_all} <ArrowUpRight size={16} /></Link>
+          <Link to={`/${lang}/blog`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary/10 text-primary font-semibold hover:bg-primary/20 transition-colors">
+            {t.blog.view_all} <ArrowUpRight size={16} />
+          </Link>
         </div>
       </div>
     </section>

@@ -6,9 +6,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 
 interface Notice {
   id: string;
@@ -50,9 +47,8 @@ const NoticesPage = () => {
   const formatDate = (date: string) => new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="pt-24 pb-16">
+    <>
+      <main id="main-content" className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           <Link to={`/${lang}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-8">
             <ArrowLeft size={16} />
@@ -118,8 +114,6 @@ const NoticesPage = () => {
           )}
         </div>
       </main>
-      <Footer />
-      <WhatsAppButton />
 
       <Dialog open={!!selected} onOpenChange={open => !open && setSelected(null)}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
@@ -138,7 +132,7 @@ const NoticesPage = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 

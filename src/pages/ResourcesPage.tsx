@@ -7,9 +7,6 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import PdfViewer from "@/components/PdfViewer";
 import { useLanguage } from "@/contexts/LanguageContext";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 
 type StudyMaterial = Tables<"study_materials">;
 type StudyCategory = { id: string; name: string; slug: string; sort_order: number; is_active: boolean; };
@@ -80,9 +77,8 @@ const ResourcesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="pt-24 pb-16">
+    <>
+      <main id="main-content" className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           <Link to={`/${lang}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-8">
             <ArrowLeft size={16} />
@@ -90,7 +86,7 @@ const ResourcesPage = () => {
           </Link>
 
           <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
+            <span className="badge-soft text-primary border border-primary/20 mb-5">
               {t.resources.badge}
             </span>
             <h1 className="font-display text-3xl md:text-5xl font-bold mb-4">
@@ -209,8 +205,6 @@ const ResourcesPage = () => {
           )}
         </div>
       </main>
-      <Footer />
-      <WhatsAppButton />
 
       <Dialog open={!!previewUrl} onOpenChange={open => { if (!open) setPreviewUrl(null); }}>
         <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 gap-0 overflow-hidden [&>button:last-child]:hidden">
@@ -231,7 +225,7 @@ const ResourcesPage = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
