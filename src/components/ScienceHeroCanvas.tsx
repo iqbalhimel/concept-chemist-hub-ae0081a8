@@ -451,7 +451,13 @@ const ScienceHeroCanvas = () => {
       ctx.clearRect(0, 0, w, h);
       const mx = mouseRef.current.x, my = mouseRef.current.y;
 
-      for (const el of elements) {
+      // Render in layer order: physics → chemistry → biology (on top)
+      const sorted = [...elements].sort((a, b) => {
+        const order = (e: ScienceElement) => BIOLOGY_TYPES.has(e.type) ? 2 : (["benzene","water","network"].includes(e.type) ? 1 : 0);
+        return order(a) - order(b);
+      });
+
+      for (const el of sorted) {
         // Mouse parallax
         if (mx >= 0 && my >= 0 && !isMobile) {
           const dx = el.x - mx, dy = el.y - my;
@@ -465,14 +471,25 @@ const ScienceHeroCanvas = () => {
         el.x += el.vx + Math.sin(tick * 0.007 + el.phase) * 0.1;
         el.y += el.vy + Math.cos(tick * 0.005 + el.phase) * 0.08;
         el.rotation += el.rotSpeed;
-        // Wrap
-        if (el.x < -80) el.x = w + 80;
-        if (el.x > w + 80) el.x = -80;
-        if (el.y < -80) el.y = h + 80;
-        if (el.y > h + 80) el.y = -80;
+        // Soft bounds — keep elements within visible area
+        const margin = el.size;
+        if (el.x < -margin) el.x = w + margin;
+        if (el.x > w + margin) el.x = -margin;
+        if (el.y < -margin) el.y = h + margin;
+        if (el.y > h + margin) el.y = -margin;
 
+        // Biology elements get subtle glow
+        const isBio = BIOLOGY_TYPES.has(el.type);
+        if (isBio) {
+          ctx.shadowColor = colors.glow;
+          ctx.shadowBlur = 8;
+        }
         ctx.globalAlpha = el.opacity;
         DRAW_MAP[el.type](ctx, el, tick, colors);
+        if (isBio) {
+          ctx.shadowColor = "transparent";
+          ctx.shadowBlur = 0;
+        }
       }
 
       ctx.globalAlpha = 1;
