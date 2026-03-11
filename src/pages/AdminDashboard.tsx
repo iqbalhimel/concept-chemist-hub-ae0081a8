@@ -76,6 +76,7 @@ const AdminDashboard = () => {
       case "subjects": return <AdminSubjects />;
       case "media": return <AdminMediaLibrary />;
       case "themes": return <AdminThemes />;
+      case "atmosphere": return <AdminAtmosphere />;
       default: return <AdminDashboardOverview onNavigate={(tab) => setActiveTab(tab as Tab)} />;
     }
   };
