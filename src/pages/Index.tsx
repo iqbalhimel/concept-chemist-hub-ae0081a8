@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import HeroSection from "@/components/HeroSection";
 import AboutSection from "@/components/AboutSection";
+const AtmosphereLayer = lazy(() => import("@/components/AtmosphereLayer"));
 import SubjectsSection from "@/components/SubjectsSection";
 import ApproachSection from "@/components/ApproachSection";
 import ExperienceSection from "@/components/ExperienceSection";
