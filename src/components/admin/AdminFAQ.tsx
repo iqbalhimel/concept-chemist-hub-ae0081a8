@@ -119,7 +119,7 @@ const AdminFAQ = () => {
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full max-w-full min-w-0">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="font-display text-2xl font-bold text-foreground">FAQ</h2>
         <div className="flex gap-2">
