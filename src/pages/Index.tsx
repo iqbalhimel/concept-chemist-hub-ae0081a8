@@ -36,7 +36,8 @@ const Index = () => {
   const show = (key: string) => vis === null || vis[key] !== "false";
 
   return (
-    <main id="main-content" role="main">
+    <main id="main-content" role="main" className="relative">
+        <Suspense fallback={null}><AtmosphereLayer /></Suspense>
         {show("show_hero") && <HeroSection />}
         {show("show_about") && <AboutSection />}
         {show("show_subjects") && <SubjectsSection />}
