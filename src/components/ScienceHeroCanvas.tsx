@@ -2,20 +2,20 @@ import { useEffect, useRef } from "react";
 import { getTimeOfDay, timeColors, type TimeOfDay } from "@/lib/atmosphere";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
-const DESKTOP_COUNT = 9;
-const MOBILE_COUNT = 5;
+// Desktop: all 9, Mobile: 6 selected elements
 
 interface ScienceElement {
   x: number;
   y: number;
-  vx: number;
-  vy: number;
+  anchorX: number;
+  anchorY: number;
   type: "atom" | "solar" | "wave" | "benzene" | "water" | "network" | "dna" | "neuron" | "cell";
   size: number;
   rotation: number;
   rotSpeed: number;
   opacity: number;
   phase: number;
+  floatRadius: number;
 }
 
 function rand(a: number, b: number) { return a + Math.random() * (b - a); }
@@ -26,52 +26,52 @@ const ELEMENT_TYPES: ScienceElement["type"][] = [
 
 const BIOLOGY_TYPES = new Set<ScienceElement["type"]>(["dna", "neuron", "cell"]);
 
-function createElement(w: number, h: number, index: number, isMobile: boolean): ScienceElement {
-  const type = ELEMENT_TYPES[index % ELEMENT_TYPES.length];
+// Fixed 3x3 grid placement for all 9 elements
+// Row 0: solar(top-left), atom(top-center), dna(top-right)
+// Row 1: wave(mid-left), network(center), benzene(mid-right)
+// Row 2: water(bot-left), cell(bot-center), neuron(bot-right)
+const PLACEMENT_ORDER: ScienceElement["type"][] = [
+  "solar", "atom", "dna",
+  "wave", "network", "benzene",
+  "water", "cell", "neuron",
+];
+
+// Mobile: show 6 elements with good coverage
+const MOBILE_INDICES = [0, 2, 3, 5, 7, 8]; // solar, dna, wave, benzene, cell, neuron
+
+function createElement(w: number, h: number, gridIndex: number): ScienceElement {
+  const type = PLACEMENT_ORDER[gridIndex];
   const isBio = BIOLOGY_TYPES.has(type);
+  const col = gridIndex % 3;
+  const row = Math.floor(gridIndex / 3);
 
-  // Biology elements get specific visible placement
-  let x: number, y: number;
-  if (isBio) {
-    if (type === "dna") {
-      // top-right area
-      x = rand(w * 0.68, w * 0.88);
-      y = rand(h * 0.08, h * 0.3);
-    } else if (type === "neuron") {
-      // bottom-right area
-      x = rand(w * 0.65, w * 0.85);
-      y = rand(h * 0.6, h * 0.8);
-    } else {
-      // cell → bottom-center
-      x = rand(w * 0.35, w * 0.6);
-      y = rand(h * 0.65, h * 0.85);
-    }
-  } else {
-    // Grid distribution for physics & chemistry
-    const physChemIndex = index < 6 ? index : 0;
-    const cols = 3;
-    const row = Math.floor(physChemIndex / cols);
-    const col = physChemIndex % cols;
-    const cellW = w / cols;
-    const cellH = h / 2.5;
-    x = cellW * col + rand(cellW * 0.15, cellW * 0.85);
-    y = cellH * row + rand(cellH * 0.15, cellH * 0.85);
-  }
+  // Margins to keep elements inside viewport
+  const mx = w * 0.12;
+  const my = h * 0.08;
+  const usableW = w - mx * 2;
+  const usableH = h - my * 2;
 
-  // Biology elements: larger, more opaque
-  const baseSize = isBio ? rand(70, 90) : rand(50, 70);
-  const baseOpacity = isBio ? rand(0.55, 0.75) : rand(0.35, 0.6);
+  // Position at center of each grid cell
+  const cellW = usableW / 3;
+  const cellH = usableH / 3;
+  const anchorX = mx + cellW * col + cellW * 0.5;
+  const anchorY = my + cellH * row + cellH * 0.5;
+
+  const baseSize = isBio ? rand(72, 88) : rand(55, 72);
+  const floatRadius = rand(18, 35);
 
   return {
-    x, y,
-    vx: rand(-0.12, 0.12),
-    vy: rand(-0.1, 0.1),
+    x: anchorX,
+    y: anchorY,
+    anchorX,
+    anchorY,
     type,
-    size: isMobile ? baseSize * 1.1 : baseSize,
+    size: baseSize,
     rotation: rand(0, 360),
-    rotSpeed: isBio ? rand(-0.15, 0.15) : rand(-0.3, 0.3),
-    opacity: baseOpacity,
+    rotSpeed: isBio ? rand(-0.12, 0.12) : rand(-0.2, 0.2),
+    opacity: isBio ? rand(0.55, 0.72) : rand(0.38, 0.58),
     phase: rand(0, Math.PI * 2),
+    floatRadius,
   };
 }
 
@@ -403,7 +403,6 @@ const ScienceHeroCanvas = () => {
     if (!ctx) return;
 
     const isMobile = window.innerWidth < 768;
-    const count = isMobile ? MOBILE_COUNT : DESKTOP_COUNT;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     let w = canvas.offsetWidth;
@@ -420,16 +419,9 @@ const ScienceHeroCanvas = () => {
     };
     resize();
 
-    const elements: ScienceElement[] = Array.from({ length: count }, (_, i) => createElement(w, h, i, isMobile));
-    // On mobile, ensure at least one biology element (dna) is included
-    if (isMobile) {
-      const hasBio = elements.some(e => BIOLOGY_TYPES.has(e.type));
-      if (!hasBio) {
-        // Replace last element with DNA
-        const last = elements.length - 1;
-        elements[last] = createElement(w, h, 6, isMobile); // index 6 = dna
-      }
-    }
+    // Create elements: all 9 on desktop, 6 on mobile
+    const indices = isMobile ? MOBILE_INDICES : Array.from({ length: 9 }, (_, i) => i);
+    const elements: ScienceElement[] = indices.map(i => createElement(w, h, i));
     let tick = 0;
 
     const getColors = () => {
@@ -458,25 +450,28 @@ const ScienceHeroCanvas = () => {
       });
 
       for (const el of sorted) {
-        // Mouse parallax
+        // Bounded floating: orbit around anchor point
+        const t = tick * 0.008 + el.phase;
+        el.x = el.anchorX + Math.sin(t) * el.floatRadius;
+        el.y = el.anchorY + Math.cos(t * 0.7) * el.floatRadius * 0.7;
+        el.rotation += el.rotSpeed;
+
+        // Gentle mouse parallax (shift, don't displace permanently)
+        let drawX = el.x, drawY = el.y;
         if (mx >= 0 && my >= 0 && !isMobile) {
           const dx = el.x - mx, dy = el.y - my;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
-            const force = (150 - dist) / 150 * 0.25;
-            el.x += (dx / dist) * force;
-            el.y += (dy / dist) * force;
+          if (dist < 180 && dist > 0) {
+            const force = (180 - dist) / 180 * 6;
+            drawX += (dx / dist) * force;
+            drawY += (dy / dist) * force;
           }
         }
-        el.x += el.vx + Math.sin(tick * 0.007 + el.phase) * 0.1;
-        el.y += el.vy + Math.cos(tick * 0.005 + el.phase) * 0.08;
-        el.rotation += el.rotSpeed;
-        // Soft bounds — keep elements within visible area
-        const margin = el.size;
-        if (el.x < -margin) el.x = w + margin;
-        if (el.x > w + margin) el.x = -margin;
-        if (el.y < -margin) el.y = h + margin;
-        if (el.y > h + margin) el.y = -margin;
+
+        // Temporarily set position for drawing
+        const origX = el.x, origY = el.y;
+        el.x = drawX;
+        el.y = drawY;
 
         // Biology elements get subtle glow
         const isBio = BIOLOGY_TYPES.has(el.type);
@@ -490,6 +485,10 @@ const ScienceHeroCanvas = () => {
           ctx.shadowColor = "transparent";
           ctx.shadowBlur = 0;
         }
+
+        // Restore actual position
+        el.x = origX;
+        el.y = origY;
       }
 
       ctx.globalAlpha = 1;
