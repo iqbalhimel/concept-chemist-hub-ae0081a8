@@ -161,7 +161,14 @@ const Navbar = () => {
                           <a
                             key={link.href}
                             href={link.href}
-                            onClick={() => setMobileOpen(false)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setMobileOpen(false);
+                              const id = link.href.replace("#", "");
+                              setTimeout(() => {
+                                document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                              }, 200);
+                            }}
                             className={`px-4 py-3 rounded-xl transition-colors ${
                               active
                                 ? "bg-secondary/60 text-foreground"
