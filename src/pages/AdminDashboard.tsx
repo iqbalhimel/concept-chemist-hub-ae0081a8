@@ -26,7 +26,7 @@ import AdminSubjects from "@/components/admin/AdminSubjects";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 
 type Tab =
-  | "dashboard" | "site-settings" | "notices" | "study-materials"
+  | "dashboard" | "analytics" | "site-settings" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
   | "media" | "themes" | "education" | "experience"
   | "achievements" | "approach" | "subjects";
