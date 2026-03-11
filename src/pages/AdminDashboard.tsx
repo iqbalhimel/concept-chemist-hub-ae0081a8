@@ -80,12 +80,12 @@ const AdminDashboard = () => {
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex items-center justify-between p-4 border-b border-border">
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform lg:translate-x-0 flex flex-col h-[100dvh] lg:h-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <h1 className="font-display text-lg font-bold gradient-text">Admin Panel</h1>
           <button className="lg:hidden text-muted-foreground" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
         </div>
-        <nav className="p-3 space-y-1 flex-1 overflow-y-auto max-h-[calc(100vh-140px)]">
+        <nav className="p-3 space-y-1 flex-1 overflow-y-auto min-h-0">
           {tabs.map(t => (
             <button
               key={t.id}
