@@ -8,8 +8,8 @@ const AtmosphereLayer = memo(() => {
 
   const enabled = get("atmosphere", "enabled", "true") !== "false";
   const seasonEnabled = get("atmosphere", "seasonal_enabled", "true") !== "false";
-  const timeOverride = get("atmosphere", "time_override", "") as TimeOfDay | "";
-  const seasonOverride = get("atmosphere", "season_override", "") as Season | "";
+  const timeOverride = get("atmosphere", "time_override", "");
+  const seasonOverride = get("atmosphere", "season_override", "");
 
   const [time, setTime] = useState<TimeOfDay>(getTimeOfDay());
   const [season, setSeason] = useState<Season>(getSeason());
