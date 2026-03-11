@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo, memo } from "react";
+import { useState, useEffect, useMemo, forwardRef } from "react";
 import { getTimeOfDay, getSeason, timeGradients, seasonTints, type TimeOfDay, type Season } from "@/lib/atmosphere";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import SeasonalParticles from "./SeasonalParticles";
 
-const AtmosphereLayer = memo(() => {
+const AtmosphereLayer = forwardRef<HTMLDivElement>(function AtmosphereLayer(_props, ref) {
   const { get } = useSiteSettings();
 
   const enabled = get("atmosphere", "enabled", "true") !== "false";
@@ -34,7 +34,7 @@ const AtmosphereLayer = memo(() => {
   if (!enabled) return null;
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden="true">
+    <div ref={ref} className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden="true">
       {/* Time-based gradient */}
       <div
         className="absolute inset-0 transition-all duration-[3000ms] ease-in-out"
@@ -51,5 +51,4 @@ const AtmosphereLayer = memo(() => {
   );
 });
 
-AtmosphereLayer.displayName = "AtmosphereLayer";
 export default AtmosphereLayer;

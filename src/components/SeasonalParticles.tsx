@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo } from "react";
+import { useEffect, useRef, forwardRef } from "react";
 import type { Season } from "@/lib/atmosphere";
 
 const PARTICLE_COUNT = 18;
@@ -21,7 +21,7 @@ interface Particle {
   rotSpeed: number;
 }
 
-const SeasonalParticles = memo(({ season }: { season: Season }) => {
+const SeasonalParticles = forwardRef<HTMLCanvasElement, { season: Season }>(function SeasonalParticles({ season }, ref) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
 
@@ -95,5 +95,4 @@ const SeasonalParticles = memo(({ season }: { season: Season }) => {
   );
 });
 
-SeasonalParticles.displayName = "SeasonalParticles";
 export default SeasonalParticles;
