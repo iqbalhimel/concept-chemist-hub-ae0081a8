@@ -369,37 +369,95 @@ function drawDNA(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number
   ctx.restore();
 }
 
-// 8. Neuron Network
-function drawNeuron(ctx: CanvasRenderingContext2D, el: ScienceElement, _tick: number, c: Colors) {
+// 8. Neuron — soma, dendrites, axon with signal pulse
+function drawNeuron(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number, c: Colors) {
   const { x, y, size } = el;
   ctx.save();
   ctx.translate(x, y);
-  // Cell body
+
+  // Axon — long extension to the right
+  const axonLen = size * 0.55;
+  const axonAngle = el.phase + 0.3;
+  const axEndX = Math.cos(axonAngle) * axonLen;
+  const axEndY = Math.sin(axonAngle) * axonLen;
   ctx.beginPath();
-  ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
-  ctx.fillStyle = c.primary;
-  ctx.fill();
-  // Dendrites (6 branches)
-  for (let i = 0; i < 6; i++) {
-    const a = (Math.PI * 2 * i) / 6 + el.phase;
-    const len = size * (0.3 + (i % 2) * 0.15);
-    const ex = Math.cos(a) * len, ey = Math.sin(a) * len;
+  ctx.moveTo(0, 0);
+  ctx.lineTo(axEndX, axEndY);
+  ctx.strokeStyle = c.secondary;
+  ctx.lineWidth = 1.4;
+  ctx.stroke();
+
+  // Axon terminal branches
+  for (let b = 0; b < 3; b++) {
+    const spread = (b - 1) * 0.4;
+    const bx = axEndX + Math.cos(axonAngle + spread) * size * 0.12;
+    const by = axEndY + Math.sin(axonAngle + spread) * size * 0.12;
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.quadraticCurveTo(
-      Math.cos(a + 0.3) * len * 0.5,
-      Math.sin(a + 0.3) * len * 0.5,
-      ex, ey
-    );
+    ctx.moveTo(axEndX, axEndY);
+    ctx.lineTo(bx, by);
     ctx.strokeStyle = c.secondary;
     ctx.lineWidth = 0.8;
     ctx.stroke();
-    // Terminal node
     ctx.beginPath();
-    ctx.arc(ex, ey, 1.8, 0, Math.PI * 2);
+    ctx.arc(bx, by, 1.5, 0, Math.PI * 2);
     ctx.fillStyle = c.glow;
     ctx.fill();
   }
+
+  // Signal pulse along axon
+  const pulseT = ((tick * 0.02 + el.phase) % 1);
+  const pulseX = pulseT * axEndX;
+  const pulseY = pulseT * axEndY;
+  ctx.beginPath();
+  ctx.arc(pulseX, pulseY, 2.5, 0, Math.PI * 2);
+  ctx.fillStyle = c.glow;
+  ctx.globalAlpha = 0.9;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Soma (cell body)
+  const somaR = size * 0.14;
+  ctx.beginPath();
+  ctx.arc(0, 0, somaR, 0, Math.PI * 2);
+  ctx.fillStyle = c.primary;
+  ctx.fill();
+  ctx.strokeStyle = c.glow;
+  ctx.lineWidth = 0.6;
+  ctx.stroke();
+
+  // Dendrites — 5 branching extensions opposite the axon
+  for (let i = 0; i < 5; i++) {
+    const base = axonAngle + Math.PI; // opposite side
+    const spread = (i - 2) * 0.45;
+    const a = base + spread;
+    const len1 = size * (0.22 + (i % 2) * 0.1);
+    const mx1 = Math.cos(a) * len1, my1 = Math.sin(a) * len1;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(
+      Math.cos(a + 0.2) * len1 * 0.6,
+      Math.sin(a + 0.2) * len1 * 0.6,
+      mx1, my1
+    );
+    ctx.strokeStyle = c.secondary;
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+    // Sub-branch
+    const subA = a + (i % 2 === 0 ? 0.5 : -0.5);
+    const subLen = size * 0.1;
+    ctx.beginPath();
+    ctx.moveTo(mx1, my1);
+    ctx.lineTo(mx1 + Math.cos(subA) * subLen, my1 + Math.sin(subA) * subLen);
+    ctx.strokeStyle = c.secondary;
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+    // Terminal
+    ctx.beginPath();
+    ctx.arc(mx1, my1, 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = c.glow;
+    ctx.fill();
+  }
+
   ctx.restore();
 }
 
