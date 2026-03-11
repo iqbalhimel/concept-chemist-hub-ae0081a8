@@ -131,7 +131,7 @@ const sections: SectionDef[] = [
       { name: "enabled", label: "Enable Dynamic Atmosphere", type: "toggle" },
       { name: "seasonal_enabled", label: "Enable Seasonal Effects", type: "toggle" },
       { name: "time_override", label: "Manual Time Override", type: "select", options: [
-        { value: "", label: "Auto (detect)" },
+        { value: "auto", label: "Auto (detect)" },
         { value: "morning", label: "Morning" },
         { value: "noon", label: "Noon" },
         { value: "evening", label: "Evening" },
