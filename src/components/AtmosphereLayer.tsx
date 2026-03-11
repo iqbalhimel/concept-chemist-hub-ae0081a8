@@ -45,23 +45,26 @@ const AtmosphereLayer = forwardRef<HTMLDivElement>(function AtmosphereLayer(_pro
     ) : null;
   }
 
-  return (
-    <div ref={ref} className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden="true">
-      <div className="absolute inset-0 transition-all duration-[3000ms] ease-in-out" style={{ backgroundImage: gradient }} />
-      <div className="absolute inset-0 transition-all duration-[3000ms] ease-in-out" style={{ backgroundColor: tint }} />
-      {seasonEnabled && <SeasonalParticles season={activeSeason} />}
-
-      {showDebug && (
-        <div className="fixed bottom-20 right-4 z-50 pointer-events-auto rounded-lg border border-border bg-card/90 backdrop-blur-sm px-3 py-2 shadow-lg text-xs leading-relaxed">
-          <div className="font-medium text-foreground">
-            {timeEmoji[activeTime]} <span className="capitalize">{activeTime}</span>
-            {" • "}
-            {seasonEmoji[activeSeason]} <span className="capitalize">{activeSeason}</span>
-          </div>
-          <div className="text-primary font-medium">Atmosphere Active</div>
-        </div>
-      )}
+  const debugBadge = showDebug ? (
+    <div className="fixed bottom-20 right-4 z-[9999] pointer-events-auto rounded-lg border border-border bg-card/90 backdrop-blur-sm px-3 py-2 shadow-lg text-xs leading-relaxed">
+      <div className="font-medium text-foreground">
+        {timeEmoji[activeTime]} <span className="capitalize">{activeTime}</span>
+        {" • "}
+        {seasonEmoji[activeSeason]} <span className="capitalize">{activeSeason}</span>
+      </div>
+      <div className="text-primary font-medium">Atmosphere Active</div>
     </div>
+  ) : null;
+
+  return (
+    <>
+      <div ref={ref} className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden="true">
+        <div className="absolute inset-0 transition-all duration-[3000ms] ease-in-out" style={{ backgroundImage: gradient }} />
+        <div className="absolute inset-0 transition-all duration-[3000ms] ease-in-out" style={{ backgroundColor: tint }} />
+        {seasonEnabled && <SeasonalParticles season={activeSeason} />}
+      </div>
+      {debugBadge}
+    </>
   );
 });
 
