@@ -10,7 +10,8 @@ const seasonEmoji: Record<Season, string> = { spring: "🌸", summer: "🔆", au
 const AtmosphereLayer = forwardRef<HTMLDivElement>(function AtmosphereLayer(_props, ref) {
   const { get } = useSiteSettings();
   const { isAdmin } = useAuth();
-
+  const isDev = import.meta.env.DEV;
+  const showDebug = isAdmin || isDev;
   const enabled = get("atmosphere", "enabled", "true") !== "false";
   const seasonEnabled = get("atmosphere", "seasonal_enabled", "true") !== "false";
   const timeOverride = get("atmosphere", "time_override", "");
