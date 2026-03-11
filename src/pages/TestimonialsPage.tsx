@@ -14,7 +14,7 @@ interface Testimonial {
   created_at: string;
 }
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 10;
 
 const TestimonialsPage = () => {
   const { lang, t } = useLanguage();
