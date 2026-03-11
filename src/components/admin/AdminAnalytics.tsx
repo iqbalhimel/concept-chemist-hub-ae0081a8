@@ -488,8 +488,8 @@ export default function AdminAnalytics() {
           </div>
           <div className="p-2">
             <AdminPagination
-              totalItems={filteredSessions.length}
-              currentPage={page}
+              total={filteredSessions.length}
+              page={page}
               pageSize={pageSize}
               onPageChange={setPage}
               onPageSizeChange={setPageSize}
