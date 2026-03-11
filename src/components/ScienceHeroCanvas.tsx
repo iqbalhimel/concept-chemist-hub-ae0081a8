@@ -404,7 +404,6 @@ const ScienceHeroCanvas = () => {
     if (!ctx) return;
 
     const isMobile = window.innerWidth < 768;
-    const count = isMobile ? MOBILE_COUNT : DESKTOP_COUNT;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     let w = canvas.offsetWidth;
@@ -421,16 +420,9 @@ const ScienceHeroCanvas = () => {
     };
     resize();
 
-    const elements: ScienceElement[] = Array.from({ length: count }, (_, i) => createElement(w, h, i, isMobile));
-    // On mobile, ensure at least one biology element (dna) is included
-    if (isMobile) {
-      const hasBio = elements.some(e => BIOLOGY_TYPES.has(e.type));
-      if (!hasBio) {
-        // Replace last element with DNA
-        const last = elements.length - 1;
-        elements[last] = createElement(w, h, 6, isMobile); // index 6 = dna
-      }
-    }
+    // Create elements: all 9 on desktop, 6 on mobile
+    const indices = isMobile ? MOBILE_INDICES : Array.from({ length: 9 }, (_, i) => i);
+    const elements: ScienceElement[] = indices.map(i => createElement(w, h, i));
     let tick = 0;
 
     const getColors = () => {
@@ -459,25 +451,28 @@ const ScienceHeroCanvas = () => {
       });
 
       for (const el of sorted) {
-        // Mouse parallax
+        // Bounded floating: orbit around anchor point
+        const t = tick * 0.008 + el.phase;
+        el.x = el.anchorX + Math.sin(t) * el.floatRadius;
+        el.y = el.anchorY + Math.cos(t * 0.7) * el.floatRadius * 0.7;
+        el.rotation += el.rotSpeed;
+
+        // Gentle mouse parallax (shift, don't displace permanently)
+        let drawX = el.x, drawY = el.y;
         if (mx >= 0 && my >= 0 && !isMobile) {
           const dx = el.x - mx, dy = el.y - my;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
-            const force = (150 - dist) / 150 * 0.25;
-            el.x += (dx / dist) * force;
-            el.y += (dy / dist) * force;
+          if (dist < 180 && dist > 0) {
+            const force = (180 - dist) / 180 * 6;
+            drawX += (dx / dist) * force;
+            drawY += (dy / dist) * force;
           }
         }
-        el.x += el.vx + Math.sin(tick * 0.007 + el.phase) * 0.1;
-        el.y += el.vy + Math.cos(tick * 0.005 + el.phase) * 0.08;
-        el.rotation += el.rotSpeed;
-        // Soft bounds — keep elements within visible area
-        const margin = el.size;
-        if (el.x < -margin) el.x = w + margin;
-        if (el.x > w + margin) el.x = -margin;
-        if (el.y < -margin) el.y = h + margin;
-        if (el.y > h + margin) el.y = -margin;
+
+        // Temporarily set position for drawing
+        const origX = el.x, origY = el.y;
+        el.x = drawX;
+        el.y = drawY;
 
         // Biology elements get subtle glow
         const isBio = BIOLOGY_TYPES.has(el.type);
@@ -491,6 +486,10 @@ const ScienceHeroCanvas = () => {
           ctx.shadowColor = "transparent";
           ctx.shadowBlur = 0;
         }
+
+        // Restore actual position
+        el.x = origX;
+        el.y = origY;
       }
 
       ctx.globalAlpha = 1;
