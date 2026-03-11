@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo, memo } from "react";
+import { useState, useEffect, useMemo, forwardRef } from "react";
 import { getTimeOfDay, getSeason, timeGradients, seasonTints, type TimeOfDay, type Season } from "@/lib/atmosphere";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import SeasonalParticles from "./SeasonalParticles";
 
-const AtmosphereLayer = memo(() => {
+const AtmosphereLayer = forwardRef<HTMLDivElement>(function AtmosphereLayer(_props, ref) {
   const { get } = useSiteSettings();
 
   const enabled = get("atmosphere", "enabled", "true") !== "false";
