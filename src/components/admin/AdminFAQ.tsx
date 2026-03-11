@@ -26,10 +26,10 @@ interface FAQItem {
 const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   return (
-    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }} {...attributes}>
-      <div className="flex items-start gap-2">
-        <button {...listeners} className="mt-3 cursor-grab text-muted-foreground hover:text-foreground"><GripVertical size={16} /></button>
-        <div className="flex-1">{children}</div>
+    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }} className="w-full max-w-full min-w-0" {...attributes}>
+      <div className="flex items-start gap-2 w-full min-w-0">
+        <button {...listeners} className="mt-3 cursor-grab text-muted-foreground hover:text-foreground shrink-0"><GripVertical size={16} /></button>
+        <div className="flex-1 min-w-0">{children}</div>
       </div>
     </div>
   );
