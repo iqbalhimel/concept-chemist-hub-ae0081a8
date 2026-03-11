@@ -420,7 +420,16 @@ const ScienceHeroCanvas = () => {
     };
     resize();
 
-    const elements: ScienceElement[] = Array.from({ length: count }, (_, i) => createElement(w, h, i));
+    const elements: ScienceElement[] = Array.from({ length: count }, (_, i) => createElement(w, h, i, isMobile));
+    // On mobile, ensure at least one biology element (dna) is included
+    if (isMobile) {
+      const hasBio = elements.some(e => BIOLOGY_TYPES.has(e.type));
+      if (!hasBio) {
+        // Replace last element with DNA
+        const last = elements.length - 1;
+        elements[last] = createElement(w, h, 6, isMobile); // index 6 = dna
+      }
+    }
     let tick = 0;
 
     const getColors = () => {
