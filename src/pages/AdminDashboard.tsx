@@ -50,6 +50,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "subjects", label: "Teaching Subjects", icon: Atom },
   { id: "media", label: "Media Library", icon: Image },
   { id: "themes", label: "Themes", icon: Palette },
+  { id: "atmosphere", label: "Atmosphere", icon: CloudSun },
 ];
 
 const AdminDashboard = () => {
