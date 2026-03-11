@@ -165,10 +165,12 @@
     "facebook": "Facebook"
   },
   "footer": {
+    "about": "About",
     "tagline": "Helping SSC and HSC students in Kishoreganj build clear, exam-ready understanding of science.",
     "quick_links": "Quick Links",
     "contact": "Contact",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "back_to_top": "Back to top"
   },
   "whatsapp": {
     "tooltip": "Chat on WhatsApp"
