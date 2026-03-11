@@ -36,7 +36,7 @@ const AtmosphereDebugBadge = () => {
 
   return (
     <div
-      className="fixed bottom-20 right-4 z-[9999] rounded-lg border border-border bg-card/80 backdrop-blur-md px-3 py-2 shadow-lg text-xs leading-relaxed pointer-events-none"
+      className="fixed bottom-20 right-4 z-[10] rounded-lg border border-border bg-card/80 backdrop-blur-md px-3 py-2 shadow-lg text-xs leading-relaxed pointer-events-none"
       style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.15)" }}
     >
       <div className="font-medium text-foreground">

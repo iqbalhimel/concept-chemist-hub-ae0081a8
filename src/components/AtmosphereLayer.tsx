@@ -34,7 +34,7 @@ const AtmosphereLayer = forwardRef<HTMLDivElement>(function AtmosphereLayer(_pro
   if (!enabled) return null;
 
   return (
-    <div ref={ref} className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden="true">
+    <div ref={ref} className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }} aria-hidden="true">
       <div className="absolute inset-0 transition-all duration-[3000ms] ease-in-out" style={{ backgroundImage: gradient }} />
       <div className="absolute inset-0 transition-all duration-[3000ms] ease-in-out" style={{ backgroundColor: tint }} />
       {seasonEnabled && <SeasonalParticles season={activeSeason} />}
