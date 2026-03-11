@@ -1,5 +1,4 @@
 export type TimeOfDay = "morning" | "noon" | "evening" | "night";
-export type Season = "spring" | "summer" | "autumn" | "winter";
 
 export function getTimeOfDay(hour?: number): TimeOfDay {
   const h = hour ?? new Date().getHours();
@@ -7,14 +6,6 @@ export function getTimeOfDay(hour?: number): TimeOfDay {
   if (h >= 11 && h <= 15) return "noon";
   if (h >= 16 && h <= 18) return "evening";
   return "night";
-}
-
-export function getSeason(month?: number): Season {
-  const m = month ?? new Date().getMonth(); // 0-indexed
-  if (m >= 2 && m <= 4) return "spring";
-  if (m >= 5 && m <= 7) return "summer";
-  if (m >= 8 && m <= 10) return "autumn";
-  return "winter";
 }
 
 export const timeGradients: Record<TimeOfDay, string> = {
@@ -36,9 +27,9 @@ export const timeGradients: Record<TimeOfDay, string> = {
     "linear-gradient(180deg, hsla(230,60%,15%,0.12) 0%, hsla(260,50%,18%,0.10) 50%, hsla(240,60%,12%,0.08) 100%)",
 };
 
-export const seasonTints: Record<Season, string> = {
-  spring: "hsla(140,60%,55%,0.06)",
-  summer: "hsla(45,80%,60%,0.06)",
-  autumn: "hsla(30,70%,50%,0.07)",
-  winter: "hsla(210,50%,70%,0.06)",
+export const timeColors: Record<TimeOfDay, { primary: string; secondary: string; glow: string }> = {
+  morning: { primary: "hsla(40,85%,60%,0.6)", secondary: "hsla(200,70%,65%,0.4)", glow: "hsla(45,90%,65%,0.3)" },
+  noon: { primary: "hsla(190,80%,60%,0.6)", secondary: "hsla(0,0%,100%,0.5)", glow: "hsla(200,85%,70%,0.3)" },
+  evening: { primary: "hsla(25,80%,55%,0.6)", secondary: "hsla(280,60%,60%,0.4)", glow: "hsla(330,70%,60%,0.3)" },
+  night: { primary: "hsla(220,80%,65%,0.6)", secondary: "hsla(270,70%,60%,0.5)", glow: "hsla(240,80%,70%,0.3)" },
 };

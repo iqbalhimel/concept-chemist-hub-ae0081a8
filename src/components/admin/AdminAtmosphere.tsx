@@ -9,16 +9,12 @@ import { Save, CloudSun, CheckCircle2, XCircle } from "lucide-react";
 
 type AtmosphereSettings = {
   enabled: string;
-  seasonal_enabled: string;
   time_override: string;
-  season_override: string;
 };
 
 const defaults: AtmosphereSettings = {
   enabled: "true",
-  seasonal_enabled: "true",
   time_override: "auto",
-  season_override: "auto",
 };
 
 const AdminAtmosphere = () => {
@@ -62,7 +58,6 @@ const AdminAtmosphere = () => {
       return;
     }
 
-    // Verification: re-read from DB
     const { data } = await supabase
       .from("site_settings")
       .select("value")
@@ -72,9 +67,7 @@ const AdminAtmosphere = () => {
     const saved = data?.value as Record<string, string> | null;
     const ok =
       saved?.enabled === settings.enabled &&
-      saved?.seasonal_enabled === settings.seasonal_enabled &&
-      saved?.time_override === settings.time_override &&
-      saved?.season_override === settings.season_override;
+      saved?.time_override === settings.time_override;
 
     setVerified(ok);
     if (ok) {
@@ -91,7 +84,7 @@ const AdminAtmosphere = () => {
       <div>
         <h2 className="font-display text-2xl font-bold text-foreground">Atmosphere Settings</h2>
         <p className="text-muted-foreground text-sm mt-1">
-          Control the dynamic time & season-based visual effects on the homepage.
+          Control the dynamic time-based visual effects on the homepage.
         </p>
       </div>
 
@@ -101,7 +94,6 @@ const AdminAtmosphere = () => {
           <h3 className="font-display font-semibold text-foreground text-lg">Visual Effects</h3>
         </div>
 
-        {/* Toggle: Dynamic Atmosphere */}
         <div className="flex items-center justify-between py-2">
           <div>
             <Label className="text-sm font-medium">Enable Dynamic Atmosphere</Label>
@@ -113,19 +105,6 @@ const AdminAtmosphere = () => {
           />
         </div>
 
-        {/* Toggle: Seasonal Effects */}
-        <div className="flex items-center justify-between py-2">
-          <div>
-            <Label className="text-sm font-medium">Enable Seasonal Effects</Label>
-            <p className="text-xs text-muted-foreground mt-0.5">Seasonal color tints and animated particles (🌸 ☀️ 🍂 ❄️).</p>
-          </div>
-          <Switch
-            checked={settings.seasonal_enabled === "true"}
-            onCheckedChange={(v) => update("seasonal_enabled", String(v))}
-          />
-        </div>
-
-        {/* Select: Time Override */}
         <div>
           <Label className="text-sm font-medium">Manual Time Override</Label>
           <p className="text-xs text-muted-foreground mt-0.5 mb-2">Force a specific time period for testing or override.</p>
@@ -143,25 +122,6 @@ const AdminAtmosphere = () => {
           </Select>
         </div>
 
-        {/* Select: Season Override */}
-        <div>
-          <Label className="text-sm font-medium">Manual Season Override</Label>
-          <p className="text-xs text-muted-foreground mt-0.5 mb-2">Force a specific season for testing or override.</p>
-          <Select value={settings.season_override} onValueChange={(v) => update("season_override", v)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="auto">Auto (detect from month)</SelectItem>
-              <SelectItem value="spring">Spring (Mar – May)</SelectItem>
-              <SelectItem value="summer">Summer (Jun – Aug)</SelectItem>
-              <SelectItem value="autumn">Autumn (Sep – Nov)</SelectItem>
-              <SelectItem value="winter">Winter (Dec – Feb)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Save + Verification */}
         <div className="flex items-center gap-3 pt-2">
           <Button onClick={handleSave} size="sm" disabled={saving}>
             <Save size={14} className="mr-1" />

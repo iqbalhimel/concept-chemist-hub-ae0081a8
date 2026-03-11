@@ -3,6 +3,7 @@ import { ArrowRight, ChevronDown, Download } from "lucide-react";
 import iqbalSir from "@/assets/iqbal-sir.png";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import ScienceHeroCanvas from "./ScienceHeroCanvas";
 
 const HeroSection = () => {
   const { t, lang } = useLanguage();
@@ -10,14 +11,12 @@ const HeroSection = () => {
 
   const isBn = lang === "bn";
   const tagline = get("hero", isBn ? "tagline_bn" : "tagline_en", "") || get("hero", "tagline_en", "") || t.hero.badge;
-  const title = get("hero", isBn ? "title_en" : "title_en", ""); // we split title into two parts
   const titleRaw = get("hero", isBn ? "title_bn" : "title_en", "");
   const subtitle = get("hero", isBn ? "subtitle_bn" : "subtitle_en", "") || get("hero", "subtitle_en", "") || t.hero.desc;
   const ctaText = get("hero", isBn ? "cta_text_bn" : "cta_text_en", "") || get("hero", "cta_text_en", "") || t.hero.cta_batch;
   const ctaLink = get("hero", "cta_link", "#contact");
   const heroImage = get("hero", "hero_image", "");
 
-  // Support "Title | Highlight" format for gradient text, fallback to translation
   let titlePart1 = t.hero.title_1;
   let titleHighlight = t.hero.title_highlight;
   if (titleRaw && titleRaw.includes("|")) {
@@ -34,6 +33,9 @@ const HeroSection = () => {
       id="home"
       className="section-shell relative min-h-[100dvh] md:min-h-screen flex items-center hero-gradient overflow-hidden w-full max-w-full"
     >
+      {/* Science animation canvas - z-index 1 */}
+      <ScienceHeroCanvas />
+
       <div aria-hidden className="absolute inset-0 opacity-40">
         <div className="absolute inset-0 bg-grid" />
       </div>
