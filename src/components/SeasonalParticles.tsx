@@ -21,7 +21,7 @@ interface Particle {
   rotSpeed: number;
 }
 
-const SeasonalParticles = memo(({ season }: { season: Season }) => {
+const SeasonalParticles = forwardRef<HTMLCanvasElement, { season: Season }>(function SeasonalParticles({ season }, ref) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
 
