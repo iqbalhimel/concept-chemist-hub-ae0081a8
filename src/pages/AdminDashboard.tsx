@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, BookOpen, Bell, Download,
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
-  Briefcase, Trophy, Lightbulb, Atom, BarChart3
+  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun
 } from "lucide-react";
 import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminNotices from "@/components/admin/AdminNotices";
@@ -24,11 +24,12 @@ import AdminAchievements from "@/components/admin/AdminAchievements";
 import AdminApproach from "@/components/admin/AdminApproach";
 import AdminSubjects from "@/components/admin/AdminSubjects";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
+import AdminAtmosphere from "@/components/admin/AdminAtmosphere";
 
 type Tab =
   | "dashboard" | "analytics" | "site-settings" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
-  | "media" | "themes" | "education" | "experience"
+  | "media" | "themes" | "atmosphere" | "education" | "experience"
   | "achievements" | "approach" | "subjects";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
@@ -49,6 +50,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "subjects", label: "Teaching Subjects", icon: Atom },
   { id: "media", label: "Media Library", icon: Image },
   { id: "themes", label: "Themes", icon: Palette },
+  { id: "atmosphere", label: "Atmosphere", icon: CloudSun },
 ];
 
 const AdminDashboard = () => {
@@ -74,6 +76,7 @@ const AdminDashboard = () => {
       case "subjects": return <AdminSubjects />;
       case "media": return <AdminMediaLibrary />;
       case "themes": return <AdminThemes />;
+      case "atmosphere": return <AdminAtmosphere />;
       default: return <AdminDashboardOverview onNavigate={(tab) => setActiveTab(tab as Tab)} />;
     }
   };
