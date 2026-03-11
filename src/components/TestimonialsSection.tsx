@@ -17,7 +17,7 @@ interface Testimonial {
   created_at: string;
 }
 
-const HOMEPAGE_LIMIT = 5;
+const HOMEPAGE_LIMIT = 3;
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const vp = { once: true, amount: 0.15 as const };
 
