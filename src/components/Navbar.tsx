@@ -58,7 +58,7 @@ const Navbar = () => {
   }, [navLinks]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50">
+    <nav className="fixed top-0 left-0 right-0 z-[90]">
       <div className="px-3 sm:px-4 pt-3">
         <div
           className={`mx-auto max-w-6xl transition-all duration-300 ${
