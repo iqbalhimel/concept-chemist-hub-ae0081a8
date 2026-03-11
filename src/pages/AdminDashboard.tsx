@@ -23,6 +23,7 @@ import AdminExperience from "@/components/admin/AdminExperience";
 import AdminAchievements from "@/components/admin/AdminAchievements";
 import AdminApproach from "@/components/admin/AdminApproach";
 import AdminSubjects from "@/components/admin/AdminSubjects";
+import AdminAnalytics from "@/components/admin/AdminAnalytics";
 
 type Tab =
   | "dashboard" | "site-settings" | "notices" | "study-materials"
