@@ -6,10 +6,10 @@ import { useBrightness } from "@/contexts/BrightnessContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ExternalLink, MapPin } from "lucide-react";
 
-const SCHOOL_LAT = 24.4449;
-const SCHOOL_LNG = 90.7766;
+const SCHOOL_LAT = 24.427541;
+const SCHOOL_LNG = 90.780505;
 const SCHOOL_NAME = "Zilla Smarani Girls' High School";
-const SCHOOL_ADDRESS = "Kishoreganj, Kishoreganj, Bangladesh";
+const SCHOOL_ADDRESS = "Kishoreganj, Bangladesh";
 
 const LIGHT_TILES = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 const DARK_TILES = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
