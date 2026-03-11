@@ -462,10 +462,13 @@ const ScienceHeroCanvas = () => {
     };
     resize();
 
-    // Create elements: all 9 on desktop, 6 on mobile
-    const indices = isMobile ? MOBILE_INDICES : Array.from({ length: 9 }, (_, i) => i);
-    const elements: ScienceElement[] = indices.map(i => createElement(w, h, i));
+    // Create elements: all 9 on desktop, 6 specific on mobile
+    const elements: ScienceElement[] = isMobile
+      ? MOBILE_TYPES.map((type, i) => createMobileElement(w, h, type, i, MOBILE_TYPES.length))
+      : Array.from({ length: 9 }, (_, i) => createElement(w, h, i, false));
     let tick = 0;
+
+    const MIN_DIST = 80; // minimum distance between mobile elements
 
     const getColors = () => {
       const valid = ["morning", "noon", "evening", "night"];
@@ -493,10 +496,49 @@ const ScienceHeroCanvas = () => {
       });
 
       for (const el of sorted) {
-        // Bounded floating: orbit around anchor point
-        const t = tick * 0.008 + el.phase;
-        el.x = el.anchorX + Math.sin(t) * el.floatRadius;
-        el.y = el.anchorY + Math.cos(t * 0.7) * el.floatRadius * 0.7;
+        if (isMobile) {
+          // Free-roaming: update position with velocity
+          el.x += el.vx;
+          el.y += el.vy;
+
+          // Boundary bounce with margin
+          const margin = el.size * 0.5 + 10;
+          if (el.x < margin) { el.x = margin; el.vx = Math.abs(el.vx); }
+          if (el.x > w - margin) { el.x = w - margin; el.vx = -Math.abs(el.vx); }
+          if (el.y < margin) { el.y = margin; el.vy = Math.abs(el.vy); }
+          if (el.y > h - margin) { el.y = h - margin; el.vy = -Math.abs(el.vy); }
+
+          // Gentle repulsion from other elements
+          for (const other of elements) {
+            if (other === el) continue;
+            const dx = el.x - other.x;
+            const dy = el.y - other.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < MIN_DIST && dist > 0) {
+              const force = (MIN_DIST - dist) / MIN_DIST * 0.05;
+              el.vx += (dx / dist) * force;
+              el.vy += (dy / dist) * force;
+            }
+          }
+
+          // Clamp speed
+          const speed = Math.sqrt(el.vx * el.vx + el.vy * el.vy);
+          const maxSpeed = 0.5;
+          const minSpeed = 0.15;
+          if (speed > maxSpeed) { el.vx = (el.vx / speed) * maxSpeed; el.vy = (el.vy / speed) * maxSpeed; }
+          if (speed < minSpeed) { el.vx = (el.vx / speed) * minSpeed; el.vy = (el.vy / speed) * minSpeed; }
+
+          // Slight random direction drift for natural motion
+          if (tick % 60 === 0) {
+            el.vx += rand(-0.05, 0.05);
+            el.vy += rand(-0.05, 0.05);
+          }
+        } else {
+          // Desktop: bounded floating around anchor
+          const t = tick * 0.008 + el.phase;
+          el.x = el.anchorX + Math.sin(t) * el.floatRadius;
+          el.y = el.anchorY + Math.cos(t * 0.7) * el.floatRadius * 0.7;
+        }
         el.rotation += el.rotSpeed;
 
         // Gentle mouse parallax (shift, don't displace permanently)
