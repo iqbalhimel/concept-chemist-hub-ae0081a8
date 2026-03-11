@@ -9,6 +9,8 @@ interface ScienceElement {
   y: number;
   anchorX: number;
   anchorY: number;
+  vx: number;
+  vy: number;
   type: "atom" | "solar" | "wave" | "benzene" | "water" | "network" | "dna" | "neuron" | "cell";
   size: number;
   rotation: number;
