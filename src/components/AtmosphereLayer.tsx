@@ -51,7 +51,7 @@ const AtmosphereLayer = forwardRef<HTMLDivElement>(function AtmosphereLayer(_pro
       <div className="absolute inset-0 transition-all duration-[3000ms] ease-in-out" style={{ backgroundColor: tint }} />
       {seasonEnabled && <SeasonalParticles season={activeSeason} />}
 
-      {isAdmin && (
+      {showDebug && (
         <div className="fixed bottom-4 right-4 z-50 pointer-events-auto rounded-lg border border-border bg-card/90 backdrop-blur-sm px-3 py-2 shadow-lg text-xs leading-relaxed">
           <div className="font-medium text-foreground">
             {timeEmoji[activeTime]} <span className="capitalize">{activeTime}</span>
