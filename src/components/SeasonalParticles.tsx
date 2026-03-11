@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo } from "react";
+import { useEffect, useRef, forwardRef } from "react";
 import type { Season } from "@/lib/atmosphere";
 
 const PARTICLE_COUNT = 18;
