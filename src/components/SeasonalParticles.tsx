@@ -95,5 +95,4 @@ const SeasonalParticles = forwardRef<HTMLCanvasElement, { season: Season }>(func
   );
 });
 
-SeasonalParticles.displayName = "SeasonalParticles";
 export default SeasonalParticles;

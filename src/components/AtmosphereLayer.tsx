@@ -51,5 +51,4 @@ const AtmosphereLayer = forwardRef<HTMLDivElement>(function AtmosphereLayer(_pro
   );
 });
 
-AtmosphereLayer.displayName = "AtmosphereLayer";
 export default AtmosphereLayer;
