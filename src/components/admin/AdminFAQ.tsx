@@ -133,7 +133,7 @@ const AdminFAQ = () => {
           {items.length === 0 && <p className="text-muted-foreground text-sm">No FAQs added yet.</p>}
           {items.map(item => (
             <SortableRow key={item.id} id={item.id}>
-              <div className="glass-card p-3">
+              <div className="glass-card p-3 w-full max-w-full min-w-0 overflow-hidden">
                 {/* Desktop */}
                 <div className="hidden md:flex items-center gap-4">
                   <span className="flex-1 font-medium text-foreground truncate">{item.question}</span>
