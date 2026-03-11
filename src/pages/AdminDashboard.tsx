@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, BookOpen, Bell, Download,
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
-  Briefcase, Trophy, Lightbulb, Atom
+  Briefcase, Trophy, Lightbulb, Atom, BarChart3
 } from "lucide-react";
 import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminNotices from "@/components/admin/AdminNotices";
@@ -23,15 +23,17 @@ import AdminExperience from "@/components/admin/AdminExperience";
 import AdminAchievements from "@/components/admin/AdminAchievements";
 import AdminApproach from "@/components/admin/AdminApproach";
 import AdminSubjects from "@/components/admin/AdminSubjects";
+import AdminAnalytics from "@/components/admin/AdminAnalytics";
 
 type Tab =
-  | "dashboard" | "site-settings" | "notices" | "study-materials"
+  | "dashboard" | "analytics" | "site-settings" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
   | "media" | "themes" | "education" | "experience"
   | "achievements" | "approach" | "subjects";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "site-settings", label: "Site Settings", icon: Settings },
   { id: "notices", label: "Notices", icon: Bell },
   { id: "study-materials", label: "Study Materials", icon: Download },
@@ -56,6 +58,7 @@ const AdminDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case "analytics": return <AdminAnalytics />;
       case "site-settings": return <AdminSiteSettings />;
       case "notices": return <AdminNotices />;
       case "study-materials": return <AdminStudyMaterials />;

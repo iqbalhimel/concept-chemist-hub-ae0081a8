@@ -3,8 +3,11 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import PageShell from "@/components/PageShell";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 
 export default function PublicLayout() {
+  useVisitorTracking();
+
   return (
     <PageShell>
       <a href="#main-content" className="skip-to-content">
