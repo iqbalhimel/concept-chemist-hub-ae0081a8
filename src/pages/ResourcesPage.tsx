@@ -36,6 +36,19 @@ const ResourcesPage = () => {
   const activeCategorySlug = searchParams.get("category") || null;
 
   useEffect(() => {
+    const autoCanonical = "https://iqbalsir.bd/resources";
+    const defaultOgImage = get("seo", "og_image", "");
+    const cleanup = setSeo({
+      title: "Study Materials – Iqbal Sir",
+      description: "Download study materials, notes, and resources from Iqbal Sir.",
+      url: autoCanonical,
+      canonicalUrl: autoCanonical,
+      image: defaultOgImage || undefined,
+    });
+    return cleanup;
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       const [matRes, catRes] = await Promise.all([
         supabase.from("study_materials").select("*").eq("is_active", true).order("created_at", { ascending: false }),

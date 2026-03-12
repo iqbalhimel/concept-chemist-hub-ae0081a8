@@ -23,11 +23,25 @@ const PAGE_SIZE = 10;
 
 const NoticesPage = () => {
   const { lang, t } = useLanguage();
+  const { get } = useSiteSettings();
   const [items, setItems] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [selected, setSelected] = useState<Notice | null>(null);
+
+  useEffect(() => {
+    const autoCanonical = "https://iqbalsir.bd/notices";
+    const defaultOgImage = get("seo", "og_image", "");
+    const cleanup = setSeo({
+      title: "Notices – Iqbal Sir",
+      description: "Latest notices and announcements from Iqbal Sir's coaching.",
+      url: autoCanonical,
+      canonicalUrl: autoCanonical,
+      image: defaultOgImage || undefined,
+    });
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {

@@ -72,13 +72,29 @@ const BlogPost = () => {
       if (p) {
         const postSlug = p.slug || p.id;
         const defaultOgImage = get("seo", "og_image", "");
+        const autoCanonical = `https://iqbalsir.bd/blog/${postSlug}`;
+        const pa = p as any;
         cleanup = setSeo({
-          title: `${p.title} – Iqbal Sir's Blog`,
-          description: p.excerpt || `Read "${p.title}" on Iqbal Sir's blog.`,
-          url: `https://iqbalsir.bd/blog/${postSlug}`,
-          image: p.featured_image || defaultOgImage || undefined,
+          title: pa.seo_title || `${p.title} – Iqbal Sir's Blog`,
+          description: pa.seo_description || p.excerpt || `Read "${p.title}" on Iqbal Sir's blog.`,
+          url: autoCanonical,
+          image: pa.seo_og_image || p.featured_image || defaultOgImage || undefined,
+          keywords: pa.seo_keywords || undefined,
+          canonicalUrl: pa.seo_canonical_url || autoCanonical,
+          twitterTitle: pa.seo_twitter_title || undefined,
+          twitterDescription: pa.seo_twitter_description || undefined,
+          twitterImage: pa.seo_twitter_image || undefined,
           jsonLd: generateArticleSchema(p),
         });
+        // Set OG overrides if present
+        if (pa.seo_og_title) {
+          const el = document.querySelector('meta[property="og:title"]') as HTMLMetaElement;
+          if (el) el.content = pa.seo_og_title;
+        }
+        if (pa.seo_og_description) {
+          const el = document.querySelector('meta[property="og:description"]') as HTMLMetaElement;
+          if (el) el.content = pa.seo_og_description;
+        }
 
         const { data: rel } = await supabase
           .from("blog_posts")
