@@ -17,7 +17,7 @@ const ROBOTS_KEY = "robots_txt";
 
 const GooglePreview = ({ title, description, url }: { title: string; description: string; url: string }) => (
   <div className="rounded-lg border border-border bg-card p-4 space-y-1">
-    <p className="text-xs text-muted-foreground font-mono truncate">{url || "https://iqbalsir.com"}</p>
+    <p className="text-xs text-muted-foreground font-mono truncate">{url || "https://iqbalsir.bd"}</p>
     <p className="text-primary text-base font-medium truncate leading-snug">{title || "Page Title"}</p>
     <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed">{description || "Page description will appear here..."}</p>
   </div>
@@ -27,7 +27,7 @@ const FacebookPreview = ({ title, description, image, url }: { title: string; de
   <div className="rounded-lg border border-border bg-card overflow-hidden max-w-md">
     {image && <img src={image} alt="OG" className="w-full h-40 object-cover" />}
     <div className="p-3 space-y-1 bg-muted/30">
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{url ? new URL(url).hostname : "iqbalsir.com"}</p>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{url ? new URL(url).hostname : "iqbalsir.bd"}</p>
       <p className="text-foreground font-semibold text-sm truncate">{title || "Open Graph Title"}</p>
       <p className="text-muted-foreground text-xs line-clamp-2">{description || "Open Graph description..."}</p>
     </div>
@@ -123,7 +123,7 @@ const AdminSEO = () => {
   const twitterTitle = fields.twitter_title || ogTitle;
   const twitterDesc = fields.twitter_description || ogDesc;
   const twitterImage = fields.twitter_image || ogImage;
-  const canonicalUrl = fields.canonical_url || "https://iqbalsir.com";
+  const canonicalUrl = fields.canonical_url || "https://iqbalsir.bd";
 
   return (
     <div className="space-y-6">
@@ -155,7 +155,7 @@ const AdminSEO = () => {
           </div>
           <div>
             <Label>Canonical URL</Label>
-            <Input value={fields.canonical_url || ""} onChange={(e) => update("canonical_url", e.target.value)} placeholder="https://iqbalsir.com" className="mt-1" />
+            <Input value={fields.canonical_url || ""} onChange={(e) => update("canonical_url", e.target.value)} placeholder="https://iqbalsir.bd" className="mt-1" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -304,7 +304,7 @@ const AdminSEO = () => {
           value={robotsTxt}
           onChange={(e) => setRobotsTxt(e.target.value)}
           className="font-mono text-sm min-h-[200px]"
-          placeholder={`User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: https://iqbalsir.com/sitemap.xml`}
+          placeholder={`User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: https://iqbalsir.bd/sitemap.xml`}
         />
         <Button onClick={() => handleSave("robots")} className="mt-3" size="sm" disabled={saving === "robots"}>
           <Save size={14} className="mr-1" /> {saving === "robots" ? "Saving..." : "Save robots.txt"}

@@ -75,7 +75,7 @@ const BlogPost = () => {
         cleanup = setSeo({
           title: `${p.title} – Iqbal Sir's Blog`,
           description: p.excerpt || `Read "${p.title}" on Iqbal Sir's blog.`,
-          url: `https://iqbalsir.com/blog/${postSlug}`,
+          url: `https://iqbalsir.bd/blog/${postSlug}`,
           image: p.featured_image || defaultOgImage || undefined,
           jsonLd: generateArticleSchema(p),
         });
@@ -183,7 +183,7 @@ const BlogPost = () => {
                 <Share2 size={14} /> {t.blog_post.share}
               </span>
               {(() => {
-                const postUrl = `https://iqbalsir.com/blog/${post.slug || post.id}`;
+                const postUrl = `https://iqbalsir.bd/blog/${post.slug || post.id}`;
                 const shareUrl = encodeURIComponent(postUrl);
                 const shareTitle = encodeURIComponent(post.title);
                 return (
@@ -217,7 +217,7 @@ const BlogPost = () => {
                     </a>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`https://iqbalsir.com/blog/${post.slug || post.id}`);
+                        navigator.clipboard.writeText(`https://iqbalsir.bd/blog/${post.slug || post.id}`);
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
                       }}

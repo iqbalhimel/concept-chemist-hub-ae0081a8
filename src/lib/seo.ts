@@ -120,7 +120,7 @@ export function generatePersonSchema(seoSettings: Record<string, string>, contac
     "@context": "https://schema.org",
     "@type": "Person",
     name: seoSettings.meta_title?.split("–")[0]?.trim() || "Iqbal Sir",
-    url: seoSettings.canonical_url || "https://iqbalsir.com",
+    url: seoSettings.canonical_url || "https://iqbalsir.bd",
     image: seoSettings.og_image || undefined,
     jobTitle: "Science Teacher",
     description: seoSettings.meta_description || DEFAULTS.description,
@@ -140,7 +140,7 @@ export function generateEducationalOrgSchema(seoSettings: Record<string, string>
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
     name: "Iqbal Sir's Science Coaching",
-    url: seoSettings.canonical_url || "https://iqbalsir.com",
+    url: seoSettings.canonical_url || "https://iqbalsir.bd",
     description: seoSettings.meta_description || DEFAULTS.description,
     address: contactSettings.address ? {
       "@type": "PostalAddress",
@@ -167,7 +167,7 @@ export function generateArticleSchema(post: {
     description: post.excerpt || undefined,
     image: post.featured_image || undefined,
     datePublished: post.created_at,
-    url: `https://iqbalsir.com/blog/${post.slug || post.id}`,
+    url: `https://iqbalsir.bd/blog/${post.slug || post.id}`,
     author: {
       "@type": "Person",
       name: "Iqbal Sir",

@@ -7,7 +7,7 @@ const corsHeaders = {
   "Content-Type": "application/xml; charset=utf-8",
 };
 
-const SITE = "https://iqbalsir.com";
+const SITE = "https://iqbalsir.bd";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {

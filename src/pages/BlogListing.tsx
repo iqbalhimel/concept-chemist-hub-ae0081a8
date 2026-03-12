@@ -36,7 +36,7 @@ const BlogListing = () => {
     const cleanup = setSeo({
       title: "Blog – Iqbal Sir | Science Education Articles & Tips",
       description: "Browse all articles and tips on physics, chemistry, biology and SSC/HSC exam preparation by Iqbal Sir.",
-      url: "https://iqbalsir.com/blog",
+      url: "https://iqbalsir.bd/blog",
       type: "website",
     });
     return cleanup;

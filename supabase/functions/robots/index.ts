@@ -26,7 +26,7 @@ Disallow: /admin/login
 Disallow: /forgot-password
 Disallow: /reset-password
 
-Sitemap: https://iqbalsir.com/sitemap.xml`;
+Sitemap: https://iqbalsir.bd/sitemap.xml`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
