@@ -72,6 +72,7 @@ const AdminAtmosphere = () => {
 
     setVerified(ok);
     if (ok) {
+      invalidateSiteSettings();
       toast.success("Atmosphere settings saved and verified!");
     } else {
       toast.error("Settings saved but verification failed. Please retry.");
