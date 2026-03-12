@@ -78,13 +78,13 @@ const GallerySection = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60] bg-background/90 backdrop-blur-xl flex items-center justify-center p-4"
+          className="fixed inset-0 z-[110] bg-background/90 backdrop-blur-xl flex items-center justify-center p-4"
           onClick={closeLightbox}
         >
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
-            className="fixed top-4 right-4 z-[80] w-11 h-11 rounded-full bg-foreground/90 text-background flex items-center justify-center hover:bg-foreground transition-colors pointer-events-auto cursor-pointer shadow-lg"
+            className="fixed top-4 right-4 z-[120] w-11 h-11 rounded-full bg-foreground/90 text-background flex items-center justify-center hover:bg-foreground transition-colors pointer-events-auto cursor-pointer shadow-lg"
             aria-label="Close gallery preview"
           >
             <X size={22} />
