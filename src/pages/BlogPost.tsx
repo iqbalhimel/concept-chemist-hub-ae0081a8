@@ -24,6 +24,7 @@ const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { lang, t } = useLanguage();
+  const { get } = useSiteSettings();
   const [post, setPost] = useState<(BlogPostType & { slug?: string | null }) | null>(null);
   const [related, setRelated] = useState<(BlogPostType & { slug?: string | null })[]>([]);
   const [loading, setLoading] = useState(true);
