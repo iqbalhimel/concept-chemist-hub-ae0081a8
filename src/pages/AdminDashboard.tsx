@@ -31,7 +31,7 @@ type Tab =
   | "dashboard" | "analytics" | "site-settings" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
   | "media" | "themes" | "atmosphere" | "education" | "experience"
-  | "achievements" | "approach" | "subjects";
+  | "achievements" | "approach" | "subjects" | "training";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
