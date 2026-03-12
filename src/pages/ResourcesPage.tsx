@@ -24,6 +24,7 @@ const PAGE_SIZE = 10;
 
 const ResourcesPage = () => {
   const { t, lang } = useLanguage();
+  const { get } = useSiteSettings();
   const [searchParams, setSearchParams] = useSearchParams();
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [categories, setCategories] = useState<StudyCategory[]>([]);
