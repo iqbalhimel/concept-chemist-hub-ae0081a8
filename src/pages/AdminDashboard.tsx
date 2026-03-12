@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, BookOpen, Bell, Download,
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
-  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun
+  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search
 } from "lucide-react";
 import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminNotices from "@/components/admin/AdminNotices";
@@ -26,6 +26,7 @@ import AdminSubjects from "@/components/admin/AdminSubjects";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import AdminAtmosphere from "@/components/admin/AdminAtmosphere";
 import AdminProfessionalTraining from "@/components/admin/AdminProfessionalTraining";
+import AdminSEO from "@/components/admin/AdminSEO";
 
 type Tab =
   | "dashboard" | "analytics" | "site-settings" | "notices" | "study-materials"
