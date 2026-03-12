@@ -5,10 +5,11 @@ type SiteSettings = Record<string, Record<string, string>>;
 
 let cachedSettings: SiteSettings | null = null;
 let fetchPromise: Promise<SiteSettings> | null = null;
+let listeners: Set<(s: SiteSettings) => void> = new Set();
 
-const fetchAllSettings = (): Promise<SiteSettings> => {
-  if (cachedSettings) return Promise.resolve(cachedSettings);
-  if (fetchPromise) return fetchPromise;
+const fetchAllSettings = (force = false): Promise<SiteSettings> => {
+  if (!force && cachedSettings) return Promise.resolve(cachedSettings);
+  if (!force && fetchPromise) return fetchPromise;
 
   fetchPromise = (async () => {
     const { data } = await supabase.from("site_settings").select("key, value");
@@ -17,10 +18,19 @@ const fetchAllSettings = (): Promise<SiteSettings> => {
       mapped[row.key] = row.value as Record<string, string>;
     });
     cachedSettings = mapped;
+    fetchPromise = null;
     return mapped;
   })();
 
   return fetchPromise;
+};
+
+export const invalidateSiteSettings = () => {
+  cachedSettings = null;
+  fetchPromise = null;
+  fetchAllSettings(true).then((s) => {
+    listeners.forEach((fn) => fn(s));
+  });
 };
 
 export const useSiteSettings = () => {
