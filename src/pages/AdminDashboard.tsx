@@ -30,7 +30,7 @@ import AdminSEO from "@/components/admin/AdminSEO";
 import AdminPerformance from "@/components/admin/AdminPerformance";
 
 type Tab =
-  | "dashboard" | "analytics" | "site-settings" | "seo" | "notices" | "study-materials"
+  | "dashboard" | "analytics" | "site-settings" | "seo" | "performance" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
   | "media" | "themes" | "atmosphere" | "education" | "experience"
   | "achievements" | "approach" | "subjects" | "training";
