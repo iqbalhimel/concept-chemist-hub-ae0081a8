@@ -42,32 +42,31 @@ const PLACEMENT_ORDER: ScienceElement["type"][] = [
 const MOBILE_TYPES: ScienceElement["type"][] = ["solar", "atom", "benzene", "dna", "water", "neuron"];
 const MOBILE_INDICES = [0, 1, 5, 2, 6, 8]; // indices into PLACEMENT_ORDER for grid fallback
 
-function createElement(w: number, h: number, gridIndex: number): ScienceElement {
-  const type = PLACEMENT_ORDER[gridIndex];
+function createRoamingElement(w: number, h: number, type: ScienceElement["type"], x: number, y: number): ScienceElement {
   const isBio = BIOLOGY_TYPES.has(type);
-
-  const mx = 50;
-  const my = 50;
   const baseSize = isBio ? rand(72, 88) : rand(55, 72);
 
-  // Distribute starting positions in a 3x3 grid with jitter
-  const col = gridIndex % 3;
-  const row = Math.floor(gridIndex / 3);
-  const cellW = (w - mx * 2) / 3;
-  const cellH = (h - my * 2) / 3;
-  const startX = mx + cellW * col + rand(cellW * 0.25, cellW * 0.75);
-  const startY = my + cellH * row + rand(cellH * 0.25, cellH * 0.75);
+  let vx = rand(-0.4, 0.4);
+  let vy = rand(-0.4, 0.4);
+  const speed = Math.sqrt(vx * vx + vy * vy);
+  if (speed < 0.08) {
+    const a = rand(0, Math.PI * 2);
+    const s = rand(0.16, 0.3);
+    vx = Math.cos(a) * s;
+    vy = Math.sin(a) * s;
+  }
 
-  const speed = rand(0.2, 0.4);
-  const angle = rand(0, Math.PI * 2);
+  const margin = baseSize * 0.5 + 10;
+  const safeX = Math.min(Math.max(x, margin), Math.max(margin, w - margin));
+  const safeY = Math.min(Math.max(y, margin), Math.max(margin, h - margin));
 
   return {
-    x: startX,
-    y: startY,
-    anchorX: startX,
-    anchorY: startY,
-    vx: Math.cos(angle) * speed,
-    vy: Math.sin(angle) * speed,
+    x: safeX,
+    y: safeY,
+    anchorX: safeX,
+    anchorY: safeY,
+    vx,
+    vy,
     type,
     size: baseSize,
     rotation: rand(0, 360),
@@ -78,38 +77,50 @@ function createElement(w: number, h: number, gridIndex: number): ScienceElement 
   };
 }
 
-function createMobileElement(w: number, h: number, type: ScienceElement["type"], index: number, total: number): ScienceElement {
-  const isBio = BIOLOGY_TYPES.has(type);
-  const mx = 50;
-  const my = 50;
+function createSpacedElements(
+  w: number,
+  h: number,
+  types: ScienceElement["type"][],
+  minDist: number,
+): ScienceElement[] {
+  const elements: ScienceElement[] = [];
 
-  // Distribute starting positions evenly using a 2x3 grid
-  const col = index % 2;
-  const row = Math.floor(index / 2);
-  const cellW = (w - mx * 2) / 2;
-  const cellH = (h - my * 2) / 3;
-  const startX = mx + cellW * col + rand(cellW * 0.3, cellW * 0.7);
-  const startY = my + cellH * row + rand(cellH * 0.3, cellH * 0.7);
+  for (const type of types) {
+    let bestX = w / 2;
+    let bestY = h / 2;
+    let bestMinDistance = -1;
 
-  const speed = rand(0.2, 0.4);
-  const angle = rand(0, Math.PI * 2);
-  const baseSize = isBio ? rand(72, 88) : rand(55, 72);
+    for (let attempt = 0; attempt < 80; attempt++) {
+      const x = rand(0, w);
+      const y = rand(0, h);
+      let nearest = Number.POSITIVE_INFINITY;
 
-  return {
-    x: startX,
-    y: startY,
-    anchorX: startX,
-    anchorY: startY,
-    vx: Math.cos(angle) * speed,
-    vy: Math.sin(angle) * speed,
-    type,
-    size: baseSize,
-    rotation: rand(0, 360),
-    rotSpeed: isBio ? rand(-0.12, 0.12) : rand(-0.2, 0.2),
-    opacity: isBio ? rand(0.55, 0.72) : rand(0.38, 0.58),
-    phase: rand(0, Math.PI * 2),
-    floatRadius: rand(18, 35),
-  };
+      for (const other of elements) {
+        const dx = x - other.x;
+        const dy = y - other.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        nearest = Math.min(nearest, dist);
+      }
+
+      if (elements.length === 0 || nearest >= minDist) {
+        elements.push(createRoamingElement(w, h, type, x, y));
+        bestMinDistance = nearest;
+        break;
+      }
+
+      if (nearest > bestMinDistance) {
+        bestMinDistance = nearest;
+        bestX = x;
+        bestY = y;
+      }
+    }
+
+    if (elements.length < types.indexOf(type) + 1) {
+      elements.push(createRoamingElement(w, h, type, bestX, bestY));
+    }
+  }
+
+  return elements;
 }
 
 type Colors = typeof timeColors.morning;
