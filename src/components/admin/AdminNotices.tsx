@@ -15,6 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Tables } from "@/integrations/supabase/types";
+import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
 
 type Notice = Tables<"notices">;
 
