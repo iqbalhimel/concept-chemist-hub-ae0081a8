@@ -406,6 +406,36 @@ export type Database = {
         }
         Relationships: []
       }
+      professional_training: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          is_active: boolean
+          sort_order: number
+          title_bn: string
+          title_en: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title_bn?: string
+          title_en?: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title_bn?: string
+          title_en?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           id: string

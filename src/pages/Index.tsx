@@ -6,6 +6,7 @@ const AtmosphereLayer = lazy(() => import("@/components/AtmosphereLayer"));
 import SubjectsSection from "@/components/SubjectsSection";
 import ApproachSection from "@/components/ApproachSection";
 import ExperienceSection from "@/components/ExperienceSection";
+import ProfessionalTrainingSection from "@/components/ProfessionalTrainingSection";
 import EducationSection from "@/components/EducationSection";
 import ResourcesSection from "@/components/ResourcesSection";
 import NoticesSection from "@/components/NoticesSection";
@@ -44,6 +45,7 @@ const Index = () => {
         {show("show_approach") && <ApproachSection />}
         {show("show_stats") && <StatsSection />}
         {show("show_experience") && <ExperienceSection />}
+        {show("show_training") && <ProfessionalTrainingSection />}
         {show("show_education") && <EducationSection />}
         {show("show_gallery") && <GallerySection />}
         {show("show_testimonials") && <TestimonialsSection />}

@@ -25,12 +25,13 @@ import AdminApproach from "@/components/admin/AdminApproach";
 import AdminSubjects from "@/components/admin/AdminSubjects";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import AdminAtmosphere from "@/components/admin/AdminAtmosphere";
+import AdminProfessionalTraining from "@/components/admin/AdminProfessionalTraining";
 
 type Tab =
   | "dashboard" | "analytics" | "site-settings" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
   | "media" | "themes" | "atmosphere" | "education" | "experience"
-  | "achievements" | "approach" | "subjects";
+  | "achievements" | "approach" | "subjects" | "training";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -45,6 +46,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "faq", label: "FAQ", icon: HelpCircle },
   { id: "education", label: "Education", icon: GraduationCap },
   { id: "experience", label: "Experience", icon: Briefcase },
+  { id: "training", label: "Professional Training", icon: Trophy },
   { id: "achievements", label: "Achievements", icon: Trophy },
   { id: "approach", label: "Teaching Approach", icon: Lightbulb },
   { id: "subjects", label: "Teaching Subjects", icon: Atom },
@@ -73,6 +75,7 @@ const AdminDashboard = () => {
       case "experience": return <AdminExperience />;
       case "achievements": return <AdminAchievements />;
       case "approach": return <AdminApproach />;
+      case "training": return <AdminProfessionalTraining />;
       case "subjects": return <AdminSubjects />;
       case "media": return <AdminMediaLibrary />;
       case "themes": return <AdminThemes />;

@@ -57,6 +57,7 @@ const sections: SectionDef[] = [
       { name: "show_gallery", label: "Show Gallery Section", type: "toggle" },
       { name: "show_testimonials", label: "Show Testimonials Section", type: "toggle" },
       { name: "show_experience", label: "Show Experience Section", type: "toggle" },
+      { name: "show_training", label: "Show Professional Training Section", type: "toggle" },
       { name: "show_education", label: "Show Education Section", type: "toggle" },
       { name: "show_notices", label: "Show Notices Section", type: "toggle" },
       { name: "show_resources", label: "Show Download Center Section", type: "toggle" },
