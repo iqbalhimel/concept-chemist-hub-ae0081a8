@@ -30,6 +30,9 @@ type PageSpeedResult = {
   scores: { performance: number; seo: number; accessibility: number; bestPractices: number };
   metrics: { lcp: number; fcp: number; cls: number; tbt: number; si: number; tti: number };
   diagnostics: { title: string; description: string; score: number; savings?: number }[];
+  quotaExceeded?: boolean;
+  status?: "ok" | "quota_exceeded" | "cached_quota";
+  message?: string;
 };
 
 type SeoHealthResult = {
@@ -93,6 +96,7 @@ const AdminSeoMonitor = () => {
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [pageSpeedResults, setPageSpeedResults] = useState<Record<string, PageSpeedResult>>({});
+  const [pageSpeedQuotaMessage, setPageSpeedQuotaMessage] = useState<string | null>(null);
   const [seoHealth, setSeoHealth] = useState<SeoHealthResult | null>(null);
   const [cwvData, setCwvData] = useState<CwvData[]>([]);
   const [cwvTimeline, setCwvTimeline] = useState<any[]>([]);
