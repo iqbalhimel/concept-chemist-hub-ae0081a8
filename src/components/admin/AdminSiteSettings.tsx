@@ -14,9 +14,12 @@ import { compressImage } from "@/lib/imageCompression";
 type FieldDef = {
   name: string;
   label: string;
-  type: "text" | "textarea" | "toggle" | "select" | "image";
+  type: "text" | "textarea" | "toggle" | "select" | "image" | "range";
   options?: { value: string; label: string }[];
   placeholder?: string;
+  min?: number;
+  max?: number;
+  step?: number;
 };
 
 type SectionDef = {
