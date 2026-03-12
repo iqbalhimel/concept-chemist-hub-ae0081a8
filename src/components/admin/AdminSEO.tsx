@@ -304,7 +304,7 @@ const AdminSEO = () => {
           value={robotsTxt}
           onChange={(e) => setRobotsTxt(e.target.value)}
           className="font-mono text-sm min-h-[200px]"
-          placeholder={`User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: https://iqbalsir.com/sitemap.xml`}
+          placeholder={`User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: https://iqbalsir.bd/sitemap.xml`}
         />
         <Button onClick={() => handleSave("robots")} className="mt-3" size="sm" disabled={saving === "robots"}>
           <Save size={14} className="mr-1" /> {saving === "robots" ? "Saving..." : "Save robots.txt"}
