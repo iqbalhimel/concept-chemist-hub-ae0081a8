@@ -155,7 +155,7 @@ const AdminSEO = () => {
           </div>
           <div>
             <Label>Canonical URL</Label>
-            <Input value={fields.canonical_url || ""} onChange={(e) => update("canonical_url", e.target.value)} placeholder="https://iqbalsir.com" className="mt-1" />
+            <Input value={fields.canonical_url || ""} onChange={(e) => update("canonical_url", e.target.value)} placeholder="https://iqbalsir.bd" className="mt-1" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
