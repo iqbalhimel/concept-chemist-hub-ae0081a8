@@ -183,7 +183,7 @@ const BlogPost = () => {
                 <Share2 size={14} /> {t.blog_post.share}
               </span>
               {(() => {
-                const postUrl = `https://iqbalsir.com/blog/${post.slug || post.id}`;
+                const postUrl = `https://iqbalsir.bd/blog/${post.slug || post.id}`;
                 const shareUrl = encodeURIComponent(postUrl);
                 const shareTitle = encodeURIComponent(post.title);
                 return (
