@@ -564,48 +564,68 @@ const ScienceHeroCanvas = () => {
       ctx.clearRect(0, 0, w, h);
       const mx = mouseRef.current.x, my = mouseRef.current.y;
 
+      // Anti-clustering repulsion (pairwise so both elements are affected)
+      for (let i = 0; i < elements.length; i++) {
+        for (let j = i + 1; j < elements.length; j++) {
+          const a = elements[i];
+          const b = elements[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < MIN_DIST && dist > 0.0001) {
+            const force = ((MIN_DIST - dist) / MIN_DIST) * 0.025;
+            const fx = (dx / dist) * force;
+            const fy = (dy / dist) * force;
+            a.vx += fx;
+            a.vy += fy;
+            b.vx -= fx;
+            b.vy -= fy;
+          }
+        }
+      }
+
       // Render in layer order: physics → chemistry → biology (on top)
       const sorted = [...elements].sort((a, b) => {
-        const order = (e: ScienceElement) => BIOLOGY_TYPES.has(e.type) ? 2 : (["benzene","water","network"].includes(e.type) ? 1 : 0);
+        const order = (e: ScienceElement) => BIOLOGY_TYPES.has(e.type) ? 2 : (["benzene", "water", "network"].includes(e.type) ? 1 : 0);
         return order(a) - order(b);
       });
 
       for (const el of sorted) {
-        // Free-roaming on all platforms
+        // Slow drift adjustments for smooth roaming
+        if (tick % 90 === 0) {
+          el.vx += rand(-0.03, 0.03);
+          el.vy += rand(-0.03, 0.03);
+        }
+
+        // Free-roaming update
         el.x += el.vx;
         el.y += el.vy;
 
-        // Boundary bounce with margin
+        // Boundary bounce with safe margin
         const margin = el.size * 0.5 + 10;
-        if (el.x < margin) { el.x = margin; el.vx = Math.abs(el.vx); }
-        if (el.x > w - margin) { el.x = w - margin; el.vx = -Math.abs(el.vx); }
-        if (el.y < margin) { el.y = margin; el.vy = Math.abs(el.vy); }
-        if (el.y > h - margin) { el.y = h - margin; el.vy = -Math.abs(el.vy); }
+        if (el.x < margin) { el.x = margin; el.vx = Math.abs(el.vx) * 0.96; }
+        if (el.x > w - margin) { el.x = w - margin; el.vx = -Math.abs(el.vx) * 0.96; }
+        if (el.y < margin) { el.y = margin; el.vy = Math.abs(el.vy) * 0.96; }
+        if (el.y > h - margin) { el.y = h - margin; el.vy = -Math.abs(el.vy) * 0.96; }
 
-        // Gentle repulsion from other elements
-        for (const other of elements) {
-          if (other === el) continue;
-          const dx = el.x - other.x;
-          const dy = el.y - other.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < MIN_DIST && dist > 0) {
-            const force = (MIN_DIST - dist) / MIN_DIST * 0.05;
-            el.vx += (dx / dist) * force;
-            el.vy += (dy / dist) * force;
-          }
-        }
+        // Keep motion calm and continuous
+        el.vx *= 0.998;
+        el.vy *= 0.998;
 
-        // Clamp speed
         const speed = Math.sqrt(el.vx * el.vx + el.vy * el.vy);
-        const maxSpeed = isMobile ? 0.5 : 0.45;
-        const minSpeed = isMobile ? 0.15 : 0.12;
-        if (speed > maxSpeed) { el.vx = (el.vx / speed) * maxSpeed; el.vy = (el.vy / speed) * maxSpeed; }
-        if (speed < minSpeed && speed > 0) { el.vx = (el.vx / speed) * minSpeed; el.vy = (el.vy / speed) * minSpeed; }
-
-        // Slight random direction drift for natural motion
-        if (tick % 60 === 0) {
-          el.vx += rand(-0.05, 0.05);
-          el.vy += rand(-0.05, 0.05);
+        const maxSpeed = isMobile ? 0.46 : 0.42;
+        const minSpeed = isMobile ? 0.12 : 0.1;
+        if (speed > maxSpeed) {
+          el.vx = (el.vx / speed) * maxSpeed;
+          el.vy = (el.vy / speed) * maxSpeed;
+        } else if (speed < minSpeed && speed > 0.0001) {
+          el.vx = (el.vx / speed) * minSpeed;
+          el.vy = (el.vy / speed) * minSpeed;
+        } else if (speed <= 0.0001) {
+          const a = rand(0, Math.PI * 2);
+          el.vx = Math.cos(a) * minSpeed;
+          el.vy = Math.sin(a) * minSpeed;
         }
 
         el.rotation += el.rotSpeed;
