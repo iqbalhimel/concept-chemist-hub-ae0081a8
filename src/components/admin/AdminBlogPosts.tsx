@@ -5,6 +5,7 @@ import { compressImage } from "@/lib/imageCompression";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
 import { toast } from "sonner";
 import {
   Plus, Trash2, Save, GripVertical, Pencil, X, Loader2, ImagePlus,
