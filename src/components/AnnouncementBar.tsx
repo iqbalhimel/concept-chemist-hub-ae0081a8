@@ -16,30 +16,25 @@ const AnnouncementBar = () => {
 
   if (!text) return null;
 
-  // Repeat text enough times for seamless loop
-  const repeated = `${text}  ·  `.repeat(6);
-
-  const tickerContent = link ? (
+  const inner = link ? (
     <a href={link} target="_blank" rel="noopener noreferrer" className="hover:underline underline-offset-2">
-      {repeated}
+      {text}
     </a>
   ) : (
-    <span>{repeated}</span>
+    <span>{text}</span>
   );
 
   return (
-    <div className="relative z-[100] w-full bg-background/[0.08] backdrop-blur-md border-b border-border/30 shadow-[0_1px_8px_hsl(var(--primary)/0.1)]">
-      <div className="overflow-hidden py-2 min-h-[36px] flex items-center pr-10">
-        <div className="announcement-ticker whitespace-nowrap text-sm font-medium text-foreground/90 drop-shadow-[0_0_6px_hsl(var(--primary)/0.4)]">
-          {tickerContent}
-        </div>
+    <div className="relative z-[100] w-full h-[30px] flex items-center overflow-hidden">
+      <div className="announcement-slide whitespace-nowrap text-sm font-medium text-[#9fdcff] drop-shadow-[0_0_4px_rgba(159,220,255,0.5)]">
+        {inner}
       </div>
       <button
         onClick={() => setDismissed(true)}
-        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-background/20 hover:bg-background/40 text-foreground/70 hover:text-foreground transition-colors"
+        className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded text-foreground/50 hover:text-foreground/80 transition-colors"
         aria-label="Dismiss announcement"
       >
-        <X size={14} />
+        <X size={12} />
       </button>
     </div>
   );

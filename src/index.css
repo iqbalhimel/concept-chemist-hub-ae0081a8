@@ -358,15 +358,17 @@
   }
 }
 
-/* Announcement ticker animation */
-@keyframes ticker-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+/* Announcement slide animation — single text, right-to-left loop */
+@keyframes announcement-slide {
+  0% { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
 }
-.announcement-ticker {
+.announcement-slide {
   display: inline-block;
-  animation: ticker-scroll 28s linear infinite;
+  animation: announcement-slide 16s linear infinite;
 }
-.announcement-ticker:hover {
-  animation-play-state: paused;
+@media (hover: hover) {
+  .announcement-slide:hover {
+    animation-play-state: paused;
+  }
 }
