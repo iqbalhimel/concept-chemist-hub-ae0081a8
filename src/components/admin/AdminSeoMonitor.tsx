@@ -30,6 +30,9 @@ type PageSpeedResult = {
   scores: { performance: number; seo: number; accessibility: number; bestPractices: number };
   metrics: { lcp: number; fcp: number; cls: number; tbt: number; si: number; tti: number };
   diagnostics: { title: string; description: string; score: number; savings?: number }[];
+  quotaExceeded?: boolean;
+  status?: "ok" | "quota_exceeded" | "cached_quota";
+  message?: string;
 };
 
 type SeoHealthResult = {
@@ -93,6 +96,7 @@ const AdminSeoMonitor = () => {
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [pageSpeedResults, setPageSpeedResults] = useState<Record<string, PageSpeedResult>>({});
+  const [pageSpeedQuotaMessage, setPageSpeedQuotaMessage] = useState<string | null>(null);
   const [seoHealth, setSeoHealth] = useState<SeoHealthResult | null>(null);
   const [cwvData, setCwvData] = useState<CwvData[]>([]);
   const [cwvTimeline, setCwvTimeline] = useState<any[]>([]);
@@ -151,23 +155,64 @@ const AdminSeoMonitor = () => {
   }, []);
 
   // Fetch PageSpeed
-  const fetchPageSpeed = useCallback(async (url: string, label: string) => {
+  const fetchPageSpeed = useCallback(async (url: string, label: string): Promise<"ok" | "quota_exceeded" | "error"> => {
     setLoading(l => ({ ...l, [`ps_${label}`]: true }));
+
     try {
       const { data, error } = await supabase.functions.invoke("pagespeed", {
         body: { url, strategy: "mobile" },
       });
-      if (error) throw error;
-      setPageSpeedResults(r => ({ ...r, [label]: data }));
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error("Empty response from PageSpeed service");
+      }
+
+      setPageSpeedResults(r => ({ ...r, [label]: data as PageSpeedResult }));
+
+      if ((data as PageSpeedResult).quotaExceeded) {
+        const message = (data as PageSpeedResult).message || "PageSpeed daily quota is exhausted. Please try again later.";
+        setPageSpeedQuotaMessage(message);
+        toast.error(message);
+        return "quota_exceeded";
+      }
+
+      return "ok";
     } catch (e) {
+      const message = e instanceof Error ? e.message : "PageSpeed request failed";
+      const isQuotaError = /quota exceeded|queries per day|429/i.test(message);
+
+      if (isQuotaError) {
+        const quotaMessage = "PageSpeed daily quota is exhausted. Try again later or connect your own API key.";
+        setPageSpeedQuotaMessage(quotaMessage);
+        toast.error(quotaMessage);
+        return "quota_exceeded";
+      }
+
       toast.error(`PageSpeed failed for ${label}`);
+      return "error";
+    } finally {
+      setLoading(l => ({ ...l, [`ps_${label}`]: false }));
     }
-    setLoading(l => ({ ...l, [`ps_${label}`]: false }));
   }, []);
 
   const fetchAllPageSpeed = useCallback(async () => {
-    for (const page of MONITORED_PAGES) {
-      await fetchPageSpeed(page.url, page.label);
+    setPageSpeedQuotaMessage(null);
+
+    for (let i = 0; i < MONITORED_PAGES.length; i++) {
+      const page = MONITORED_PAGES[i];
+      const result = await fetchPageSpeed(page.url, page.label);
+
+      if (result === "quota_exceeded") {
+        break;
+      }
+
+      if (i < MONITORED_PAGES.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1200));
+      }
     }
   }, [fetchPageSpeed]);
 
@@ -234,16 +279,22 @@ const AdminSeoMonitor = () => {
 
         {/* PageSpeed Tab */}
         <TabsContent value="pagespeed" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Google PageSpeed Insights (Mobile)</p>
-            <Button
-              size="sm"
-              onClick={fetchAllPageSpeed}
-              disabled={Object.values(loading).some(v => v)}
-            >
-              <RefreshCw size={14} className={`mr-1 ${Object.keys(loading).some(k => k.startsWith("ps_") && loading[k]) ? "animate-spin" : ""}`} />
-              Run All Tests
-            </Button>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Google PageSpeed Insights (Mobile)</p>
+              <Button
+                size="sm"
+                onClick={fetchAllPageSpeed}
+                disabled={Object.values(loading).some(v => v)}
+              >
+                <RefreshCw size={14} className={`mr-1 ${Object.keys(loading).some(k => k.startsWith("ps_") && loading[k]) ? "animate-spin" : ""}`} />
+                Run All Tests
+              </Button>
+            </div>
+
+            {pageSpeedQuotaMessage && (
+              <p className="text-xs text-destructive">{pageSpeedQuotaMessage}</p>
+            )}
           </div>
 
           {/* Page cards */}
@@ -262,7 +313,10 @@ const AdminSeoMonitor = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => fetchPageSpeed(page.url, page.label)}
+                        onClick={() => {
+                          setPageSpeedQuotaMessage(null);
+                          void fetchPageSpeed(page.url, page.label);
+                        }}
                         disabled={isLoading}
                       >
                         <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
