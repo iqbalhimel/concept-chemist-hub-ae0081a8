@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Save, Upload, Globe, Search, Bell, MessageCircle, FileText, Settings2 } from "lucide-react";
+import { Save, Upload, Globe, Search, Bell, MessageCircle, FileText, Settings2, Atom } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import { compressImage } from "@/lib/imageCompression";
 
 type FieldDef = {
