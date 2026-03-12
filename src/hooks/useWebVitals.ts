@@ -46,9 +46,8 @@ export function useWebVitals() {
       }
     };
 
-    import("web-vitals").then(({ onLCP, onFID, onCLS, onFCP, onTTFB, onINP }) => {
+    import("web-vitals").then(({ onLCP, onCLS, onFCP, onTTFB, onINP }) => {
       onLCP(({ value }) => reportMetric("LCP", value));
-      onFID(({ value }) => reportMetric("FID", value));
       onCLS(({ value }) => reportMetric("CLS", value));
       onFCP(({ value }) => reportMetric("FCP", value));
       onTTFB(({ value }) => reportMetric("TTFB", value));
