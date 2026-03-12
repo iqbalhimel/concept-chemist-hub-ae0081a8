@@ -527,7 +527,7 @@ const ScienceHeroCanvas = () => {
     // Create elements: all 9 on desktop, 6 specific on mobile
     const elements: ScienceElement[] = isMobile
       ? MOBILE_TYPES.map((type, i) => createMobileElement(w, h, type, i, MOBILE_TYPES.length))
-      : Array.from({ length: 9 }, (_, i) => createElement(w, h, i, false));
+      : Array.from({ length: 9 }, (_, i) => createElement(w, h, i));
     let tick = 0;
 
     const MIN_DIST = 80; // minimum distance between mobile elements
