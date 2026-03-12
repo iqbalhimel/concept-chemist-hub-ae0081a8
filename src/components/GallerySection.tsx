@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
 import { X, ImageIcon } from "lucide-react";
 import OptimizedImage from "@/components/OptimizedImage";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,17 @@ const GallerySection = () => {
   const [photos, setPhotos] = useState<GalleryItem[]>([]);
   const [loaded, setLoaded] = useState(false);
   const { t } = useLanguage();
+
+  const closeLightbox = useCallback(() => setLightbox(null), []);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeLightbox();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [lightbox, closeLightbox]);
 
   useEffect(() => {
     const fetchGallery = async () => {
@@ -61,10 +72,32 @@ const GallerySection = () => {
           );
         })}
       </div></div></section>
-    {lightbox && <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-[60] bg-background/90 backdrop-blur-xl flex items-center justify-center p-4" onClick={()=>setLightbox(null)}>
-      <button onClick={()=>setLightbox(null)} className="absolute top-6 right-6 w-10 h-10 rounded-full glass-card flex items-center justify-center text-foreground hover:text-primary transition-colors"><X size={20}/></button>
-      <img src={lightbox} alt="Gallery preview" className="max-w-full max-h-[85vh] rounded-xl object-contain" />
-    </motion.div>}</>
+    <AnimatePresence>
+      {lightbox && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[60] bg-background/90 backdrop-blur-xl flex items-center justify-center p-4"
+          onClick={closeLightbox}
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
+            className="absolute top-6 right-6 z-[70] w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-foreground hover:text-primary transition-colors pointer-events-auto cursor-pointer"
+            aria-label="Close gallery preview"
+          >
+            <X size={20} />
+          </button>
+          <img
+            src={lightbox}
+            alt="Gallery preview"
+            className="max-w-full max-h-[85vh] rounded-xl object-contain pointer-events-none"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence></>
   );
 };
 
