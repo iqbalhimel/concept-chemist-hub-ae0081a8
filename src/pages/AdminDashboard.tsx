@@ -69,6 +69,7 @@ const AdminDashboard = () => {
       case "analytics": return <AdminAnalytics />;
       case "site-settings": return <AdminSiteSettings />;
       case "seo": return <AdminSEO />;
+      case "performance": return <AdminPerformance />;
       case "notices": return <AdminNotices />;
       case "study-materials": return <AdminStudyMaterials />;
       case "blog": return <AdminBlogPosts />;
