@@ -123,7 +123,7 @@ const AdminSEO = () => {
   const twitterTitle = fields.twitter_title || ogTitle;
   const twitterDesc = fields.twitter_description || ogDesc;
   const twitterImage = fields.twitter_image || ogImage;
-  const canonicalUrl = fields.canonical_url || "https://iqbalsir.com";
+  const canonicalUrl = fields.canonical_url || "https://iqbalsir.bd";
 
   return (
     <div className="space-y-6">
