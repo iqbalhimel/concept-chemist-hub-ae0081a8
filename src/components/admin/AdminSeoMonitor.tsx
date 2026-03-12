@@ -102,8 +102,7 @@ const AdminSeoMonitor = () => {
     setLoading(l => ({ ...l, cwv: true }));
     try {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const { data } = await supabase
-        .from("core_web_vitals")
+      const { data } = await (supabase.from as any)("core_web_vitals")
         .select("*")
         .gte("created_at", sevenDaysAgo)
         .order("created_at", { ascending: true });
