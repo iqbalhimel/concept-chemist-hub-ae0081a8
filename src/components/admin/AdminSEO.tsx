@@ -17,7 +17,7 @@ const ROBOTS_KEY = "robots_txt";
 
 const GooglePreview = ({ title, description, url }: { title: string; description: string; url: string }) => (
   <div className="rounded-lg border border-border bg-card p-4 space-y-1">
-    <p className="text-xs text-muted-foreground font-mono truncate">{url || "https://iqbalsir.com"}</p>
+    <p className="text-xs text-muted-foreground font-mono truncate">{url || "https://iqbalsir.bd"}</p>
     <p className="text-primary text-base font-medium truncate leading-snug">{title || "Page Title"}</p>
     <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed">{description || "Page description will appear here..."}</p>
   </div>
