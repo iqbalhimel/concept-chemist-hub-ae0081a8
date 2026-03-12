@@ -25,8 +25,8 @@ const AnnouncementBar = () => {
   );
 
   return (
-    <div className="relative z-[100] w-full h-7 flex items-center overflow-hidden pointer-events-none hero-gradient">
-      <div className="announcement-slide whitespace-nowrap text-sm font-medium text-[#9fdcff] tracking-wide drop-shadow-[0_0_4px_rgba(159,220,255,0.5)] pointer-events-auto">
+    <div className="relative z-[100] w-full h-9 flex items-center overflow-hidden pointer-events-none">
+      <div className="announcement-slide whitespace-nowrap text-sm font-medium text-primary tracking-wide pointer-events-auto">
         {inner}
       </div>
       <button
