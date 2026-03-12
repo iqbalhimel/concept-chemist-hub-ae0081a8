@@ -537,13 +537,13 @@ const ScienceHeroCanvas = () => {
     };
     resize();
 
-    // Create elements: all 9 on desktop, 6 specific on mobile
-    const elements: ScienceElement[] = isMobile
-      ? MOBILE_TYPES.map((type, i) => createMobileElement(w, h, type, i, MOBILE_TYPES.length))
-      : Array.from({ length: 9 }, (_, i) => createElement(w, h, i));
+    // Create elements with random spawn across hero + minimum spacing
+    const spawnTypes = isMobile ? MOBILE_TYPES : PLACEMENT_ORDER;
+    const spawnMinDistance = isMobile ? 110 : 140;
+    const elements: ScienceElement[] = createSpacedElements(w, h, spawnTypes, spawnMinDistance);
     let tick = 0;
 
-    const MIN_DIST = isMobile ? 80 : 120; // minimum distance between elements
+    const MIN_DIST = spawnMinDistance;
 
     const getColors = () => {
       const valid = ["morning", "noon", "evening", "night"];
