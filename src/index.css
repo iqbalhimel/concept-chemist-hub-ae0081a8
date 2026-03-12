@@ -357,3 +357,16 @@
     outline-style: solid;
   }
 }
+
+/* Announcement ticker animation */
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.announcement-ticker {
+  display: inline-block;
+  animation: ticker-scroll 28s linear infinite;
+}
+.announcement-ticker:hover {
+  animation-play-state: paused;
+}
