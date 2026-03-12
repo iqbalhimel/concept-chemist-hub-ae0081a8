@@ -100,6 +100,7 @@ const App = () => (
       <BrightnessProvider>
         <AuthProvider>
           <ThemeLoader />
+          <PerformanceApplier />
           <BrowserRouter>
             <LanguageProvider>
               <AppRoutes />
