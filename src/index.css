@@ -358,14 +358,16 @@
   }
 }
 
-/* Announcement slide animation — single text, right-to-left loop */
+/* Announcement slide animation — seamless right-to-left marquee */
 @keyframes announcement-slide {
-  0% { transform: translateX(100vw); }
-  100% { transform: translateX(-100%); }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 .announcement-slide {
   display: inline-block;
-  animation: announcement-slide 16s linear infinite;
+  white-space: nowrap;
+  will-change: transform;
+  animation: announcement-slide 18s linear infinite;
 }
 @media (hover: hover) {
   .announcement-slide:hover {
