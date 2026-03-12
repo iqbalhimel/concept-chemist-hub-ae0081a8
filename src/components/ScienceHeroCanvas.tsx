@@ -538,13 +538,18 @@ const ScienceHeroCanvas = () => {
     };
     resize();
 
+    // Read admin animation settings (values stored as strings, with sensible defaults)
+    const adminMinSpacing = Number(get("hero_animation", "min_spacing", "0")) || (isMobile ? 110 : 140);
+    const adminRepulsion = (Number(get("hero_animation", "repulsion_force", "0")) || 25) / 1000;
+    const adminMinSpeed = (Number(get("hero_animation", "min_speed", "0")) || (isMobile ? 12 : 10)) / 100;
+    const adminMaxSpeed = (Number(get("hero_animation", "max_speed", "0")) || (isMobile ? 46 : 42)) / 100;
+
     // Create elements with random spawn across hero + minimum spacing
     const spawnTypes = isMobile ? MOBILE_TYPES : PLACEMENT_ORDER;
-    const spawnMinDistance = isMobile ? 110 : 140;
-    const elements: ScienceElement[] = createSpacedElements(w, h, spawnTypes, spawnMinDistance);
+    const elements: ScienceElement[] = createSpacedElements(w, h, spawnTypes, adminMinSpacing);
     let tick = 0;
 
-    const MIN_DIST = spawnMinDistance;
+    const MIN_DIST = adminMinSpacing;
 
     const getColors = () => {
       const valid = ["morning", "noon", "evening", "night"];
