@@ -19,24 +19,31 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_ANON_KEY")!
   );
 
-  // Fetch published blog posts
-  const { data: posts } = await supabase
-    .from("blog_posts")
-    .select("slug, id, updated_at")
-    .eq("is_published", true)
-    .order("sort_order", { ascending: true });
+  // Fetch all content in parallel
+  const [postsRes, categoriesRes, noticesRes] = await Promise.all([
+    supabase
+      .from("blog_posts")
+      .select("slug, id, updated_at")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("study_categories")
+      .select("slug")
+      .eq("is_active", true),
+    supabase
+      .from("notices")
+      .select("id, updated_at")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true }),
+  ]);
 
-  // Fetch active study material categories
-  const { data: categories } = await supabase
-    .from("study_categories")
-    .select("slug")
-    .eq("is_active", true);
+  const posts = postsRes.data;
+  const categories = categoriesRes.data;
+  const notices = noticesRes.data;
 
   const langs = ["en", "bn"];
-
   let urls = "";
 
-  // Helper to add a URL entry with hreflang alternates
   const addUrl = (path: string, priority: string, changefreq: string, lastmod?: string) => {
     const enUrl = `${SITE}/en${path}`;
     const bnUrl = `${SITE}/bn${path}`;
@@ -68,6 +75,9 @@ Deno.serve(async (req) => {
       addUrl(`/blog/${slug}`, "0.6", "monthly", lastmod);
     }
   }
+
+  // Notices (individual notice pages if they exist, otherwise just the listing)
+  // The listing is already covered above
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
