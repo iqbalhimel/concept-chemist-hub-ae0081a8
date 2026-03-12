@@ -38,6 +38,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "site-settings", label: "Site Settings", icon: Settings },
+  { id: "seo", label: "SEO", icon: Search },
   { id: "notices", label: "Notices", icon: Bell },
   { id: "study-materials", label: "Study Materials", icon: Download },
   { id: "blog", label: "Blog Posts", icon: FileText },
