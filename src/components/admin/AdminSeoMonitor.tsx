@@ -313,7 +313,10 @@ const AdminSeoMonitor = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => fetchPageSpeed(page.url, page.label)}
+                        onClick={() => {
+                          setPageSpeedQuotaMessage(null);
+                          void fetchPageSpeed(page.url, page.label);
+                        }}
                         disabled={isLoading}
                       >
                         <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
