@@ -580,7 +580,7 @@ const ScienceHeroCanvas = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < MIN_DIST && dist > 0.0001) {
-            const force = ((MIN_DIST - dist) / MIN_DIST) * 0.025;
+            const force = ((MIN_DIST - dist) / MIN_DIST) * adminRepulsion;
             const fx = (dx / dist) * force;
             const fy = (dy / dist) * force;
             a.vx += fx;
