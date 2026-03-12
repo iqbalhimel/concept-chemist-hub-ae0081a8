@@ -85,10 +85,12 @@ function createSpacedElements(
 ): ScienceElement[] {
   const elements: ScienceElement[] = [];
 
-  for (const type of types) {
+  for (let i = 0; i < types.length; i++) {
+    const type = types[i];
     let bestX = w / 2;
     let bestY = h / 2;
     let bestMinDistance = -1;
+    let placed = false;
 
     for (let attempt = 0; attempt < 80; attempt++) {
       const x = rand(0, w);
@@ -104,7 +106,7 @@ function createSpacedElements(
 
       if (elements.length === 0 || nearest >= minDist) {
         elements.push(createRoamingElement(w, h, type, x, y));
-        bestMinDistance = nearest;
+        placed = true;
         break;
       }
 
@@ -115,7 +117,7 @@ function createSpacedElements(
       }
     }
 
-    if (elements.length < types.indexOf(type) + 1) {
+    if (!placed) {
       elements.push(createRoamingElement(w, h, type, bestX, bestY));
     }
   }
