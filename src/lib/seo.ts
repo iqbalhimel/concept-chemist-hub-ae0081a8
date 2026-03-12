@@ -140,7 +140,7 @@ export function generateEducationalOrgSchema(seoSettings: Record<string, string>
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
     name: "Iqbal Sir's Science Coaching",
-    url: seoSettings.canonical_url || "https://iqbalsir.com",
+    url: seoSettings.canonical_url || "https://iqbalsir.bd",
     description: seoSettings.meta_description || DEFAULTS.description,
     address: contactSettings.address ? {
       "@type": "PostalAddress",
