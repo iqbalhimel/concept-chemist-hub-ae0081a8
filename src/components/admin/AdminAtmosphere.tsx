@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Save, CloudSun, CheckCircle2, XCircle } from "lucide-react";
+import { invalidateSiteSettings } from "@/hooks/useSiteSettings";
 
 type AtmosphereSettings = {
   enabled: string;
@@ -71,6 +72,7 @@ const AdminAtmosphere = () => {
 
     setVerified(ok);
     if (ok) {
+      invalidateSiteSettings();
       toast.success("Atmosphere settings saved and verified!");
     } else {
       toast.error("Settings saved but verification failed. Please retry.");
