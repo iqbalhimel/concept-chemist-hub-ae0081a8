@@ -6,6 +6,7 @@ const AtmosphereLayer = lazy(() => import("@/components/AtmosphereLayer"));
 import SubjectsSection from "@/components/SubjectsSection";
 import ApproachSection from "@/components/ApproachSection";
 import ExperienceSection from "@/components/ExperienceSection";
+import ProfessionalTrainingSection from "@/components/ProfessionalTrainingSection";
 import EducationSection from "@/components/EducationSection";
 import ResourcesSection from "@/components/ResourcesSection";
 import NoticesSection from "@/components/NoticesSection";
