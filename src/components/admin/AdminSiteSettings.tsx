@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Save, Upload, Globe, Search, Bell, MessageCircle, FileText, Settings2, Atom } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { compressImage } from "@/lib/imageCompression";
+import { invalidateSiteSettings } from "@/hooks/useSiteSettings";
 
 type FieldDef = {
   name: string;
@@ -222,6 +223,7 @@ const AdminSiteSettings = () => {
     if (error) {
       toast.error("Failed to save: " + error.message);
     } else {
+      invalidateSiteSettings();
       toast.success(`${sections.find(s => s.key === key)?.label || key} saved!`);
     }
   };
