@@ -129,6 +129,16 @@ export type Database = {
           is_published: boolean
           read_time: string | null
           scheduled_at: string | null
+          seo_canonical_url: string | null
+          seo_description: string | null
+          seo_keywords: string | null
+          seo_og_description: string | null
+          seo_og_image: string | null
+          seo_og_title: string | null
+          seo_title: string | null
+          seo_twitter_description: string | null
+          seo_twitter_image: string | null
+          seo_twitter_title: string | null
           slug: string | null
           sort_order: number
           title: string
@@ -144,6 +154,16 @@ export type Database = {
           is_published?: boolean
           read_time?: string | null
           scheduled_at?: string | null
+          seo_canonical_url?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          seo_og_description?: string | null
+          seo_og_image?: string | null
+          seo_og_title?: string | null
+          seo_title?: string | null
+          seo_twitter_description?: string | null
+          seo_twitter_image?: string | null
+          seo_twitter_title?: string | null
           slug?: string | null
           sort_order?: number
           title: string
@@ -159,6 +179,16 @@ export type Database = {
           is_published?: boolean
           read_time?: string | null
           scheduled_at?: string | null
+          seo_canonical_url?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          seo_og_description?: string | null
+          seo_og_image?: string | null
+          seo_og_title?: string | null
+          seo_title?: string | null
+          seo_twitter_description?: string | null
+          seo_twitter_image?: string | null
+          seo_twitter_title?: string | null
           slug?: string | null
           sort_order?: number
           title?: string
@@ -355,6 +385,16 @@ export type Database = {
           id: string
           is_active: boolean
           is_pinned: boolean
+          seo_canonical_url: string | null
+          seo_description: string | null
+          seo_keywords: string | null
+          seo_og_description: string | null
+          seo_og_image: string | null
+          seo_og_title: string | null
+          seo_title: string | null
+          seo_twitter_description: string | null
+          seo_twitter_image: string | null
+          seo_twitter_title: string | null
           sort_order: number
           title: string
           updated_at: string
@@ -367,6 +407,16 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_pinned?: boolean
+          seo_canonical_url?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          seo_og_description?: string | null
+          seo_og_image?: string | null
+          seo_og_title?: string | null
+          seo_title?: string | null
+          seo_twitter_description?: string | null
+          seo_twitter_image?: string | null
+          seo_twitter_title?: string | null
           sort_order?: number
           title: string
           updated_at?: string
@@ -379,6 +429,16 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_pinned?: boolean
+          seo_canonical_url?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          seo_og_description?: string | null
+          seo_og_image?: string | null
+          seo_og_title?: string | null
+          seo_title?: string | null
+          seo_twitter_description?: string | null
+          seo_twitter_image?: string | null
+          seo_twitter_title?: string | null
           sort_order?: number
           title?: string
           updated_at?: string
@@ -493,6 +553,16 @@ export type Database = {
           id: string
           is_active: boolean
           pages: number | null
+          seo_canonical_url: string | null
+          seo_description: string | null
+          seo_keywords: string | null
+          seo_og_description: string | null
+          seo_og_image: string | null
+          seo_og_title: string | null
+          seo_title: string | null
+          seo_twitter_description: string | null
+          seo_twitter_image: string | null
+          seo_twitter_title: string | null
           sort_order: number
           title: string
           updated_at: string
@@ -505,6 +575,16 @@ export type Database = {
           id?: string
           is_active?: boolean
           pages?: number | null
+          seo_canonical_url?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          seo_og_description?: string | null
+          seo_og_image?: string | null
+          seo_og_title?: string | null
+          seo_title?: string | null
+          seo_twitter_description?: string | null
+          seo_twitter_image?: string | null
+          seo_twitter_title?: string | null
           sort_order?: number
           title: string
           updated_at?: string
@@ -517,6 +597,16 @@ export type Database = {
           id?: string
           is_active?: boolean
           pages?: number | null
+          seo_canonical_url?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          seo_og_description?: string | null
+          seo_og_image?: string | null
+          seo_og_title?: string | null
+          seo_title?: string | null
+          seo_twitter_description?: string | null
+          seo_twitter_image?: string | null
+          seo_twitter_title?: string | null
           sort_order?: number
           title?: string
           updated_at?: string

@@ -7,6 +7,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import PdfViewer from "@/components/PdfViewer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { setSeo } from "@/lib/seo";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 type StudyMaterial = Tables<"study_materials">;
 type StudyCategory = { id: string; name: string; slug: string; sort_order: number; is_active: boolean; };
@@ -22,6 +24,7 @@ const PAGE_SIZE = 10;
 
 const ResourcesPage = () => {
   const { t, lang } = useLanguage();
+  const { get } = useSiteSettings();
   const [searchParams, setSearchParams] = useSearchParams();
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [categories, setCategories] = useState<StudyCategory[]>([]);
@@ -31,6 +34,19 @@ const ResourcesPage = () => {
   const [previewTitle, setPreviewTitle] = useState("");
 
   const activeCategorySlug = searchParams.get("category") || null;
+
+  useEffect(() => {
+    const autoCanonical = "https://iqbalsir.bd/resources";
+    const defaultOgImage = get("seo", "og_image", "");
+    const cleanup = setSeo({
+      title: "Study Materials – Iqbal Sir",
+      description: "Download study materials, notes, and resources from Iqbal Sir.",
+      url: autoCanonical,
+      canonicalUrl: autoCanonical,
+      image: defaultOgImage || undefined,
+    });
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {

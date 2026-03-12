@@ -15,6 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Tables } from "@/integrations/supabase/types";
+import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
 
 type Notice = Tables<"notices">;
 
@@ -105,6 +106,11 @@ const AdminNotices = () => {
     const { error } = await supabase.from("notices").update({
       title: n.title, description: n.description, date: n.date,
       is_active: n.is_active, is_pinned: a.is_pinned, expires_at: a.expires_at || null,
+      seo_title: a.seo_title || null, seo_description: a.seo_description || null,
+      seo_keywords: a.seo_keywords || null, seo_canonical_url: a.seo_canonical_url || null,
+      seo_og_title: a.seo_og_title || null, seo_og_description: a.seo_og_description || null,
+      seo_og_image: a.seo_og_image || null, seo_twitter_title: a.seo_twitter_title || null,
+      seo_twitter_description: a.seo_twitter_description || null, seo_twitter_image: a.seo_twitter_image || null,
     } as any).eq("id", n.id);
     if (error) toast.error(error.message); else toast.success("Updated");
   };
@@ -330,6 +336,17 @@ const AdminNotices = () => {
                                 </label>
                               </div>
                             </div>
+                            <SeoFieldsPanel
+                              values={{
+                                seo_title: a.seo_title, seo_description: a.seo_description,
+                                seo_keywords: a.seo_keywords, seo_canonical_url: a.seo_canonical_url,
+                                seo_og_title: a.seo_og_title, seo_og_description: a.seo_og_description,
+                                seo_og_image: a.seo_og_image, seo_twitter_title: a.seo_twitter_title,
+                                seo_twitter_description: a.seo_twitter_description, seo_twitter_image: a.seo_twitter_image,
+                              }}
+                              onChange={(field, value) => updateLocal(n.id, { [field]: value })}
+                              defaultCanonical={`https://iqbalsir.bd/notices`}
+                            />
                             <div className="flex justify-end gap-2">
                               <Button size="sm" variant="outline" onClick={() => setExpandedEditId(null)}>Cancel</Button>
                               <Button size="sm" onClick={() => { updateNotice(n); setExpandedEditId(null); }}>

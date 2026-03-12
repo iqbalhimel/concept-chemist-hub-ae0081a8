@@ -3,6 +3,8 @@ import { Bell, Calendar, Pin, ArrowLeft, Copy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { setSeo } from "@/lib/seo";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -21,11 +23,25 @@ const PAGE_SIZE = 10;
 
 const NoticesPage = () => {
   const { lang, t } = useLanguage();
+  const { get } = useSiteSettings();
   const [items, setItems] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [selected, setSelected] = useState<Notice | null>(null);
+
+  useEffect(() => {
+    const autoCanonical = "https://iqbalsir.bd/notices";
+    const defaultOgImage = get("seo", "og_image", "");
+    const cleanup = setSeo({
+      title: "Notices – Iqbal Sir",
+      description: "Latest notices and announcements from Iqbal Sir's coaching.",
+      url: autoCanonical,
+      canonicalUrl: autoCanonical,
+      image: defaultOgImage || undefined,
+    });
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
