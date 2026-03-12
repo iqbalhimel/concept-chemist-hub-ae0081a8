@@ -177,6 +177,24 @@ const EditPanel = ({
       Estimated read time: <span className="font-medium text-foreground">{post.read_time || calcReadTime(post.content || "")}</span>
     </p>
 
+    {/* SEO Overrides */}
+    <SeoFieldsPanel
+      values={{
+        seo_title: (post as any).seo_title,
+        seo_description: (post as any).seo_description,
+        seo_keywords: (post as any).seo_keywords,
+        seo_canonical_url: (post as any).seo_canonical_url,
+        seo_og_title: (post as any).seo_og_title,
+        seo_og_description: (post as any).seo_og_description,
+        seo_og_image: (post as any).seo_og_image,
+        seo_twitter_title: (post as any).seo_twitter_title,
+        seo_twitter_description: (post as any).seo_twitter_description,
+        seo_twitter_image: (post as any).seo_twitter_image,
+      }}
+      onChange={(field, value) => onUpdateLocal(post.id, field, value)}
+      defaultCanonical={`https://iqbalsir.bd/blog/${(post as any).slug || post.id}`}
+    />
+
     {/* Scheduling */}
     {!post.is_published && (
       <div className="flex items-center gap-2 flex-wrap">
