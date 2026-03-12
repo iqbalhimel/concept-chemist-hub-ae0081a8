@@ -120,7 +120,7 @@ export function generatePersonSchema(seoSettings: Record<string, string>, contac
     "@context": "https://schema.org",
     "@type": "Person",
     name: seoSettings.meta_title?.split("–")[0]?.trim() || "Iqbal Sir",
-    url: seoSettings.canonical_url || "https://iqbalsir.com",
+    url: seoSettings.canonical_url || "https://iqbalsir.bd",
     image: seoSettings.og_image || undefined,
     jobTitle: "Science Teacher",
     description: seoSettings.meta_description || DEFAULTS.description,
