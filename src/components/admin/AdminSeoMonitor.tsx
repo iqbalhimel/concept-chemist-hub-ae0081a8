@@ -279,16 +279,22 @@ const AdminSeoMonitor = () => {
 
         {/* PageSpeed Tab */}
         <TabsContent value="pagespeed" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Google PageSpeed Insights (Mobile)</p>
-            <Button
-              size="sm"
-              onClick={fetchAllPageSpeed}
-              disabled={Object.values(loading).some(v => v)}
-            >
-              <RefreshCw size={14} className={`mr-1 ${Object.keys(loading).some(k => k.startsWith("ps_") && loading[k]) ? "animate-spin" : ""}`} />
-              Run All Tests
-            </Button>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Google PageSpeed Insights (Mobile)</p>
+              <Button
+                size="sm"
+                onClick={fetchAllPageSpeed}
+                disabled={Object.values(loading).some(v => v)}
+              >
+                <RefreshCw size={14} className={`mr-1 ${Object.keys(loading).some(k => k.startsWith("ps_") && loading[k]) ? "animate-spin" : ""}`} />
+                Run All Tests
+              </Button>
+            </div>
+
+            {pageSpeedQuotaMessage && (
+              <p className="text-xs text-destructive">{pageSpeedQuotaMessage}</p>
+            )}
           </div>
 
           {/* Page cards */}
