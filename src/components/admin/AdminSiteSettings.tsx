@@ -223,6 +223,7 @@ const AdminSiteSettings = () => {
     if (error) {
       toast.error("Failed to save: " + error.message);
     } else {
+      invalidateSiteSettings();
       toast.success(`${sections.find(s => s.key === key)?.label || key} saved!`);
     }
   };
