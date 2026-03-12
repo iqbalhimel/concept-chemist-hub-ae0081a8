@@ -178,6 +178,17 @@ const sections: SectionDef[] = [
       { name: "email_link", label: "Email Link", type: "text" },
     ],
   },
+  {
+    key: "hero_animation",
+    label: "Hero Animation",
+    icon: Atom,
+    fields: [
+      { name: "min_spacing", label: "Minimum Spacing (px)", type: "range", min: 60, max: 250, step: 10 },
+      { name: "repulsion_force", label: "Repulsion Force", type: "range", min: 5, max: 80, step: 5 },
+      { name: "min_speed", label: "Minimum Speed", type: "range", min: 2, max: 30, step: 1 },
+      { name: "max_speed", label: "Maximum Speed", type: "range", min: 10, max: 80, step: 2 },
+    ],
+  },
 ];
 
 const AdminSiteSettings = () => {
