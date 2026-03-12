@@ -782,10 +782,30 @@ const AdminStudyMaterials = () => {
                               </div>
                             </div>
 
+                            {/* SEO Overrides */}
+                            <SeoFieldsPanel
+                              values={{
+                                seo_title: (item as any).seo_title, seo_description: (item as any).seo_description,
+                                seo_keywords: (item as any).seo_keywords, seo_canonical_url: (item as any).seo_canonical_url,
+                                seo_og_title: (item as any).seo_og_title, seo_og_description: (item as any).seo_og_description,
+                                seo_og_image: (item as any).seo_og_image, seo_twitter_title: (item as any).seo_twitter_title,
+                                seo_twitter_description: (item as any).seo_twitter_description, seo_twitter_image: (item as any).seo_twitter_image,
+                              }}
+                              onChange={(field, value) => updateLocal(item.id, field, value)}
+                              defaultCanonical={`https://iqbalsir.bd/resources`}
+                            />
+
                             {/* Save / Cancel */}
                             <div className="flex justify-end gap-2">
                               <Button size="sm" variant="outline" onClick={() => setExpandedEditId(null)}>Cancel</Button>
-                              <Button size="sm" onClick={() => { update(item.id, { title: item.title, category: item.category, file_url: item.file_url, file_size: item.file_size, pages: item.pages }); setExpandedEditId(null); }}>
+                              <Button size="sm" onClick={() => { update(item.id, {
+                                title: item.title, category: item.category, file_url: item.file_url, file_size: item.file_size, pages: item.pages,
+                                seo_title: (item as any).seo_title || null, seo_description: (item as any).seo_description || null,
+                                seo_keywords: (item as any).seo_keywords || null, seo_canonical_url: (item as any).seo_canonical_url || null,
+                                seo_og_title: (item as any).seo_og_title || null, seo_og_description: (item as any).seo_og_description || null,
+                                seo_og_image: (item as any).seo_og_image || null, seo_twitter_title: (item as any).seo_twitter_title || null,
+                                seo_twitter_description: (item as any).seo_twitter_description || null, seo_twitter_image: (item as any).seo_twitter_image || null,
+                              } as any); setExpandedEditId(null); }}>
                                 <Save size={14} className="mr-1" /> Save
                               </Button>
                             </div>

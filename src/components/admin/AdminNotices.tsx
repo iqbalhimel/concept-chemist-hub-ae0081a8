@@ -336,6 +336,17 @@ const AdminNotices = () => {
                                 </label>
                               </div>
                             </div>
+                            <SeoFieldsPanel
+                              values={{
+                                seo_title: a.seo_title, seo_description: a.seo_description,
+                                seo_keywords: a.seo_keywords, seo_canonical_url: a.seo_canonical_url,
+                                seo_og_title: a.seo_og_title, seo_og_description: a.seo_og_description,
+                                seo_og_image: a.seo_og_image, seo_twitter_title: a.seo_twitter_title,
+                                seo_twitter_description: a.seo_twitter_description, seo_twitter_image: a.seo_twitter_image,
+                              }}
+                              onChange={(field, value) => updateLocal(n.id, { [field]: value })}
+                              defaultCanonical={`https://iqbalsir.bd/notices`}
+                            />
                             <div className="flex justify-end gap-2">
                               <Button size="sm" variant="outline" onClick={() => setExpandedEditId(null)}>Cancel</Button>
                               <Button size="sm" onClick={() => { updateNotice(n); setExpandedEditId(null); }}>

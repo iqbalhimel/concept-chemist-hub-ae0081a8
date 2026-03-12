@@ -285,6 +285,16 @@ const AdminBlogPosts = () => {
       featured_image: (post as any).featured_image || null,
       scheduled_at: (post as any).scheduled_at || null,
       slug: (post as any).slug || null,
+      seo_title: (post as any).seo_title || null,
+      seo_description: (post as any).seo_description || null,
+      seo_keywords: (post as any).seo_keywords || null,
+      seo_canonical_url: (post as any).seo_canonical_url || null,
+      seo_og_title: (post as any).seo_og_title || null,
+      seo_og_description: (post as any).seo_og_description || null,
+      seo_og_image: (post as any).seo_og_image || null,
+      seo_twitter_title: (post as any).seo_twitter_title || null,
+      seo_twitter_description: (post as any).seo_twitter_description || null,
+      seo_twitter_image: (post as any).seo_twitter_image || null,
     } as any).eq("id", post.id);
     if (error) {
       if (error.message.includes("blog_posts_slug_unique")) {
