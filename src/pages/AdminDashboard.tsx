@@ -29,7 +29,7 @@ import AdminProfessionalTraining from "@/components/admin/AdminProfessionalTrain
 import AdminSEO from "@/components/admin/AdminSEO";
 
 type Tab =
-  | "dashboard" | "analytics" | "site-settings" | "notices" | "study-materials"
+  | "dashboard" | "analytics" | "site-settings" | "seo" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
   | "media" | "themes" | "atmosphere" | "education" | "experience"
   | "achievements" | "approach" | "subjects" | "training";
