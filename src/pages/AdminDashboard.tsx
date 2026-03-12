@@ -75,6 +75,7 @@ const AdminDashboard = () => {
       case "experience": return <AdminExperience />;
       case "achievements": return <AdminAchievements />;
       case "approach": return <AdminApproach />;
+      case "training": return <AdminProfessionalTraining />;
       case "subjects": return <AdminSubjects />;
       case "media": return <AdminMediaLibrary />;
       case "themes": return <AdminThemes />;

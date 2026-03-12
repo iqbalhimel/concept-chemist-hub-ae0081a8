@@ -45,6 +45,7 @@ const Index = () => {
         {show("show_approach") && <ApproachSection />}
         {show("show_stats") && <StatsSection />}
         {show("show_experience") && <ExperienceSection />}
+        {show("show_training") && <ProfessionalTrainingSection />}
         {show("show_education") && <EducationSection />}
         {show("show_gallery") && <GallerySection />}
         {show("show_testimonials") && <TestimonialsSection />}
