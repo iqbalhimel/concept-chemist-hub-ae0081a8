@@ -6,9 +6,11 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import SeoHead from "@/components/SeoHead";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
+import { useWebVitals } from "@/hooks/useWebVitals";
 
 export default function PublicLayout() {
   useVisitorTracking();
+  useWebVitals();
 
   return (
     <PageShell>

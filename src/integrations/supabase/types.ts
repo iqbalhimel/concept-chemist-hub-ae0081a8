@@ -196,6 +196,39 @@ export type Database = {
         }
         Relationships: []
       }
+      core_web_vitals: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          id: string
+          metric_name: string
+          metric_value: number
+          page_path: string
+          rating: string | null
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          metric_name: string
+          metric_value: number
+          page_path: string
+          rating?: string | null
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          metric_name?: string
+          metric_value?: number
+          page_path?: string
+          rating?: string | null
+          session_id?: string
+        }
+        Relationships: []
+      }
       education: {
         Row: {
           cgpa_or_result: string

@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, BookOpen, Bell, Download,
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
-  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap
+  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp
 } from "lucide-react";
 import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminNotices from "@/components/admin/AdminNotices";
@@ -28,9 +28,10 @@ import AdminAtmosphere from "@/components/admin/AdminAtmosphere";
 import AdminProfessionalTraining from "@/components/admin/AdminProfessionalTraining";
 import AdminSEO from "@/components/admin/AdminSEO";
 import AdminPerformance from "@/components/admin/AdminPerformance";
+import AdminSeoMonitor from "@/components/admin/AdminSeoMonitor";
 
 type Tab =
-  | "dashboard" | "analytics" | "site-settings" | "seo" | "performance" | "notices" | "study-materials"
+  | "dashboard" | "analytics" | "site-settings" | "seo" | "seo-monitor" | "performance" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
   | "media" | "themes" | "atmosphere" | "education" | "experience"
   | "achievements" | "approach" | "subjects" | "training";
@@ -40,6 +41,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "site-settings", label: "Site Settings", icon: Settings },
   { id: "seo", label: "SEO", icon: Search },
+  { id: "seo-monitor", label: "SEO Monitor", icon: TrendingUp },
   { id: "performance", label: "Performance", icon: Zap },
   { id: "notices", label: "Notices", icon: Bell },
   { id: "study-materials", label: "Study Materials", icon: Download },
@@ -69,6 +71,7 @@ const AdminDashboard = () => {
       case "analytics": return <AdminAnalytics />;
       case "site-settings": return <AdminSiteSettings />;
       case "seo": return <AdminSEO />;
+      case "seo-monitor": return <AdminSeoMonitor />;
       case "performance": return <AdminPerformance />;
       case "notices": return <AdminNotices />;
       case "study-materials": return <AdminStudyMaterials />;
