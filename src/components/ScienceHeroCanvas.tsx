@@ -93,8 +93,9 @@ function createSpacedElements(
     let placed = false;
 
     for (let attempt = 0; attempt < 80; attempt++) {
-      const x = rand(0, w);
-      const y = rand(0, h);
+      const edgePadding = 60;
+      const x = rand(edgePadding, Math.max(edgePadding, w - edgePadding));
+      const y = rand(edgePadding, Math.max(edgePadding, h - edgePadding));
       let nearest = Number.POSITIVE_INFINITY;
 
       for (const other of elements) {
