@@ -530,7 +530,7 @@ const ScienceHeroCanvas = () => {
       : Array.from({ length: 9 }, (_, i) => createElement(w, h, i));
     let tick = 0;
 
-    const MIN_DIST = 80; // minimum distance between mobile elements
+    const MIN_DIST = isMobile ? 80 : 120; // minimum distance between elements
 
     const getColors = () => {
       const valid = ["morning", "noon", "evening", "night"];
