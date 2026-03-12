@@ -18,4 +18,4 @@ Disallow: /admin/login
 Disallow: /forgot-password
 Disallow: /reset-password
 
-Sitemap: https://evkbhalknerpptiofwsi.supabase.co/functions/v1/sitemap
+Sitemap: https://iqbalsir.bd/sitemap.xml

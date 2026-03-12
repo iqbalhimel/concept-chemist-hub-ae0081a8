@@ -167,7 +167,7 @@ export function generateArticleSchema(post: {
     description: post.excerpt || undefined,
     image: post.featured_image || undefined,
     datePublished: post.created_at,
-    url: `https://iqbalsir.com/blog/${post.slug || post.id}`,
+    url: `https://iqbalsir.bd/blog/${post.slug || post.id}`,
     author: {
       "@type": "Person",
       name: "Iqbal Sir",

@@ -27,7 +27,7 @@ const FacebookPreview = ({ title, description, image, url }: { title: string; de
   <div className="rounded-lg border border-border bg-card overflow-hidden max-w-md">
     {image && <img src={image} alt="OG" className="w-full h-40 object-cover" />}
     <div className="p-3 space-y-1 bg-muted/30">
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{url ? new URL(url).hostname : "iqbalsir.com"}</p>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{url ? new URL(url).hostname : "iqbalsir.bd"}</p>
       <p className="text-foreground font-semibold text-sm truncate">{title || "Open Graph Title"}</p>
       <p className="text-muted-foreground text-xs line-clamp-2">{description || "Open Graph description..."}</p>
     </div>
