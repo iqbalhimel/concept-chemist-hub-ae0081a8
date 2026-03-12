@@ -95,21 +95,6 @@ const sections: SectionDef[] = [
     ],
   },
   {
-    key: "seo",
-    label: "SEO Settings",
-    icon: Search,
-    fields: [
-      { name: "meta_title", label: "Meta Title", type: "text", placeholder: "Iqbal Sir – Science Teacher" },
-      { name: "meta_description", label: "Meta Description", type: "textarea", placeholder: "Best science teacher in Kishoreganj..." },
-      { name: "meta_keywords", label: "Meta Keywords", type: "text", placeholder: "science, teacher, kishoreganj" },
-      { name: "og_title", label: "Open Graph Title", type: "text" },
-      { name: "og_description", label: "Open Graph Description", type: "textarea" },
-      { name: "og_image", label: "Open Graph Image", type: "image" },
-      { name: "ga_id", label: "Google Analytics ID", type: "text", placeholder: "G-XXXXXXXXXX" },
-      { name: "gsc_code", label: "Google Search Console Verification Code", type: "text" },
-    ],
-  },
-  {
     key: "announcement",
     label: "Announcement Bar",
     icon: Bell,
