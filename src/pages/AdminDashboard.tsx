@@ -31,7 +31,7 @@ import AdminPerformance from "@/components/admin/AdminPerformance";
 import AdminSeoMonitor from "@/components/admin/AdminSeoMonitor";
 
 type Tab =
-  | "dashboard" | "analytics" | "site-settings" | "seo" | "performance" | "notices" | "study-materials"
+  | "dashboard" | "analytics" | "site-settings" | "seo" | "seo-monitor" | "performance" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
   | "media" | "themes" | "atmosphere" | "education" | "experience"
   | "achievements" | "approach" | "subjects" | "training";
