@@ -27,7 +27,8 @@ const AnnouncementBar = () => {
   return (
     <div className="relative z-[100] w-full h-9 flex items-center overflow-hidden pointer-events-none">
       <div className="announcement-slide whitespace-nowrap text-sm font-medium text-primary tracking-wide pointer-events-auto">
-        {inner}
+        <span className="inline-block px-[50vw]">{inner}</span>
+        <span className="inline-block px-[50vw]" aria-hidden="true">{inner}</span>
       </div>
       <button
         onClick={() => setDismissed(true)}
