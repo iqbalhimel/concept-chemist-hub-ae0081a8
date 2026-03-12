@@ -7,6 +7,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import PdfViewer from "@/components/PdfViewer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { setSeo } from "@/lib/seo";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 type StudyMaterial = Tables<"study_materials">;
 type StudyCategory = { id: string; name: string; slug: string; sort_order: number; is_active: boolean; };
