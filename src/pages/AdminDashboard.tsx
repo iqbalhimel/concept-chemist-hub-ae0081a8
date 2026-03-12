@@ -28,6 +28,7 @@ import AdminAtmosphere from "@/components/admin/AdminAtmosphere";
 import AdminProfessionalTraining from "@/components/admin/AdminProfessionalTraining";
 import AdminSEO from "@/components/admin/AdminSEO";
 import AdminPerformance from "@/components/admin/AdminPerformance";
+import AdminSeoMonitor from "@/components/admin/AdminSeoMonitor";
 
 type Tab =
   | "dashboard" | "analytics" | "site-settings" | "seo" | "performance" | "notices" | "study-materials"
