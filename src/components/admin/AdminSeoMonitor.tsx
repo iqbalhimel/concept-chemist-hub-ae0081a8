@@ -155,23 +155,64 @@ const AdminSeoMonitor = () => {
   }, []);
 
   // Fetch PageSpeed
-  const fetchPageSpeed = useCallback(async (url: string, label: string) => {
+  const fetchPageSpeed = useCallback(async (url: string, label: string): Promise<"ok" | "quota_exceeded" | "error"> => {
     setLoading(l => ({ ...l, [`ps_${label}`]: true }));
+
     try {
       const { data, error } = await supabase.functions.invoke("pagespeed", {
         body: { url, strategy: "mobile" },
       });
-      if (error) throw error;
-      setPageSpeedResults(r => ({ ...r, [label]: data }));
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error("Empty response from PageSpeed service");
+      }
+
+      setPageSpeedResults(r => ({ ...r, [label]: data as PageSpeedResult }));
+
+      if ((data as PageSpeedResult).quotaExceeded) {
+        const message = (data as PageSpeedResult).message || "PageSpeed daily quota is exhausted. Please try again later.";
+        setPageSpeedQuotaMessage(message);
+        toast.error(message);
+        return "quota_exceeded";
+      }
+
+      return "ok";
     } catch (e) {
+      const message = e instanceof Error ? e.message : "PageSpeed request failed";
+      const isQuotaError = /quota exceeded|queries per day|429/i.test(message);
+
+      if (isQuotaError) {
+        const quotaMessage = "PageSpeed daily quota is exhausted. Try again later or connect your own API key.";
+        setPageSpeedQuotaMessage(quotaMessage);
+        toast.error(quotaMessage);
+        return "quota_exceeded";
+      }
+
       toast.error(`PageSpeed failed for ${label}`);
+      return "error";
+    } finally {
+      setLoading(l => ({ ...l, [`ps_${label}`]: false }));
     }
-    setLoading(l => ({ ...l, [`ps_${label}`]: false }));
   }, []);
 
   const fetchAllPageSpeed = useCallback(async () => {
-    for (const page of MONITORED_PAGES) {
-      await fetchPageSpeed(page.url, page.label);
+    setPageSpeedQuotaMessage(null);
+
+    for (let i = 0; i < MONITORED_PAGES.length; i++) {
+      const page = MONITORED_PAGES[i];
+      const result = await fetchPageSpeed(page.url, page.label);
+
+      if (result === "quota_exceeded") {
+        break;
+      }
+
+      if (i < MONITORED_PAGES.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1200));
+      }
     }
   }, [fetchPageSpeed]);
 
