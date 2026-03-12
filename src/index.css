@@ -372,3 +372,27 @@
     animation-play-state: paused;
   }
 }
+
+/* ── Performance: Reduce Motion ────────────────────── */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html.reduce-motion .animate-pulse,
+html.reduce-motion .animate-spin,
+html.reduce-motion .animate-bounce {
+  animation: none !important;
+}
+
+/* Auto reduce on mobile when setting is enabled */
+@media (max-width: 767px) {
+  html.reduce-motion .atmosphere-layer,
+  html.reduce-motion .parallax-effect {
+    display: none !important;
+  }
+}
