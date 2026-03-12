@@ -3,6 +3,8 @@ import { Bell, Calendar, Pin, ArrowLeft, Copy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { setSeo } from "@/lib/seo";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
