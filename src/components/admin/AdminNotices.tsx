@@ -106,6 +106,11 @@ const AdminNotices = () => {
     const { error } = await supabase.from("notices").update({
       title: n.title, description: n.description, date: n.date,
       is_active: n.is_active, is_pinned: a.is_pinned, expires_at: a.expires_at || null,
+      seo_title: a.seo_title || null, seo_description: a.seo_description || null,
+      seo_keywords: a.seo_keywords || null, seo_canonical_url: a.seo_canonical_url || null,
+      seo_og_title: a.seo_og_title || null, seo_og_description: a.seo_og_description || null,
+      seo_og_image: a.seo_og_image || null, seo_twitter_title: a.seo_twitter_title || null,
+      seo_twitter_description: a.seo_twitter_description || null, seo_twitter_image: a.seo_twitter_image || null,
     } as any).eq("id", n.id);
     if (error) toast.error(error.message); else toast.success("Updated");
   };
