@@ -84,10 +84,10 @@ const GallerySection = () => {
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
-            className="absolute top-6 right-6 z-[70] w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-foreground hover:text-primary transition-colors pointer-events-auto cursor-pointer"
+            className="fixed top-4 right-4 z-[80] w-11 h-11 rounded-full bg-foreground/90 text-background flex items-center justify-center hover:bg-foreground transition-colors pointer-events-auto cursor-pointer shadow-lg"
             aria-label="Close gallery preview"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
           <img
             src={lightbox}
