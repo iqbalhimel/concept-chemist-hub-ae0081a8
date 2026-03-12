@@ -33,7 +33,7 @@ export function useWebVitals() {
   useEffect(() => {
     const reportMetric = async (name: string, value: number) => {
       try {
-        await supabase.from("core_web_vitals").insert({
+        await (supabase.from as any)("core_web_vitals").insert({
           session_id: getSessionId(),
           page_path: window.location.pathname,
           metric_name: name,
