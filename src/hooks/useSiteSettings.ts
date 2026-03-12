@@ -38,15 +38,20 @@ export const useSiteSettings = () => {
   const [loaded, setLoaded] = useState(!!cachedSettings);
 
   useEffect(() => {
+    const listener = (s: SiteSettings) => {
+      setSettings(s);
+      setLoaded(true);
+    };
+    listeners.add(listener);
+
     if (cachedSettings) {
       setSettings(cachedSettings);
       setLoaded(true);
-      return;
+    } else {
+      fetchAllSettings().then(listener);
     }
-    fetchAllSettings().then((s) => {
-      setSettings(s);
-      setLoaded(true);
-    });
+
+    return () => { listeners.delete(listener); };
   }, []);
 
   const get = (section: string, field: string, fallback = "") =>
