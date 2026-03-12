@@ -31,7 +31,7 @@ const AnnouncementBar = () => {
       </div>
       <button
         onClick={() => setDismissed(true)}
-        className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded text-foreground/50 hover:text-foreground/80 transition-colors"
+        className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded text-foreground/50 hover:text-foreground/80 transition-colors pointer-events-auto"
         aria-label="Dismiss announcement"
       >
         <X size={12} />
