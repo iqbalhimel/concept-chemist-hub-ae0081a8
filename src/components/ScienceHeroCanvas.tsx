@@ -620,18 +620,16 @@ const ScienceHeroCanvas = () => {
         el.vy *= 0.998;
 
         const speed = Math.sqrt(el.vx * el.vx + el.vy * el.vy);
-        const maxSpeed = isMobile ? 0.46 : 0.42;
-        const minSpeed = isMobile ? 0.12 : 0.1;
-        if (speed > maxSpeed) {
-          el.vx = (el.vx / speed) * maxSpeed;
-          el.vy = (el.vy / speed) * maxSpeed;
-        } else if (speed < minSpeed && speed > 0.0001) {
-          el.vx = (el.vx / speed) * minSpeed;
-          el.vy = (el.vy / speed) * minSpeed;
+        if (speed > adminMaxSpeed) {
+          el.vx = (el.vx / speed) * adminMaxSpeed;
+          el.vy = (el.vy / speed) * adminMaxSpeed;
+        } else if (speed < adminMinSpeed && speed > 0.0001) {
+          el.vx = (el.vx / speed) * adminMinSpeed;
+          el.vy = (el.vy / speed) * adminMinSpeed;
         } else if (speed <= 0.0001) {
           const a = rand(0, Math.PI * 2);
-          el.vx = Math.cos(a) * minSpeed;
-          el.vy = Math.sin(a) * minSpeed;
+          el.vx = Math.cos(a) * adminMinSpeed;
+          el.vy = Math.sin(a) * adminMinSpeed;
         }
 
         el.rotation += el.rotSpeed;

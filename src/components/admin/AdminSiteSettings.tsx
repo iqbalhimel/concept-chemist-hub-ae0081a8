@@ -323,6 +323,24 @@ const AdminSiteSettings = () => {
             )}
           </div>
         );
+      case "range":
+        return (
+          <div>
+            <Label>{field.label}: <span className="text-primary font-mono">{value || field.min || 0}</span></Label>
+            <Slider
+              value={[Number(value) || field.min || 0]}
+              min={field.min ?? 0}
+              max={field.max ?? 100}
+              step={field.step ?? 1}
+              onValueChange={(v) => updateField(section.key, field.name, String(v[0]))}
+              className="mt-2"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>{field.min ?? 0}</span>
+              <span>{field.max ?? 100}</span>
+            </div>
+          </div>
+        );
       case "textarea":
         return (
           <div>
