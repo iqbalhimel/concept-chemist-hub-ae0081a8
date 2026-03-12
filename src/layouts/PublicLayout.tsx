@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import PageShell from "@/components/PageShell";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import AnnouncementBar from "@/components/AnnouncementBar";
+import SeoHead from "@/components/SeoHead";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 
 export default function PublicLayout() {
@@ -11,6 +12,7 @@ export default function PublicLayout() {
 
   return (
     <PageShell>
+      <SeoHead />
       <a href="#main-content" className="skip-to-content">
         Skip to main content
       </a>

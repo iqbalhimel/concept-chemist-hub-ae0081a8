@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { generateFAQSchema } from "@/lib/seo";
 
 interface FAQ {
   id: string;
@@ -30,8 +31,23 @@ const FAQSection = () => {
         .order("sort_order", { ascending: true });
       setFaqs(data || []);
       setLoading(false);
+
+      // Inject FAQ schema
+      if (data && data.length > 0) {
+        const schema = generateFAQSchema(data.map(f => ({ question: f.question, answer: f.answer })));
+        const existing = document.querySelector('script[data-faq-jsonld]');
+        if (existing) existing.remove();
+        const script = document.createElement("script");
+        script.type = "application/ld+json";
+        script.setAttribute("data-faq-jsonld", "true");
+        script.textContent = JSON.stringify(schema);
+        document.head.appendChild(script);
+      }
     };
     fetchFaqs();
+    return () => {
+      document.querySelectorAll('script[data-faq-jsonld]').forEach(el => el.remove());
+    };
   }, []);
 
   return (

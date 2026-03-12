@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Clock, User, Calendar, ArrowUpRight, Share2, Link2, Check } from "lucide-react";
-import { setSeo } from "@/lib/seo";
+import { setSeo, generateArticleSchema } from "@/lib/seo";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Button } from "@/components/ui/button";
 import BlogReactions from "@/components/BlogReactions";
 import BlogComments from "@/components/BlogComments";
@@ -23,6 +24,7 @@ const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { lang, t } = useLanguage();
+  const { get } = useSiteSettings();
   const [post, setPost] = useState<(BlogPostType & { slug?: string | null }) | null>(null);
   const [related, setRelated] = useState<(BlogPostType & { slug?: string | null })[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,11 +71,13 @@ const BlogPost = () => {
 
       if (p) {
         const postSlug = p.slug || p.id;
+        const defaultOgImage = get("seo", "og_image", "");
         cleanup = setSeo({
           title: `${p.title} – Iqbal Sir's Blog`,
           description: p.excerpt || `Read "${p.title}" on Iqbal Sir's blog.`,
           url: `https://iqbalsir.com/blog/${postSlug}`,
-          image: p.featured_image || undefined,
+          image: p.featured_image || defaultOgImage || undefined,
+          jsonLd: generateArticleSchema(p),
         });
 
         const { data: rel } = await supabase
