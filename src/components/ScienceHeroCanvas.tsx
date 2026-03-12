@@ -42,45 +42,39 @@ const PLACEMENT_ORDER: ScienceElement["type"][] = [
 const MOBILE_TYPES: ScienceElement["type"][] = ["solar", "atom", "benzene", "dna", "water", "neuron"];
 const MOBILE_INDICES = [0, 1, 5, 2, 6, 8]; // indices into PLACEMENT_ORDER for grid fallback
 
-function createElement(w: number, h: number, gridIndex: number, isMobile: boolean): ScienceElement {
+function createElement(w: number, h: number, gridIndex: number): ScienceElement {
   const type = PLACEMENT_ORDER[gridIndex];
   const isBio = BIOLOGY_TYPES.has(type);
+
+  const mx = 50;
+  const my = 50;
+  const baseSize = isBio ? rand(72, 88) : rand(55, 72);
+
+  // Distribute starting positions in a 3x3 grid with jitter
   const col = gridIndex % 3;
   const row = Math.floor(gridIndex / 3);
+  const cellW = (w - mx * 2) / 3;
+  const cellH = (h - my * 2) / 3;
+  const startX = mx + cellW * col + rand(cellW * 0.25, cellW * 0.75);
+  const startY = my + cellH * row + rand(cellH * 0.25, cellH * 0.75);
 
-  const mx = w * 0.12;
-  const my = h * 0.08;
-  const usableW = w - mx * 2;
-  const usableH = h - my * 2;
-
-  const cellW = usableW / 3;
-  const cellH = usableH / 3;
-  const anchorX = mx + cellW * col + cellW * 0.5;
-  const anchorY = my + cellH * row + cellH * 0.5;
-
-  const baseSize = isBio ? rand(72, 88) : rand(55, 72);
-  const floatRadius = rand(18, 35);
-
-  // Mobile: random starting position + velocity for free roaming
-  const startX = isMobile ? rand(mx + 30, w - mx - 30) : anchorX;
-  const startY = isMobile ? rand(my + 30, h - my - 30) : anchorY;
-  const speed = 0.3;
+  const speed = rand(0.2, 0.4);
   const angle = rand(0, Math.PI * 2);
 
   return {
     x: startX,
     y: startY,
-    anchorX,
-    anchorY,
-    vx: isMobile ? Math.cos(angle) * speed : 0,
-    vy: isMobile ? Math.sin(angle) * speed : 0,
+    anchorX: startX,
+    anchorY: startY,
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed,
     type,
     size: baseSize,
     rotation: rand(0, 360),
     rotSpeed: isBio ? rand(-0.12, 0.12) : rand(-0.2, 0.2),
     opacity: isBio ? rand(0.55, 0.72) : rand(0.38, 0.58),
     phase: rand(0, Math.PI * 2),
-    floatRadius,
+    floatRadius: rand(18, 35),
   };
 }
 
