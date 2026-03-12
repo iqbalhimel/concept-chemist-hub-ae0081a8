@@ -42,32 +42,31 @@ const PLACEMENT_ORDER: ScienceElement["type"][] = [
 const MOBILE_TYPES: ScienceElement["type"][] = ["solar", "atom", "benzene", "dna", "water", "neuron"];
 const MOBILE_INDICES = [0, 1, 5, 2, 6, 8]; // indices into PLACEMENT_ORDER for grid fallback
 
-function createElement(w: number, h: number, gridIndex: number): ScienceElement {
-  const type = PLACEMENT_ORDER[gridIndex];
+function createRoamingElement(w: number, h: number, type: ScienceElement["type"], x: number, y: number): ScienceElement {
   const isBio = BIOLOGY_TYPES.has(type);
-
-  const mx = 50;
-  const my = 50;
   const baseSize = isBio ? rand(72, 88) : rand(55, 72);
 
-  // Distribute starting positions in a 3x3 grid with jitter
-  const col = gridIndex % 3;
-  const row = Math.floor(gridIndex / 3);
-  const cellW = (w - mx * 2) / 3;
-  const cellH = (h - my * 2) / 3;
-  const startX = mx + cellW * col + rand(cellW * 0.25, cellW * 0.75);
-  const startY = my + cellH * row + rand(cellH * 0.25, cellH * 0.75);
+  let vx = rand(-0.4, 0.4);
+  let vy = rand(-0.4, 0.4);
+  const speed = Math.sqrt(vx * vx + vy * vy);
+  if (speed < 0.08) {
+    const a = rand(0, Math.PI * 2);
+    const s = rand(0.16, 0.3);
+    vx = Math.cos(a) * s;
+    vy = Math.sin(a) * s;
+  }
 
-  const speed = rand(0.2, 0.4);
-  const angle = rand(0, Math.PI * 2);
+  const margin = baseSize * 0.5 + 10;
+  const safeX = Math.min(Math.max(x, margin), Math.max(margin, w - margin));
+  const safeY = Math.min(Math.max(y, margin), Math.max(margin, h - margin));
 
   return {
-    x: startX,
-    y: startY,
-    anchorX: startX,
-    anchorY: startY,
-    vx: Math.cos(angle) * speed,
-    vy: Math.sin(angle) * speed,
+    x: safeX,
+    y: safeY,
+    anchorX: safeX,
+    anchorY: safeY,
+    vx,
+    vy,
     type,
     size: baseSize,
     rotation: rand(0, 360),
@@ -78,38 +77,53 @@ function createElement(w: number, h: number, gridIndex: number): ScienceElement 
   };
 }
 
-function createMobileElement(w: number, h: number, type: ScienceElement["type"], index: number, total: number): ScienceElement {
-  const isBio = BIOLOGY_TYPES.has(type);
-  const mx = 50;
-  const my = 50;
+function createSpacedElements(
+  w: number,
+  h: number,
+  types: ScienceElement["type"][],
+  minDist: number,
+): ScienceElement[] {
+  const elements: ScienceElement[] = [];
 
-  // Distribute starting positions evenly using a 2x3 grid
-  const col = index % 2;
-  const row = Math.floor(index / 2);
-  const cellW = (w - mx * 2) / 2;
-  const cellH = (h - my * 2) / 3;
-  const startX = mx + cellW * col + rand(cellW * 0.3, cellW * 0.7);
-  const startY = my + cellH * row + rand(cellH * 0.3, cellH * 0.7);
+  for (let i = 0; i < types.length; i++) {
+    const type = types[i];
+    let bestX = w / 2;
+    let bestY = h / 2;
+    let bestMinDistance = -1;
+    let placed = false;
 
-  const speed = rand(0.2, 0.4);
-  const angle = rand(0, Math.PI * 2);
-  const baseSize = isBio ? rand(72, 88) : rand(55, 72);
+    for (let attempt = 0; attempt < 80; attempt++) {
+      const edgePadding = 60;
+      const x = rand(edgePadding, Math.max(edgePadding, w - edgePadding));
+      const y = rand(edgePadding, Math.max(edgePadding, h - edgePadding));
+      let nearest = Number.POSITIVE_INFINITY;
 
-  return {
-    x: startX,
-    y: startY,
-    anchorX: startX,
-    anchorY: startY,
-    vx: Math.cos(angle) * speed,
-    vy: Math.sin(angle) * speed,
-    type,
-    size: baseSize,
-    rotation: rand(0, 360),
-    rotSpeed: isBio ? rand(-0.12, 0.12) : rand(-0.2, 0.2),
-    opacity: isBio ? rand(0.55, 0.72) : rand(0.38, 0.58),
-    phase: rand(0, Math.PI * 2),
-    floatRadius: rand(18, 35),
-  };
+      for (const other of elements) {
+        const dx = x - other.x;
+        const dy = y - other.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        nearest = Math.min(nearest, dist);
+      }
+
+      if (elements.length === 0 || nearest >= minDist) {
+        elements.push(createRoamingElement(w, h, type, x, y));
+        placed = true;
+        break;
+      }
+
+      if (nearest > bestMinDistance) {
+        bestMinDistance = nearest;
+        bestX = x;
+        bestY = y;
+      }
+    }
+
+    if (!placed) {
+      elements.push(createRoamingElement(w, h, type, bestX, bestY));
+    }
+  }
+
+  return elements;
 }
 
 type Colors = typeof timeColors.morning;
@@ -524,13 +538,13 @@ const ScienceHeroCanvas = () => {
     };
     resize();
 
-    // Create elements: all 9 on desktop, 6 specific on mobile
-    const elements: ScienceElement[] = isMobile
-      ? MOBILE_TYPES.map((type, i) => createMobileElement(w, h, type, i, MOBILE_TYPES.length))
-      : Array.from({ length: 9 }, (_, i) => createElement(w, h, i));
+    // Create elements with random spawn across hero + minimum spacing
+    const spawnTypes = isMobile ? MOBILE_TYPES : PLACEMENT_ORDER;
+    const spawnMinDistance = isMobile ? 110 : 140;
+    const elements: ScienceElement[] = createSpacedElements(w, h, spawnTypes, spawnMinDistance);
     let tick = 0;
 
-    const MIN_DIST = isMobile ? 80 : 120; // minimum distance between elements
+    const MIN_DIST = spawnMinDistance;
 
     const getColors = () => {
       const valid = ["morning", "noon", "evening", "night"];
@@ -551,48 +565,68 @@ const ScienceHeroCanvas = () => {
       ctx.clearRect(0, 0, w, h);
       const mx = mouseRef.current.x, my = mouseRef.current.y;
 
+      // Anti-clustering repulsion (pairwise so both elements are affected)
+      for (let i = 0; i < elements.length; i++) {
+        for (let j = i + 1; j < elements.length; j++) {
+          const a = elements[i];
+          const b = elements[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < MIN_DIST && dist > 0.0001) {
+            const force = ((MIN_DIST - dist) / MIN_DIST) * 0.025;
+            const fx = (dx / dist) * force;
+            const fy = (dy / dist) * force;
+            a.vx += fx;
+            a.vy += fy;
+            b.vx -= fx;
+            b.vy -= fy;
+          }
+        }
+      }
+
       // Render in layer order: physics → chemistry → biology (on top)
       const sorted = [...elements].sort((a, b) => {
-        const order = (e: ScienceElement) => BIOLOGY_TYPES.has(e.type) ? 2 : (["benzene","water","network"].includes(e.type) ? 1 : 0);
+        const order = (e: ScienceElement) => BIOLOGY_TYPES.has(e.type) ? 2 : (["benzene", "water", "network"].includes(e.type) ? 1 : 0);
         return order(a) - order(b);
       });
 
       for (const el of sorted) {
-        // Free-roaming on all platforms
+        // Slow drift adjustments for smooth roaming
+        if (tick % 90 === 0) {
+          el.vx += rand(-0.03, 0.03);
+          el.vy += rand(-0.03, 0.03);
+        }
+
+        // Free-roaming update
         el.x += el.vx;
         el.y += el.vy;
 
-        // Boundary bounce with margin
+        // Boundary bounce with safe margin
         const margin = el.size * 0.5 + 10;
-        if (el.x < margin) { el.x = margin; el.vx = Math.abs(el.vx); }
-        if (el.x > w - margin) { el.x = w - margin; el.vx = -Math.abs(el.vx); }
-        if (el.y < margin) { el.y = margin; el.vy = Math.abs(el.vy); }
-        if (el.y > h - margin) { el.y = h - margin; el.vy = -Math.abs(el.vy); }
+        if (el.x < margin) { el.x = margin; el.vx = Math.abs(el.vx) * 0.96; }
+        if (el.x > w - margin) { el.x = w - margin; el.vx = -Math.abs(el.vx) * 0.96; }
+        if (el.y < margin) { el.y = margin; el.vy = Math.abs(el.vy) * 0.96; }
+        if (el.y > h - margin) { el.y = h - margin; el.vy = -Math.abs(el.vy) * 0.96; }
 
-        // Gentle repulsion from other elements
-        for (const other of elements) {
-          if (other === el) continue;
-          const dx = el.x - other.x;
-          const dy = el.y - other.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < MIN_DIST && dist > 0) {
-            const force = (MIN_DIST - dist) / MIN_DIST * 0.05;
-            el.vx += (dx / dist) * force;
-            el.vy += (dy / dist) * force;
-          }
-        }
+        // Keep motion calm and continuous
+        el.vx *= 0.998;
+        el.vy *= 0.998;
 
-        // Clamp speed
         const speed = Math.sqrt(el.vx * el.vx + el.vy * el.vy);
-        const maxSpeed = isMobile ? 0.5 : 0.45;
-        const minSpeed = isMobile ? 0.15 : 0.12;
-        if (speed > maxSpeed) { el.vx = (el.vx / speed) * maxSpeed; el.vy = (el.vy / speed) * maxSpeed; }
-        if (speed < minSpeed && speed > 0) { el.vx = (el.vx / speed) * minSpeed; el.vy = (el.vy / speed) * minSpeed; }
-
-        // Slight random direction drift for natural motion
-        if (tick % 60 === 0) {
-          el.vx += rand(-0.05, 0.05);
-          el.vy += rand(-0.05, 0.05);
+        const maxSpeed = isMobile ? 0.46 : 0.42;
+        const minSpeed = isMobile ? 0.12 : 0.1;
+        if (speed > maxSpeed) {
+          el.vx = (el.vx / speed) * maxSpeed;
+          el.vy = (el.vy / speed) * maxSpeed;
+        } else if (speed < minSpeed && speed > 0.0001) {
+          el.vx = (el.vx / speed) * minSpeed;
+          el.vy = (el.vy / speed) * minSpeed;
+        } else if (speed <= 0.0001) {
+          const a = rand(0, Math.PI * 2);
+          el.vx = Math.cos(a) * minSpeed;
+          el.vy = Math.sin(a) * minSpeed;
         }
 
         el.rotation += el.rotSpeed;
