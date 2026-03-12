@@ -46,6 +46,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "faq", label: "FAQ", icon: HelpCircle },
   { id: "education", label: "Education", icon: GraduationCap },
   { id: "experience", label: "Experience", icon: Briefcase },
+  { id: "training", label: "Professional Training", icon: Trophy },
   { id: "achievements", label: "Achievements", icon: Trophy },
   { id: "approach", label: "Teaching Approach", icon: Lightbulb },
   { id: "subjects", label: "Teaching Subjects", icon: Atom },
