@@ -71,11 +71,13 @@ const BlogPost = () => {
 
       if (p) {
         const postSlug = p.slug || p.id;
+        const defaultOgImage = get("seo", "og_image", "");
         cleanup = setSeo({
           title: `${p.title} – Iqbal Sir's Blog`,
           description: p.excerpt || `Read "${p.title}" on Iqbal Sir's blog.`,
           url: `https://iqbalsir.com/blog/${postSlug}`,
-          image: p.featured_image || undefined,
+          image: p.featured_image || defaultOgImage || undefined,
+          jsonLd: generateArticleSchema(p),
         });
 
         const { data: rel } = await supabase
