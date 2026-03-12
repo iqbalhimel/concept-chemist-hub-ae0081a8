@@ -7,15 +7,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Save, Upload, Globe, Search, Bell, MessageCircle, FileText, Settings2 } from "lucide-react";
+import { Save, Upload, Globe, Search, Bell, MessageCircle, FileText, Settings2, Atom } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import { compressImage } from "@/lib/imageCompression";
 
 type FieldDef = {
   name: string;
   label: string;
-  type: "text" | "textarea" | "toggle" | "select" | "image";
+  type: "text" | "textarea" | "toggle" | "select" | "image" | "range";
   options?: { value: string; label: string }[];
   placeholder?: string;
+  min?: number;
+  max?: number;
+  step?: number;
 };
 
 type SectionDef = {
@@ -174,6 +178,17 @@ const sections: SectionDef[] = [
       { name: "email_link", label: "Email Link", type: "text" },
     ],
   },
+  {
+    key: "hero_animation",
+    label: "Hero Animation",
+    icon: Atom,
+    fields: [
+      { name: "min_spacing", label: "Minimum Spacing (px)", type: "range", min: 60, max: 250, step: 10 },
+      { name: "repulsion_force", label: "Repulsion Force", type: "range", min: 5, max: 80, step: 5 },
+      { name: "min_speed", label: "Minimum Speed", type: "range", min: 2, max: 30, step: 1 },
+      { name: "max_speed", label: "Maximum Speed", type: "range", min: 10, max: 80, step: 2 },
+    ],
+  },
 ];
 
 const AdminSiteSettings = () => {
@@ -306,6 +321,24 @@ const AdminSiteSettings = () => {
             {value && (
               <img src={value} alt="Preview" className="mt-2 h-16 rounded-md border border-border object-contain" />
             )}
+          </div>
+        );
+      case "range":
+        return (
+          <div>
+            <Label>{field.label}: <span className="text-primary font-mono">{value || field.min || 0}</span></Label>
+            <Slider
+              value={[Number(value) || field.min || 0]}
+              min={field.min ?? 0}
+              max={field.max ?? 100}
+              step={field.step ?? 1}
+              onValueChange={(v) => updateField(section.key, field.name, String(v[0]))}
+              className="mt-2"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>{field.min ?? 0}</span>
+              <span>{field.max ?? 100}</span>
+            </div>
           </div>
         );
       case "textarea":

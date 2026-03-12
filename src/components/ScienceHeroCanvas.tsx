@@ -538,13 +538,18 @@ const ScienceHeroCanvas = () => {
     };
     resize();
 
+    // Read admin animation settings (values stored as strings, with sensible defaults)
+    const adminMinSpacing = Number(get("hero_animation", "min_spacing", "0")) || (isMobile ? 110 : 140);
+    const adminRepulsion = (Number(get("hero_animation", "repulsion_force", "0")) || 25) / 1000;
+    const adminMinSpeed = (Number(get("hero_animation", "min_speed", "0")) || (isMobile ? 12 : 10)) / 100;
+    const adminMaxSpeed = (Number(get("hero_animation", "max_speed", "0")) || (isMobile ? 46 : 42)) / 100;
+
     // Create elements with random spawn across hero + minimum spacing
     const spawnTypes = isMobile ? MOBILE_TYPES : PLACEMENT_ORDER;
-    const spawnMinDistance = isMobile ? 110 : 140;
-    const elements: ScienceElement[] = createSpacedElements(w, h, spawnTypes, spawnMinDistance);
+    const elements: ScienceElement[] = createSpacedElements(w, h, spawnTypes, adminMinSpacing);
     let tick = 0;
 
-    const MIN_DIST = spawnMinDistance;
+    const MIN_DIST = adminMinSpacing;
 
     const getColors = () => {
       const valid = ["morning", "noon", "evening", "night"];
@@ -575,7 +580,7 @@ const ScienceHeroCanvas = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < MIN_DIST && dist > 0.0001) {
-            const force = ((MIN_DIST - dist) / MIN_DIST) * 0.025;
+            const force = ((MIN_DIST - dist) / MIN_DIST) * adminRepulsion;
             const fx = (dx / dist) * force;
             const fy = (dy / dist) * force;
             a.vx += fx;
@@ -615,18 +620,16 @@ const ScienceHeroCanvas = () => {
         el.vy *= 0.998;
 
         const speed = Math.sqrt(el.vx * el.vx + el.vy * el.vy);
-        const maxSpeed = isMobile ? 0.46 : 0.42;
-        const minSpeed = isMobile ? 0.12 : 0.1;
-        if (speed > maxSpeed) {
-          el.vx = (el.vx / speed) * maxSpeed;
-          el.vy = (el.vy / speed) * maxSpeed;
-        } else if (speed < minSpeed && speed > 0.0001) {
-          el.vx = (el.vx / speed) * minSpeed;
-          el.vy = (el.vy / speed) * minSpeed;
+        if (speed > adminMaxSpeed) {
+          el.vx = (el.vx / speed) * adminMaxSpeed;
+          el.vy = (el.vy / speed) * adminMaxSpeed;
+        } else if (speed < adminMinSpeed && speed > 0.0001) {
+          el.vx = (el.vx / speed) * adminMinSpeed;
+          el.vy = (el.vy / speed) * adminMinSpeed;
         } else if (speed <= 0.0001) {
           const a = rand(0, Math.PI * 2);
-          el.vx = Math.cos(a) * minSpeed;
-          el.vy = Math.sin(a) * minSpeed;
+          el.vx = Math.cos(a) * adminMinSpeed;
+          el.vy = Math.sin(a) * adminMinSpeed;
         }
 
         el.rotation += el.rotSpeed;
