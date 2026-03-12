@@ -1,6 +1,7 @@
 /**
  * Compress an image file using Canvas API.
- * Outputs WebP when supported, falls back to JPEG.
+ * Reads performance settings for max dimensions, quality, and format preferences.
+ * Outputs WebP when supported and enabled, falls back to JPEG.
  */
 
 const supportsWebP = (() => {
@@ -14,18 +15,40 @@ const supportsWebP = (() => {
   }
 })();
 
+export interface CompressionOptions {
+  maxWidth?: number;
+  maxHeight?: number;
+  quality?: number;
+  enableWebp?: boolean;
+  enableCompression?: boolean;
+}
+
 export const compressImage = (
   file: File,
-  maxWidth = 1920,
-  maxHeight = 1920,
-  quality = 0.82
+  options: CompressionOptions = {}
 ): Promise<{ blob: Blob; wasCompressed: boolean; extension: string; contentType: string }> => {
-  const outputType = supportsWebP ? "image/webp" : "image/jpeg";
-  const outputExt = supportsWebP ? "webp" : "jpg";
+  const {
+    maxWidth = 1920,
+    maxHeight = 1920,
+    quality = 82,
+    enableWebp = true,
+    enableCompression = true,
+  } = options;
+
+  const qualityNormalized = quality > 1 ? quality / 100 : quality;
+  const useWebp = enableWebp && supportsWebP;
+  const outputType = useWebp ? "image/webp" : "image/jpeg";
+  const outputExt = useWebp ? "webp" : "jpg";
 
   return new Promise((resolve) => {
     if (!file.type.startsWith("image/")) {
       resolve({ blob: file, wasCompressed: false, extension: file.name.split(".").pop() || "bin", contentType: file.type });
+      return;
+    }
+
+    // If compression is disabled, only enforce max resolution
+    if (!enableCompression && !enableWebp) {
+      resolve({ blob: file, wasCompressed: false, extension: file.name.split(".").pop() || "jpg", contentType: file.type });
       return;
     }
 
@@ -37,13 +60,13 @@ export const compressImage = (
 
       let { width, height } = img;
 
-      // Skip compression for small images
-      if (width <= maxWidth && height <= maxHeight && file.size < 200 * 1024) {
+      // Skip compression for small images when compression is enabled
+      if (enableCompression && width <= maxWidth && height <= maxHeight && file.size < 200 * 1024) {
         resolve({ blob: file, wasCompressed: false, extension: file.name.split(".").pop() || "jpg", contentType: file.type });
         return;
       }
 
-      // Scale down proportionally
+      // Always enforce max resolution
       if (width > maxWidth) {
         height = Math.round((height * maxWidth) / width);
         width = maxWidth;
@@ -74,7 +97,7 @@ export const compressImage = (
           }
         },
         outputType,
-        quality
+        qualityNormalized
       );
     };
 

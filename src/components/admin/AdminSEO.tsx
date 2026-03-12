@@ -99,7 +99,7 @@ const AdminSEO = () => {
     try {
       let fileToUpload: File | Blob = file;
       if (file.type.startsWith("image/") && file.size > 200 * 1024) {
-        const { blob } = await compressImage(file, 1200, 1200, 0.8);
+        const { blob } = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 80 });
         fileToUpload = blob;
       }
       const ext = file.name.split(".").pop();

@@ -12,6 +12,7 @@ import HreflangTags from "@/components/HreflangTags";
 import LanguageRedirect from "@/components/LanguageRedirect";
 import { lazy, Suspense } from "react";
 import PublicLayout from "@/layouts/PublicLayout";
+import PerformanceApplier from "@/components/PerformanceApplier";
 
 // Eagerly loaded (homepage critical path)
 import Index from "./pages/Index";
@@ -99,6 +100,7 @@ const App = () => (
       <BrightnessProvider>
         <AuthProvider>
           <ThemeLoader />
+          <PerformanceApplier />
           <BrowserRouter>
             <LanguageProvider>
               <AppRoutes />

@@ -42,7 +42,7 @@ const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string;
     if (!file.type.startsWith("image/")) { toast.error("Only images allowed"); return; }
     setUploading(true);
     try {
-      const { blob, wasCompressed, extension, contentType } = await compressImage(file, 1920, 1080);
+      const { blob, wasCompressed, extension, contentType } = await compressImage(file, { maxWidth: 1920, maxHeight: 1080 });
       const fileName = `blog-featured/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
       const { error } = await supabase.storage.from("media").upload(fileName, blob, { contentType });
       if (error) throw error;

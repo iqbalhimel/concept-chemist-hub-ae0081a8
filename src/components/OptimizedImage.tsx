@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, ImgHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> {
   src: string;
@@ -8,6 +9,8 @@ interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 
   widths?: number[];
   /** Show blur-up placeholder */
   blurPlaceholder?: boolean;
+  /** Force eager loading (bypass lazy setting) */
+  eager?: boolean;
 }
 
 /**
@@ -19,7 +22,6 @@ const isSupabaseStorageUrl = (url: string) =>
 
 const getTransformUrl = (url: string, width: number, quality = 80) => {
   if (!isSupabaseStorageUrl(url)) return null;
-  // Supabase image transform: /render/image/public/bucket/path
   const transformed = url.replace(
     "/storage/v1/object/public/",
     `/storage/v1/render/image/public/`
@@ -32,18 +34,26 @@ const OptimizedImage = ({
   alt,
   widths = [400, 800, 1200],
   blurPlaceholder = true,
+  eager = false,
   className,
   ...rest
 }: OptimizedImageProps) => {
+  const { get } = useSiteSettings();
+  const lazyEnabled = get("performance", "lazy_loading", "true") !== "false";
+  const shouldLazy = lazyEnabled && !eager;
+
   const [loaded, setLoaded] = useState(false);
-  const [inView, setInView] = useState(false);
+  const [inView, setInView] = useState(!shouldLazy);
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
+    if (!shouldLazy) {
+      setInView(true);
+      return;
+    }
     const el = imgRef.current;
     if (!el) return;
 
-    // Use IntersectionObserver for true lazy loading with early trigger
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -51,11 +61,11 @@ const OptimizedImage = ({
           observer.disconnect();
         }
       },
-      { rootMargin: "200px" } // Start loading 200px before visible
+      { rootMargin: "200px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [shouldLazy]);
 
   // Build srcSet for Supabase storage images
   const srcSet = isSupabaseStorageUrl(src)
@@ -88,7 +98,7 @@ const OptimizedImage = ({
           srcSet={srcSet}
           sizes={sizes}
           alt={alt}
-          loading="lazy"
+          loading={shouldLazy ? "lazy" : "eager"}
           decoding="async"
           onLoad={() => setLoaded(true)}
           className={cn(
