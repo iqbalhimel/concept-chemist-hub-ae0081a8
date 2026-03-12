@@ -75,7 +75,7 @@ const BlogPost = () => {
         cleanup = setSeo({
           title: `${p.title} – Iqbal Sir's Blog`,
           description: p.excerpt || `Read "${p.title}" on Iqbal Sir's blog.`,
-          url: `https://iqbalsir.com/blog/${postSlug}`,
+          url: `https://iqbalsir.bd/blog/${postSlug}`,
           image: p.featured_image || defaultOgImage || undefined,
           jsonLd: generateArticleSchema(p),
         });
