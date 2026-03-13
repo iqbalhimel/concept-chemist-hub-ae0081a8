@@ -117,7 +117,7 @@ const AdminMediaLibrary = () => {
       setItems(prev => prev.filter(n => n.id !== item.id));
       setExpandedDeleteId(null);
       toast.success("Deleted");
-    });
+    }, "content_delete", `Deleted media: ${item.name}`);
   };
 
   const copyUrl = (url: string) => {
