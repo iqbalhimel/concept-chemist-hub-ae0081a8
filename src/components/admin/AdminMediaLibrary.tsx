@@ -34,6 +34,7 @@ const getTypeLabel = (type: string) => {
 };
 
 const AdminMediaLibrary = () => {
+  const csrfGuard = useCsrfGuard();
   const [items, setItems] = useState<Media[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
