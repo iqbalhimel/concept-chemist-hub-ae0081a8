@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, GripVertical, Pencil, X } from "lucide-react";
+import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent,
@@ -47,6 +48,8 @@ const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }
 };
 
 const AdminEducation = () => {
+  const csrfGuard = useCsrfGuard();
+  const csrfToken = useCsrfToken();
   const [items, setItems] = useState<Education[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<string | null>(null);
@@ -68,27 +71,33 @@ const AdminEducation = () => {
 
   const handleSave = async () => {
     if (!form.degree_title_en.trim()) { toast.error("Degree title (EN) is required"); return; }
-    if (editing) {
-      const { error } = await supabase.from("education").update(form).eq("id", editing);
-      if (error) { toast.error(error.message); return; }
-      toast.success("Updated!");
-    } else {
-      const { error } = await supabase.from("education").insert({ ...form, sort_order: items.length });
-      if (error) { toast.error(error.message); return; }
-      toast.success("Added!");
-    }
-    setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    await csrfGuard(async () => {
+      if (editing) {
+        const { error } = await supabase.from("education").update(form).eq("id", editing);
+        if (error) { toast.error(error.message); return; }
+        toast.success("Updated!");
+      } else {
+        const { error } = await supabase.from("education").insert({ ...form, sort_order: items.length });
+        if (error) { toast.error(error.message); return; }
+        toast.success("Added!");
+      }
+      setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    });
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("education").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Deleted!"); fetchAll();
+    await csrfGuard(async () => {
+      const { error } = await supabase.from("education").delete().eq("id", id);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Deleted!"); fetchAll();
+    });
   };
 
   const toggleActive = async (id: string, val: boolean) => {
-    await supabase.from("education").update({ is_active: val }).eq("id", id);
-    setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i));
+    await csrfGuard(async () => {
+      await supabase.from("education").update({ is_active: val }).eq("id", id);
+      setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i));
+    });
   };
 
   const startEdit = (item: Education) => {
@@ -109,10 +118,12 @@ const AdminEducation = () => {
   };
 
   const saveOrder = async () => {
-    const updates = items.map((item, i) => supabase.from("education").update({ sort_order: i }).eq("id", item.id));
-    await Promise.all(updates);
-    setOrderChanged(false);
-    toast.success("Order saved!");
+    await csrfGuard(async () => {
+      const updates = items.map((item, i) => supabase.from("education").update({ sort_order: i }).eq("id", item.id));
+      await Promise.all(updates);
+      setOrderChanged(false);
+      toast.success("Order saved!");
+    });
   };
 
   const paginated = paginateItems(items, page, pageSize);
@@ -144,6 +155,7 @@ const AdminEducation = () => {
             <div><Label>Year</Label><Input value={form.year} onChange={e => setForm({ ...form, year: e.target.value })} className="mt-1" /></div>
           </div>
           <div className="flex items-center gap-2"><Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} /><Label>Active</Label></div>
+          <input type="hidden" name="_csrf" value={csrfToken || ""} />
           <Button onClick={handleSave}><Save size={14} className="mr-1" />Save</Button>
         </div>
       )}

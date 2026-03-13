@@ -17,6 +17,7 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Tables } from "@/integrations/supabase/types";
 import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
 import { validateTextInput, stripHtml } from "@/lib/sanitize";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 type Notice = Tables<"notices">;
 
@@ -45,6 +46,7 @@ const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }
 };
 
 const AdminNotices = () => {
+  const csrfGuard = useCsrfGuard();
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [orderDirty, setOrderDirty] = useState(false);
@@ -88,54 +90,60 @@ const AdminNotices = () => {
   };
 
   const addNotice = async () => {
-    const { data, error } = await supabase
-      .from("notices")
-      .insert({ title: "New Notice", description: "", date: new Date().toISOString().split("T")[0], sort_order: 0 })
-      .select().single();
-    if (error || !data) { toast.error(error?.message || "Failed"); return; }
-    const updated = notices.map((n, i) => ({ ...n, sort_order: i + 1 }));
-    for (const u of updated) {
-      await supabase.from("notices").update({ sort_order: u.sort_order }).eq("id", u.id);
-    }
-    setNotices([data, ...updated]);
-    setNewNoticeId(data.id);
-    toast.success("Notice added");
+    await csrfGuard(async () => {
+      const { data, error } = await supabase
+        .from("notices")
+        .insert({ title: "New Notice", description: "", date: new Date().toISOString().split("T")[0], sort_order: 0 })
+        .select().single();
+      if (error || !data) { toast.error(error?.message || "Failed"); return; }
+      const updated = notices.map((n, i) => ({ ...n, sort_order: i + 1 }));
+      for (const u of updated) {
+        await supabase.from("notices").update({ sort_order: u.sort_order }).eq("id", u.id);
+      }
+      setNotices([data, ...updated]);
+      setNewNoticeId(data.id);
+      toast.success("Notice added");
+    });
   };
 
   const updateNotice = async (n: Notice) => {
-    // Validate title
     const titleErr = validateTextInput(n.title, "Title", { required: true, maxLength: 300 });
     if (titleErr) { toast.error(titleErr); return; }
-
-    const a = n as any;
-    const { error } = await supabase.from("notices").update({
-      title: stripHtml(n.title).trim(),
-      description: n.description,
-      date: n.date,
-      is_active: n.is_active, is_pinned: a.is_pinned, expires_at: a.expires_at || null,
-      seo_title: a.seo_title || null, seo_description: a.seo_description || null,
-      seo_keywords: a.seo_keywords || null, seo_canonical_url: a.seo_canonical_url || null,
-      seo_og_title: a.seo_og_title || null, seo_og_description: a.seo_og_description || null,
-      seo_og_image: a.seo_og_image || null, seo_twitter_title: a.seo_twitter_title || null,
-      seo_twitter_description: a.seo_twitter_description || null, seo_twitter_image: a.seo_twitter_image || null,
-    } as any).eq("id", n.id);
-    if (error) toast.error(error.message); else toast.success("Updated");
+    await csrfGuard(async () => {
+      const a = n as any;
+      const { error } = await supabase.from("notices").update({
+        title: stripHtml(n.title).trim(),
+        description: n.description,
+        date: n.date,
+        is_active: n.is_active, is_pinned: a.is_pinned, expires_at: a.expires_at || null,
+        seo_title: a.seo_title || null, seo_description: a.seo_description || null,
+        seo_keywords: a.seo_keywords || null, seo_canonical_url: a.seo_canonical_url || null,
+        seo_og_title: a.seo_og_title || null, seo_og_description: a.seo_og_description || null,
+        seo_og_image: a.seo_og_image || null, seo_twitter_title: a.seo_twitter_title || null,
+        seo_twitter_description: a.seo_twitter_description || null, seo_twitter_image: a.seo_twitter_image || null,
+      } as any).eq("id", n.id);
+      if (error) toast.error(error.message); else toast.success("Updated");
+    });
   };
 
   const togglePin = async (n: Notice) => {
-    const newVal = !(n as any).is_pinned;
-    const { error } = await supabase.from("notices").update({ is_pinned: newVal } as any).eq("id", n.id);
-    if (error) { toast.error(error.message); return; }
-    setNotices(prev => prev.map(x => x.id === n.id ? ({ ...x, is_pinned: newVal } as any) : x));
-    toast.success(newVal ? "Pinned" : "Unpinned");
+    await csrfGuard(async () => {
+      const newVal = !(n as any).is_pinned;
+      const { error } = await supabase.from("notices").update({ is_pinned: newVal } as any).eq("id", n.id);
+      if (error) { toast.error(error.message); return; }
+      setNotices(prev => prev.map(x => x.id === n.id ? ({ ...x, is_pinned: newVal } as any) : x));
+      toast.success(newVal ? "Pinned" : "Unpinned");
+    });
   };
 
   const deleteNotice = async (id: string) => {
-    await supabase.from("notices").delete().eq("id", id);
-    setNotices(prev => prev.filter(n => n.id !== id));
-    setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
-    setExpandedDeleteId(null);
-    toast.success("Deleted");
+    await csrfGuard(async () => {
+      await supabase.from("notices").delete().eq("id", id);
+      setNotices(prev => prev.filter(n => n.id !== id));
+      setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
+      setExpandedDeleteId(null);
+      toast.success("Deleted");
+    });
   };
 
   const toggleSelect = (id: string) => {
@@ -148,12 +156,14 @@ const AdminNotices = () => {
   const bulkDelete = async () => {
     if (selectedIds.size === 0) return;
     if (!window.confirm(`Delete ${selectedIds.size} selected notice(s)?`)) return;
-    setBulkDeleting(true);
-    for (const id of selectedIds) { await supabase.from("notices").delete().eq("id", id); }
-    setNotices(prev => prev.filter(n => !selectedIds.has(n.id)));
-    toast.success(`${selectedIds.size} notice(s) deleted`);
-    setSelectedIds(new Set());
-    setBulkDeleting(false);
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      for (const id of selectedIds) { await supabase.from("notices").delete().eq("id", id); }
+      setNotices(prev => prev.filter(n => !selectedIds.has(n.id)));
+      toast.success(`${selectedIds.size} notice(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    });
   };
 
   const updateLocal = (id: string, updates: Record<string, any>) => {
@@ -170,13 +180,15 @@ const AdminNotices = () => {
   };
 
   const saveOrder = useCallback(async () => {
-    setSavingOrder(true);
-    for (let i = 0; i < notices.length; i++) {
-      await supabase.from("notices").update({ sort_order: i }).eq("id", notices[i].id);
-    }
-    setOrderDirty(false); setSavingOrder(false);
-    toast.success("Order saved");
-  }, [notices]);
+    await csrfGuard(async () => {
+      setSavingOrder(true);
+      for (let i = 0; i < notices.length; i++) {
+        await supabase.from("notices").update({ sort_order: i }).eq("id", notices[i].id);
+      }
+      setOrderDirty(false); setSavingOrder(false);
+      toast.success("Order saved");
+    });
+  }, [notices, csrfGuard]);
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 

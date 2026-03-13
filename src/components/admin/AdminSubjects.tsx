@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, GripVertical, Pencil, X } from "lucide-react";
+import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -29,6 +30,8 @@ const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }
 };
 
 const AdminSubjects = () => {
+  const csrfGuard = useCsrfGuard();
+  const csrfToken = useCsrfToken();
   const [items, setItems] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<string | null>(null);
@@ -46,17 +49,19 @@ const AdminSubjects = () => {
     if (!form.subject_name_en.trim() && !form.subject_name_bn.trim()) { toast.error("Subject name (EN or BN) is required"); return; }
     if (!form.category) { toast.error("Category is required"); return; }
     if (!form.icon) { toast.error("Icon is required"); return; }
-    if (editing) { const { error } = await supabase.from("subjects").update(form).eq("id", editing); if (error) { toast.error(error.message); return; } toast.success("Updated!"); }
-    else { const { error } = await supabase.from("subjects").insert({ ...form, sort_order: items.length }); if (error) { toast.error(error.message); return; } toast.success("Added!"); }
-    setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    await csrfGuard(async () => {
+      if (editing) { const { error } = await supabase.from("subjects").update(form).eq("id", editing); if (error) { toast.error(error.message); return; } toast.success("Updated!"); }
+      else { const { error } = await supabase.from("subjects").insert({ ...form, sort_order: items.length }); if (error) { toast.error(error.message); return; } toast.success("Added!"); }
+      setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    });
   };
 
-  const handleDelete = async (id: string) => { await supabase.from("subjects").delete().eq("id", id); toast.success("Deleted!"); fetchAll(); };
-  const toggleActive = async (id: string, val: boolean) => { await supabase.from("subjects").update({ is_active: val }).eq("id", id); setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i)); };
+  const handleDelete = async (id: string) => { await csrfGuard(async () => { await supabase.from("subjects").delete().eq("id", id); toast.success("Deleted!"); fetchAll(); }); };
+  const toggleActive = async (id: string, val: boolean) => { await csrfGuard(async () => { await supabase.from("subjects").update({ is_active: val }).eq("id", id); setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i)); }); };
   const startEdit = (item: Subject) => { setEditing(item.id); setForm({ category: item.category, subject_name_en: item.subject_name_en, subject_name_bn: item.subject_name_bn, icon: item.icon, sort_order: item.sort_order, is_active: item.is_active }); setAdding(false); };
 
   const handleDragEnd = (event: DragEndEvent) => { const { active, over } = event; if (!over || active.id === over.id) return; setItems(prev => arrayMove(prev, prev.findIndex(i => i.id === active.id), prev.findIndex(i => i.id === over.id))); setOrderChanged(true); };
-  const saveOrder = async () => { await Promise.all(items.map((item, i) => supabase.from("subjects").update({ sort_order: i }).eq("id", item.id))); setOrderChanged(false); toast.success("Order saved!"); };
+  const saveOrder = async () => { await csrfGuard(async () => { await Promise.all(items.map((item, i) => supabase.from("subjects").update({ sort_order: i }).eq("id", item.id))); setOrderChanged(false); toast.success("Order saved!"); }); };
 
   const paginated = paginateItems(items, page, pageSize);
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
@@ -94,6 +99,7 @@ const AdminSubjects = () => {
             <div><Label>Subject Name (BN)</Label><Input value={form.subject_name_bn} onChange={e => setForm({ ...form, subject_name_bn: e.target.value })} className="mt-1" /></div>
           </div>
           <div className="flex items-center gap-2"><Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} /><Label>Active</Label></div>
+          <input type="hidden" name="_csrf" value={csrfToken || ""} />
           <Button onClick={handleSave}><Save size={14} className="mr-1" />Save</Button>
         </div>
       )}

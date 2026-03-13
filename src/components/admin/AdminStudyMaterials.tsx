@@ -14,6 +14,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { secureUpload } from "@/lib/secureUpload";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
@@ -74,6 +75,7 @@ const uploadToStorage = async (file: File) => {
 };
 
 const AdminStudyMaterials = () => {
+  const csrfGuard = useCsrfGuard();
   const [items, setItems] = useState<Material[]>([]);
   const [categories, setCategories] = useState<StudyCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -187,29 +189,34 @@ const AdminStudyMaterials = () => {
 
   // --- Material CRUD ---
   const add = async () => {
-    const defaultCat = activeCategoryNames[0] || "Uncategorized";
-    const { data, error } = await supabase.from("study_materials").insert({ title: "New Material", category: defaultCat, sort_order: 0 }).select().single();
-    if (error || !data) { toast.error(error?.message || "Failed"); return; }
-    // Shift existing sort_orders
-    const updated = items.map((n, i) => ({ ...n, sort_order: i + 1 }));
-    for (const u of updated) {
-      await supabase.from("study_materials").update({ sort_order: u.sort_order }).eq("id", u.id);
-    }
-    setItems([data, ...updated]);
-    setNewItemId(data.id);
-    toast.success("Added");
+    await csrfGuard(async () => {
+      const defaultCat = activeCategoryNames[0] || "Uncategorized";
+      const { data, error } = await supabase.from("study_materials").insert({ title: "New Material", category: defaultCat, sort_order: 0 }).select().single();
+      if (error || !data) { toast.error(error?.message || "Failed"); return; }
+      const updated = items.map((n, i) => ({ ...n, sort_order: i + 1 }));
+      for (const u of updated) {
+        await supabase.from("study_materials").update({ sort_order: u.sort_order }).eq("id", u.id);
+      }
+      setItems([data, ...updated]);
+      setNewItemId(data.id);
+      toast.success("Added");
+    });
   };
 
   const update = async (id: string, updates: Partial<Material>) => {
-    const { error } = await supabase.from("study_materials").update(updates).eq("id", id);
-    if (error) toast.error(error.message); else toast.success("Updated");
+    await csrfGuard(async () => {
+      const { error } = await supabase.from("study_materials").update(updates).eq("id", id);
+      if (error) toast.error(error.message); else toast.success("Updated");
+    });
   };
 
   const remove = async (id: string) => {
-    await supabase.from("study_materials").delete().eq("id", id);
-    setItems(prev => prev.filter(n => n.id !== id));
-    setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
-    toast.success("Deleted");
+    await csrfGuard(async () => {
+      await supabase.from("study_materials").delete().eq("id", id);
+      setItems(prev => prev.filter(n => n.id !== id));
+      setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
+      toast.success("Deleted");
+    });
   };
 
   const toggleSelect = (id: string) => {
@@ -237,14 +244,16 @@ const AdminStudyMaterials = () => {
   const bulkDelete = async () => {
     if (selectedIds.size === 0) return;
     if (!window.confirm(`Delete ${selectedIds.size} selected item(s)? This cannot be undone.`)) return;
-    setBulkDeleting(true);
-    for (const id of selectedIds) {
-      await supabase.from("study_materials").delete().eq("id", id);
-    }
-    setItems(prev => prev.filter(n => !selectedIds.has(n.id)));
-    toast.success(`${selectedIds.size} item(s) deleted`);
-    setSelectedIds(new Set());
-    setBulkDeleting(false);
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      for (const id of selectedIds) {
+        await supabase.from("study_materials").delete().eq("id", id);
+      }
+      setItems(prev => prev.filter(n => !selectedIds.has(n.id)));
+      toast.success(`${selectedIds.size} item(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    });
   };
 
   const updateLocal = (id: string, field: string, value: string | number | boolean | null) => {
@@ -262,14 +271,16 @@ const AdminStudyMaterials = () => {
   }, [items]);
 
   const saveOrder = useCallback(async () => {
-    setSavingOrder(true);
-    for (let i = 0; i < items.length; i++) {
-      await supabase.from("study_materials").update({ sort_order: i }).eq("id", items[i].id);
-    }
-    setOrderDirty(false);
-    setSavingOrder(false);
-    toast.success("Order saved");
-  }, [items]);
+    await csrfGuard(async () => {
+      setSavingOrder(true);
+      for (let i = 0; i < items.length; i++) {
+        await supabase.from("study_materials").update({ sort_order: i }).eq("id", items[i].id);
+      }
+      setOrderDirty(false);
+      setSavingOrder(false);
+      toast.success("Order saved");
+    });
+  }, [items, csrfGuard]);
 
   // --- Category CRUD ---
   const addCategory = async () => {

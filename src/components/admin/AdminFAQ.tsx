@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
 import { Plus, Trash2, Save, GripVertical, Pencil, X } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
@@ -36,6 +37,8 @@ const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }
 };
 
 const AdminFAQ = () => {
+  const csrfGuard = useCsrfGuard();
+  const csrfToken = useCsrfToken();
   const [items, setItems] = useState<FAQItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedEditId, setExpandedEditId] = useState<string | null>(null);
@@ -62,33 +65,41 @@ const AdminFAQ = () => {
   };
 
   const add = async () => {
-    const { data, error } = await supabase.from("faq").insert({ question: "New Question?", answer: "Answer here.", question_bn: "", answer_bn: "", sort_order: 0 }).select().single();
-    if (error || !data) { toast.error(error?.message || "Failed"); return; }
-    toast.success("Added");
-    newIdRef.current = data.id;
-    setExpandedEditId(data.id);
-    setItems(prev => [data as FAQItem, ...prev]);
+    await csrfGuard(async () => {
+      const { data, error } = await supabase.from("faq").insert({ question: "New Question?", answer: "Answer here.", question_bn: "", answer_bn: "", sort_order: 0 }).select().single();
+      if (error || !data) { toast.error(error?.message || "Failed"); return; }
+      toast.success("Added");
+      newIdRef.current = data.id;
+      setExpandedEditId(data.id);
+      setItems(prev => [data as FAQItem, ...prev]);
+    });
   };
 
   const update = async (id: string, updates: Partial<FAQItem>) => {
-    const { error } = await supabase.from("faq").update(updates).eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Updated");
-    setExpandedEditId(null);
+    await csrfGuard(async () => {
+      const { error } = await supabase.from("faq").update(updates).eq("id", id);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Updated");
+      setExpandedEditId(null);
+    });
   };
 
   const toggleActive = async (item: FAQItem) => {
-    const newVal = !item.is_active;
-    setItems(prev => prev.map(x => x.id === item.id ? { ...x, is_active: newVal } : x));
-    const { error } = await supabase.from("faq").update({ is_active: newVal }).eq("id", item.id);
-    if (error) toast.error(error.message); else toast.success(newVal ? "Activated" : "Deactivated");
+    await csrfGuard(async () => {
+      const newVal = !item.is_active;
+      setItems(prev => prev.map(x => x.id === item.id ? { ...x, is_active: newVal } : x));
+      const { error } = await supabase.from("faq").update({ is_active: newVal }).eq("id", item.id);
+      if (error) toast.error(error.message); else toast.success(newVal ? "Activated" : "Deactivated");
+    });
   };
 
   const remove = async (id: string) => {
-    await supabase.from("faq").delete().eq("id", id);
-    setItems(prev => prev.filter(n => n.id !== id));
-    setExpandedDeleteId(null);
-    toast.success("Deleted");
+    await csrfGuard(async () => {
+      await supabase.from("faq").delete().eq("id", id);
+      setItems(prev => prev.filter(n => n.id !== id));
+      setExpandedDeleteId(null);
+      toast.success("Deleted");
+    });
   };
 
   const updateLocal = (id: string, field: string, value: string) => {
@@ -110,10 +121,12 @@ const AdminFAQ = () => {
   }, []);
 
   const saveOrder = async () => {
-    const promises = items.map((item, i) => supabase.from("faq").update({ sort_order: i }).eq("id", item.id));
-    await Promise.all(promises);
-    setOrderChanged(false);
-    toast.success("Order saved");
+    await csrfGuard(async () => {
+      const promises = items.map((item, i) => supabase.from("faq").update({ sort_order: i }).eq("id", item.id));
+      await Promise.all(promises);
+      setOrderChanged(false);
+      toast.success("Order saved");
+    });
   };
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
@@ -181,6 +194,7 @@ const AdminFAQ = () => {
                       <Textarea value={item.answer_bn} onChange={e => updateLocal(item.id, "answer_bn", e.target.value)} placeholder="বাংলায় উত্তর লিখুন" rows={3} className="mt-1" />
                     </div>
                     <div className="flex gap-2">
+                      <input type="hidden" name="_csrf" value={csrfToken || ""} />
                       <Button size="sm" onClick={() => update(item.id, { question: item.question, answer: item.answer, question_bn: item.question_bn, answer_bn: item.answer_bn })}><Save size={14} className="mr-1" /> Save</Button>
                       <Button size="sm" variant="outline" onClick={() => setExpandedEditId(null)}><X size={14} className="mr-1" /> Cancel</Button>
                     </div>

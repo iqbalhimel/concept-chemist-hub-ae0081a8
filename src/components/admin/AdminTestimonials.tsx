@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, GripVertical, Pencil, Star, X, MessageSquareQuote } from "lucide-react";
+import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent,
@@ -58,6 +59,8 @@ const StarRating = ({ value, onChange }: { value: number; onChange: (v: number) 
 );
 
 const AdminTestimonials = () => {
+  const csrfGuard = useCsrfGuard();
+  const csrfToken = useCsrfToken();
   const [items, setItems] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [editId, setEditId] = useState<string | null>(null);
@@ -104,15 +107,17 @@ const AdminTestimonials = () => {
     if (!form.student_name.trim()) { toast.error("Student name is required"); return; }
     if (!form.testimonial_text_en.trim() && !form.testimonial_text_bn.trim()) { toast.error("At least one testimonial text is required"); return; }
 
-    if (editId) {
-      const { error } = await supabase.from("testimonials").update(form).eq("id", editId);
-      if (error) toast.error("Update failed");
-      else { toast.success("Testimonial updated"); resetForm(); fetchItems(); }
-    } else {
-      const { error } = await supabase.from("testimonials").insert({ ...form, sort_order: items.length });
-      if (error) toast.error("Insert failed");
-      else { toast.success("Testimonial added"); resetForm(); fetchItems(); }
-    }
+    await csrfGuard(async () => {
+      if (editId) {
+        const { error } = await supabase.from("testimonials").update(form).eq("id", editId);
+        if (error) toast.error("Update failed");
+        else { toast.success("Testimonial updated"); resetForm(); fetchItems(); }
+      } else {
+        const { error } = await supabase.from("testimonials").insert({ ...form, sort_order: items.length });
+        if (error) toast.error("Insert failed");
+        else { toast.success("Testimonial added"); resetForm(); fetchItems(); }
+      }
+    });
   };
 
   const handleEdit = (item: Testimonial) => {
@@ -131,9 +136,11 @@ const AdminTestimonials = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this testimonial?")) return;
-    const { error } = await supabase.from("testimonials").delete().eq("id", id);
-    if (error) toast.error("Delete failed");
-    else { toast.success("Deleted"); if (editId === id) resetForm(); fetchItems(); }
+    await csrfGuard(async () => {
+      const { error } = await supabase.from("testimonials").delete().eq("id", id);
+      if (error) toast.error("Delete failed");
+      else { toast.success("Deleted"); if (editId === id) resetForm(); fetchItems(); }
+    });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -147,12 +154,14 @@ const AdminTestimonials = () => {
   };
 
   const saveOrder = async () => {
-    const updates = items.map((item, idx) =>
-      supabase.from("testimonials").update({ sort_order: idx }).eq("id", item.id)
-    );
-    await Promise.all(updates);
-    setOrderDirty(false);
-    toast.success("Order saved");
+    await csrfGuard(async () => {
+      const updates = items.map((item, idx) =>
+        supabase.from("testimonials").update({ sort_order: idx }).eq("id", item.id)
+      );
+      await Promise.all(updates);
+      setOrderDirty(false);
+      toast.success("Order saved");
+    });
   };
 
   const paginated = paginateItems(items, page, pageSize);
@@ -218,6 +227,7 @@ const AdminTestimonials = () => {
             </div>
           </div>
           <div className="flex gap-2 pt-2">
+            <input type="hidden" name="_csrf" value={csrfToken || ""} />
             <Button onClick={handleSave} size="sm"><Save size={14} className="mr-1" /> Save</Button>
             <Button variant="ghost" size="sm" onClick={resetForm}>Cancel</Button>
           </div>

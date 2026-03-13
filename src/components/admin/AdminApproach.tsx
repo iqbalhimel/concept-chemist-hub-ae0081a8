@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, GripVertical, Pencil, X } from "lucide-react";
+import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -57,6 +58,8 @@ const SortableCard = ({ item, toggleActive, startEdit, handleDelete }: {
 };
 
 const AdminApproach = () => {
+  const csrfGuard = useCsrfGuard();
+  const csrfToken = useCsrfToken();
   const [items, setItems] = useState<Approach[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<string | null>(null);
@@ -73,17 +76,19 @@ const AdminApproach = () => {
   const handleSave = async () => {
     if (!form.title_en.trim() && !form.title_bn.trim()) { toast.error("Title (EN or BN) is required"); return; }
     if (!form.icon) { toast.error("Icon is required"); return; }
-    if (editing) { const { error } = await supabase.from("teaching_approach").update(form).eq("id", editing); if (error) { toast.error(error.message); return; } toast.success("Updated!"); }
-    else { const { error } = await supabase.from("teaching_approach").insert({ ...form, sort_order: items.length }); if (error) { toast.error(error.message); return; } toast.success("Added!"); }
-    setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    await csrfGuard(async () => {
+      if (editing) { const { error } = await supabase.from("teaching_approach").update(form).eq("id", editing); if (error) { toast.error(error.message); return; } toast.success("Updated!"); }
+      else { const { error } = await supabase.from("teaching_approach").insert({ ...form, sort_order: items.length }); if (error) { toast.error(error.message); return; } toast.success("Added!"); }
+      setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    });
   };
 
-  const handleDelete = async (id: string) => { await supabase.from("teaching_approach").delete().eq("id", id); toast.success("Deleted!"); fetchAll(); };
-  const toggleActive = async (id: string, val: boolean) => { await supabase.from("teaching_approach").update({ is_active: val }).eq("id", id); setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i)); };
+  const handleDelete = async (id: string) => { await csrfGuard(async () => { await supabase.from("teaching_approach").delete().eq("id", id); toast.success("Deleted!"); fetchAll(); }); };
+  const toggleActive = async (id: string, val: boolean) => { await csrfGuard(async () => { await supabase.from("teaching_approach").update({ is_active: val }).eq("id", id); setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i)); }); };
   const startEdit = (item: Approach) => { setEditing(item.id); setForm({ title_en: item.title_en, title_bn: item.title_bn, description_en: item.description_en, description_bn: item.description_bn, icon: item.icon, sort_order: item.sort_order, is_active: item.is_active }); setAdding(false); };
 
   const handleDragEnd = (event: DragEndEvent) => { const { active, over } = event; if (!over || active.id === over.id) return; setItems(prev => arrayMove(prev, prev.findIndex(i => i.id === active.id), prev.findIndex(i => i.id === over.id))); setOrderChanged(true); };
-  const saveOrder = async () => { await Promise.all(items.map((item, i) => supabase.from("teaching_approach").update({ sort_order: i }).eq("id", item.id))); setOrderChanged(false); toast.success("Order saved!"); };
+  const saveOrder = async () => { await csrfGuard(async () => { await Promise.all(items.map((item, i) => supabase.from("teaching_approach").update({ sort_order: i }).eq("id", item.id))); setOrderChanged(false); toast.success("Order saved!"); }); };
 
   const paginated = paginateItems(items, page, pageSize);
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
@@ -117,6 +122,7 @@ const AdminApproach = () => {
             </div>
           </div>
           <div className="flex items-center gap-2"><Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} /><Label>Active</Label></div>
+          <input type="hidden" name="_csrf" value={csrfToken || ""} />
           <Button onClick={handleSave}><Save size={14} className="mr-1" />Save</Button>
         </div>
       )}

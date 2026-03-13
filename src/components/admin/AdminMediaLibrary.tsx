@@ -8,6 +8,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { compressImage } from "@/lib/imageCompression";
 import { secureUpload } from "@/lib/secureUpload";
 import AdminPagination, { paginateItems } from "./AdminPagination";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 type Media = Tables<"media_library">;
 
@@ -33,6 +34,7 @@ const getTypeLabel = (type: string) => {
 };
 
 const AdminMediaLibrary = () => {
+  const csrfGuard = useCsrfGuard();
   const [items, setItems] = useState<Media[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -102,14 +104,16 @@ const AdminMediaLibrary = () => {
   };
 
   const remove = async (item: Media) => {
-    const urlParts = item.file_url.split("/media/");
-    if (urlParts[1]) {
-      await supabase.storage.from("media").remove([urlParts[1]]);
-    }
-    await supabase.from("media_library").delete().eq("id", item.id);
-    setItems(prev => prev.filter(n => n.id !== item.id));
-    setExpandedDeleteId(null);
-    toast.success("Deleted");
+    await csrfGuard(async () => {
+      const urlParts = item.file_url.split("/media/");
+      if (urlParts[1]) {
+        await supabase.storage.from("media").remove([urlParts[1]]);
+      }
+      await supabase.from("media_library").delete().eq("id", item.id);
+      setItems(prev => prev.filter(n => n.id !== item.id));
+      setExpandedDeleteId(null);
+      toast.success("Deleted");
+    });
   };
 
   const copyUrl = (url: string) => {

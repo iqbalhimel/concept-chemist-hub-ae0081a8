@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BrightnessProvider } from "@/contexts/BrightnessContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { CsrfProvider } from "@/contexts/CsrfContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ThemeLoader from "@/components/ThemeLoader";
 import HreflangTags from "@/components/HreflangTags";
@@ -99,6 +100,7 @@ const App = () => (
       <Sonner />
       <BrightnessProvider>
         <AuthProvider>
+          <CsrfProvider>
           <ThemeLoader />
           <PerformanceApplier />
           <BrowserRouter>
@@ -109,6 +111,7 @@ const App = () => (
           <Suspense fallback={null}>
             <AtmosphereDebugBadge />
           </Suspense>
+        </CsrfProvider>
         </AuthProvider>
       </BrightnessProvider>
     </TooltipProvider>

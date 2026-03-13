@@ -23,6 +23,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Tables } from "@/integrations/supabase/types";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 type Post = Tables<"blog_posts">;
 
@@ -240,6 +241,7 @@ const EditPanel = ({
 /* ── Main Component ──────────────────────────────── */
 
 const AdminBlogPosts = () => {
+  const csrfGuard = useCsrfGuard();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -261,12 +263,14 @@ const AdminBlogPosts = () => {
   };
 
   const add = async () => {
-    const maxOrder = posts.length > 0 ? Math.max(...posts.map(p => (p as any).sort_order ?? 0)) + 1 : 0;
-    const newSlug = slugify("new-post") + "-" + Date.now().toString(36);
-    const { error } = await supabase.from("blog_posts").insert({ title: "New Post", category: "General", excerpt: "", content: "", sort_order: maxOrder, slug: newSlug } as any);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Post added");
-    fetchAll();
+    await csrfGuard(async () => {
+      const maxOrder = posts.length > 0 ? Math.max(...posts.map(p => (p as any).sort_order ?? 0)) + 1 : 0;
+      const newSlug = slugify("new-post") + "-" + Date.now().toString(36);
+      const { error } = await supabase.from("blog_posts").insert({ title: "New Post", category: "General", excerpt: "", content: "", sort_order: maxOrder, slug: newSlug } as any);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Post added");
+      fetchAll();
+    });
   };
 
   const updateLocal = (id: string, field: string, value: string | boolean) => {
@@ -274,54 +278,53 @@ const AdminBlogPosts = () => {
   };
 
   const savePost = async (post: Post) => {
-    // Validate required fields
     const titleErr = validateTextInput(post.title, "Title", { required: true, maxLength: 300 });
     if (titleErr) { toast.error(titleErr); return; }
-
     const categoryErr = validateTextInput(post.category, "Category", { required: true, maxLength: 100 });
     if (categoryErr) { toast.error(categoryErr); return; }
-
-    // Sanitize HTML content before saving
-    const sanitizedContent = post.content ? sanitizeHtml(post.content) : null;
-
-    const { error } = await supabase.from("blog_posts").update({
-      title: stripHtml(post.title).trim(),
-      category: stripHtml(post.category).trim(),
-      excerpt: post.excerpt ? stripHtml(post.excerpt).trim() : null,
-      content: sanitizedContent,
-      read_time: post.read_time,
-      is_published: post.is_published,
-      featured_image: (post as any).featured_image || null,
-      scheduled_at: (post as any).scheduled_at || null,
-      slug: (post as any).slug || null,
-      seo_title: (post as any).seo_title || null,
-      seo_description: (post as any).seo_description || null,
-      seo_keywords: (post as any).seo_keywords || null,
-      seo_canonical_url: (post as any).seo_canonical_url || null,
-      seo_og_title: (post as any).seo_og_title || null,
-      seo_og_description: (post as any).seo_og_description || null,
-      seo_og_image: (post as any).seo_og_image || null,
-      seo_twitter_title: (post as any).seo_twitter_title || null,
-      seo_twitter_description: (post as any).seo_twitter_description || null,
-      seo_twitter_image: (post as any).seo_twitter_image || null,
-    } as any).eq("id", post.id);
-    if (error) {
-      if (error.message.includes("blog_posts_slug_unique")) {
-        toast.error("This slug is already in use. Please choose a different one.");
+    await csrfGuard(async () => {
+      const sanitizedContent = post.content ? sanitizeHtml(post.content) : null;
+      const { error } = await supabase.from("blog_posts").update({
+        title: stripHtml(post.title).trim(),
+        category: stripHtml(post.category).trim(),
+        excerpt: post.excerpt ? stripHtml(post.excerpt).trim() : null,
+        content: sanitizedContent,
+        read_time: post.read_time,
+        is_published: post.is_published,
+        featured_image: (post as any).featured_image || null,
+        scheduled_at: (post as any).scheduled_at || null,
+        slug: (post as any).slug || null,
+        seo_title: (post as any).seo_title || null,
+        seo_description: (post as any).seo_description || null,
+        seo_keywords: (post as any).seo_keywords || null,
+        seo_canonical_url: (post as any).seo_canonical_url || null,
+        seo_og_title: (post as any).seo_og_title || null,
+        seo_og_description: (post as any).seo_og_description || null,
+        seo_og_image: (post as any).seo_og_image || null,
+        seo_twitter_title: (post as any).seo_twitter_title || null,
+        seo_twitter_description: (post as any).seo_twitter_description || null,
+        seo_twitter_image: (post as any).seo_twitter_image || null,
+      } as any).eq("id", post.id);
+      if (error) {
+        if (error.message.includes("blog_posts_slug_unique")) {
+          toast.error("This slug is already in use. Please choose a different one.");
+        } else {
+          toast.error(error.message);
+        }
       } else {
-        toast.error(error.message);
+        toast.success("Post saved");
       }
-    } else {
-      toast.success("Post saved");
-    }
+    });
   };
 
   const remove = async (id: string) => {
     if (!window.confirm("Delete this post? This cannot be undone.")) return;
-    await supabase.from("blog_posts").delete().eq("id", id);
-    setPosts(prev => prev.filter(p => p.id !== id));
-    if (editingId === id) setEditingId(null);
-    toast.success("Deleted");
+    await csrfGuard(async () => {
+      await supabase.from("blog_posts").delete().eq("id", id);
+      setPosts(prev => prev.filter(p => p.id !== id));
+      if (editingId === id) setEditingId(null);
+      toast.success("Deleted");
+    });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -337,12 +340,14 @@ const AdminBlogPosts = () => {
 
   const saveOrder = async () => {
     setSavingOrder(true);
-    for (let i = 0; i < posts.length; i++) {
-      await supabase.from("blog_posts").update({ sort_order: i } as any).eq("id", posts[i].id);
-    }
-    setOrderChanged(false);
+    await csrfGuard(async () => {
+      for (let i = 0; i < posts.length; i++) {
+        await supabase.from("blog_posts").update({ sort_order: i } as any).eq("id", posts[i].id);
+      }
+      setOrderChanged(false);
+      toast.success("Order saved");
+    });
     setSavingOrder(false);
-    toast.success("Order saved");
   };
 
   const categories = useMemo(() => [...new Set(posts.map(p => p.category))].sort(), [posts]);

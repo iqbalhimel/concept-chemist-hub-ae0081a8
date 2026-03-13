@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Save, Upload, Search, Globe, FileText, Code } from "lucide-react";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import { compressImage } from "@/lib/imageCompression";
 import { secureUpload } from "@/lib/secureUpload";
 import { invalidateSiteSettings } from "@/hooks/useSiteSettings";
@@ -48,6 +49,7 @@ const TwitterPreview = ({ title, description, image }: { title: string; descript
 /* ── Main Component ───────────────────────────────── */
 
 const AdminSEO = () => {
+  const csrfGuard = useCsrfGuard();
   const [fields, setFields] = useState<Record<string, string>>({});
   const [robotsTxt, setRobotsTxt] = useState("");
   const [loading, setLoading] = useState(true);
@@ -76,23 +78,26 @@ const AdminSEO = () => {
 
   const handleSave = async (section: string) => {
     setSaving(section);
-    if (section === "robots") {
+    await csrfGuard(async () => {
+      if (section === "robots") {
+        const { error } = await supabase
+          .from("site_settings")
+          .upsert({ key: ROBOTS_KEY, value: { content: robotsTxt } }, { onConflict: "key" });
+        setSaving(null);
+        if (error) { toast.error("Failed: " + error.message); return; }
+        invalidateSiteSettings();
+        toast.success("robots.txt saved!");
+        return;
+      }
       const { error } = await supabase
         .from("site_settings")
-        .upsert({ key: ROBOTS_KEY, value: { content: robotsTxt } }, { onConflict: "key" });
+        .upsert({ key: SECTION_KEY, value: fields }, { onConflict: "key" });
       setSaving(null);
       if (error) { toast.error("Failed: " + error.message); return; }
       invalidateSiteSettings();
-      toast.success("robots.txt saved!");
-      return;
-    }
-    const { error } = await supabase
-      .from("site_settings")
-      .upsert({ key: SECTION_KEY, value: fields }, { onConflict: "key" });
+      toast.success("SEO settings saved!");
+    });
     setSaving(null);
-    if (error) { toast.error("Failed: " + error.message); return; }
-    invalidateSiteSettings();
-    toast.success("SEO settings saved!");
   };
 
   const handleImageUpload = async (field: string, file: File, ref: React.RefObject<HTMLInputElement | null>) => {

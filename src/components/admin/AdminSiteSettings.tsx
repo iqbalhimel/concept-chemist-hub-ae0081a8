@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Save, Upload, Globe, Search, Bell, MessageCircle, FileText, Settings2, Atom } from "lucide-react";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import { Slider } from "@/components/ui/slider";
 import { compressImage } from "@/lib/imageCompression";
 import { secureUpload } from "@/lib/secureUpload";
@@ -180,6 +181,7 @@ const sections: SectionDef[] = [
 ];
 
 const AdminSiteSettings = () => {
+  const csrfGuard = useCsrfGuard();
   const [settings, setSettings] = useState<Record<string, Record<string, string>>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
@@ -202,17 +204,20 @@ const AdminSiteSettings = () => {
 
   const handleSave = async (key: string) => {
     setSaving(key);
-    const value = settings[key] || {};
-    const { error } = await supabase
-      .from("site_settings")
-      .upsert({ key, value }, { onConflict: "key" });
+    await csrfGuard(async () => {
+      const value = settings[key] || {};
+      const { error } = await supabase
+        .from("site_settings")
+        .upsert({ key, value }, { onConflict: "key" });
+      setSaving(null);
+      if (error) {
+        toast.error("Failed to save: " + error.message);
+      } else {
+        invalidateSiteSettings();
+        toast.success(`${sections.find(s => s.key === key)?.label || key} saved!`);
+      }
+    });
     setSaving(null);
-    if (error) {
-      toast.error("Failed to save: " + error.message);
-    } else {
-      invalidateSiteSettings();
-      toast.success(`${sections.find(s => s.key === key)?.label || key} saved!`);
-    }
   };
 
   const updateField = (section: string, field: string, value: string) => {
