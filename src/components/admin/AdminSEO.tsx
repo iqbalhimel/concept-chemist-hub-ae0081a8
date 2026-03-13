@@ -49,6 +49,7 @@ const TwitterPreview = ({ title, description, image }: { title: string; descript
 /* ── Main Component ───────────────────────────────── */
 
 const AdminSEO = () => {
+  const csrfGuard = useCsrfGuard();
   const [fields, setFields] = useState<Record<string, string>>({});
   const [robotsTxt, setRobotsTxt] = useState("");
   const [loading, setLoading] = useState(true);
