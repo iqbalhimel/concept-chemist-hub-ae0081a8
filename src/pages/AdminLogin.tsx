@@ -23,17 +23,47 @@ const AdminLogin = () => {
     }
   }, [user, isAdmin, navigate]);
 
+  // Re-check rate limit on mount & periodically to clear expired lockouts
+  useEffect(() => {
+    const check = () => {
+      const result = checkRateLimit();
+      setRateLimitMsg(result.allowed ? null : result.message || null);
+    };
+    check();
+    const interval = setInterval(check, 10_000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
+
+    // Check rate limit before attempting login
+    const limitCheck = checkRateLimit();
+    if (!limitCheck.allowed) {
+      setRateLimitMsg(limitCheck.message || "Too many attempts.");
+      toast.error(limitCheck.message || "Too many login attempts.");
+      return;
+    }
+
     setSubmitting(true);
     const { error } = await signIn(email.trim(), password);
     if (error) {
-      toast.error("Login failed: " + error.message);
+      recordFailedAttempt();
+      // Re-check after recording
+      const recheck = checkRateLimit();
+      if (!recheck.allowed) {
+        setRateLimitMsg(recheck.message || null);
+        toast.error(recheck.message || "Too many login attempts.");
+      } else {
+        toast.error("Login failed: " + error.message);
+      }
       setSubmitting(false);
       return;
     }
-    // Wait a moment for auth state to propagate, then check admin
+    // Success — reset rate limiter
+    resetRateLimit();
+    setRateLimitMsg(null);
     setTimeout(() => {
       navigate("/admin", { replace: true });
       setSubmitting(false);
