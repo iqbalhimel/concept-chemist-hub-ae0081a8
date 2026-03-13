@@ -65,33 +65,41 @@ const AdminFAQ = () => {
   };
 
   const add = async () => {
-    const { data, error } = await supabase.from("faq").insert({ question: "New Question?", answer: "Answer here.", question_bn: "", answer_bn: "", sort_order: 0 }).select().single();
-    if (error || !data) { toast.error(error?.message || "Failed"); return; }
-    toast.success("Added");
-    newIdRef.current = data.id;
-    setExpandedEditId(data.id);
-    setItems(prev => [data as FAQItem, ...prev]);
+    await csrfGuard(async () => {
+      const { data, error } = await supabase.from("faq").insert({ question: "New Question?", answer: "Answer here.", question_bn: "", answer_bn: "", sort_order: 0 }).select().single();
+      if (error || !data) { toast.error(error?.message || "Failed"); return; }
+      toast.success("Added");
+      newIdRef.current = data.id;
+      setExpandedEditId(data.id);
+      setItems(prev => [data as FAQItem, ...prev]);
+    });
   };
 
   const update = async (id: string, updates: Partial<FAQItem>) => {
-    const { error } = await supabase.from("faq").update(updates).eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Updated");
-    setExpandedEditId(null);
+    await csrfGuard(async () => {
+      const { error } = await supabase.from("faq").update(updates).eq("id", id);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Updated");
+      setExpandedEditId(null);
+    });
   };
 
   const toggleActive = async (item: FAQItem) => {
-    const newVal = !item.is_active;
-    setItems(prev => prev.map(x => x.id === item.id ? { ...x, is_active: newVal } : x));
-    const { error } = await supabase.from("faq").update({ is_active: newVal }).eq("id", item.id);
-    if (error) toast.error(error.message); else toast.success(newVal ? "Activated" : "Deactivated");
+    await csrfGuard(async () => {
+      const newVal = !item.is_active;
+      setItems(prev => prev.map(x => x.id === item.id ? { ...x, is_active: newVal } : x));
+      const { error } = await supabase.from("faq").update({ is_active: newVal }).eq("id", item.id);
+      if (error) toast.error(error.message); else toast.success(newVal ? "Activated" : "Deactivated");
+    });
   };
 
   const remove = async (id: string) => {
-    await supabase.from("faq").delete().eq("id", id);
-    setItems(prev => prev.filter(n => n.id !== id));
-    setExpandedDeleteId(null);
-    toast.success("Deleted");
+    await csrfGuard(async () => {
+      await supabase.from("faq").delete().eq("id", id);
+      setItems(prev => prev.filter(n => n.id !== id));
+      setExpandedDeleteId(null);
+      toast.success("Deleted");
+    });
   };
 
   const updateLocal = (id: string, field: string, value: string) => {
