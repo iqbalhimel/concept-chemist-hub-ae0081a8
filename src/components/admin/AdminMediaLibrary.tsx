@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Upload, Trash2, Copy, FileText, Search } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { compressImage } from "@/lib/imageCompression";
+import { logSecurityEvent } from "@/lib/securityLogger";
 import { secureUpload } from "@/lib/secureUpload";
 import AdminPagination, { paginateItems } from "./AdminPagination";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
