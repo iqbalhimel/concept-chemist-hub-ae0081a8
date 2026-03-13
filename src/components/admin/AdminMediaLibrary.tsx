@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Upload, Trash2, Copy, FileText, Search } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { compressImage } from "@/lib/imageCompression";
+import { logSecurityEvent } from "@/lib/securityLogger";
 import { secureUpload } from "@/lib/secureUpload";
 import AdminPagination, { paginateItems } from "./AdminPagination";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
@@ -96,7 +97,10 @@ const AdminMediaLibrary = () => {
         continue;
       }
     }
-
+    logSecurityEvent({
+      event_type: "file_upload",
+      description: `Uploaded ${Array.from(files).length} file(s) to media library`,
+    });
     toast.success("Upload complete");
     setUploading(false);
     setPage(1);
@@ -113,7 +117,7 @@ const AdminMediaLibrary = () => {
       setItems(prev => prev.filter(n => n.id !== item.id));
       setExpandedDeleteId(null);
       toast.success("Deleted");
-    });
+    }, "content_delete", `Deleted media: ${item.name}`);
   };
 
   const copyUrl = (url: string) => {

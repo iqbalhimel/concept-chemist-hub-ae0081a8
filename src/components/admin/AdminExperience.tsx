@@ -66,10 +66,10 @@ const AdminExperience = () => {
         toast.success("Added!");
       }
       setEditing(null); setAdding(false); setForm(empty); fetchAll();
-    });
+    }, editing ? "content_update" : "content_create", `${editing ? "Updated" : "Created"} experience: ${form.job_title_en}`);
   };
 
-  const handleDelete = async (id: string) => { await csrfGuard(async () => { const { error } = await supabase.from("experience").delete().eq("id", id); if (error) { toast.error(error.message); return; } toast.success("Deleted!"); fetchAll(); }); };
+  const handleDelete = async (id: string) => { await csrfGuard(async () => { const { error } = await supabase.from("experience").delete().eq("id", id); if (error) { toast.error(error.message); return; } toast.success("Deleted!"); fetchAll(); }, "content_delete", "Deleted experience item"); };
   const toggleActive = async (id: string, val: boolean) => { await csrfGuard(async () => { await supabase.from("experience").update({ is_active: val }).eq("id", id); setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i)); }); };
   const startEdit = (item: Experience) => { setEditing(item.id); setForm({ job_title_en: item.job_title_en, job_title_bn: item.job_title_bn, institution_en: item.institution_en, institution_bn: item.institution_bn, duration_en: item.duration_en, duration_bn: item.duration_bn, description_en: item.description_en, description_bn: item.description_bn, sort_order: item.sort_order, is_active: item.is_active }); setAdding(false); };
 

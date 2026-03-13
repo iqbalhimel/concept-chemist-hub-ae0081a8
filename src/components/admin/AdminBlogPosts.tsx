@@ -270,7 +270,7 @@ const AdminBlogPosts = () => {
       if (error) { toast.error(error.message); return; }
       toast.success("Post added");
       fetchAll();
-    });
+    }, "content_create", "Created new blog post");
   };
 
   const updateLocal = (id: string, field: string, value: string | boolean) => {
@@ -314,7 +314,7 @@ const AdminBlogPosts = () => {
       } else {
         toast.success("Post saved");
       }
-    });
+    }, "content_update", `Updated blog post: ${post.title}`);
   };
 
   const remove = async (id: string) => {
@@ -324,7 +324,7 @@ const AdminBlogPosts = () => {
       setPosts(prev => prev.filter(p => p.id !== id));
       if (editingId === id) setEditingId(null);
       toast.success("Deleted");
-    });
+    }, "content_delete", "Deleted blog post");
   };
 
   const handleDragEnd = (event: DragEndEvent) => {

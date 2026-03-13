@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, BookOpen, Bell, Download,
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
-  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp
+  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp, Shield
 } from "lucide-react";
 import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminNotices from "@/components/admin/AdminNotices";
@@ -29,12 +29,13 @@ import AdminProfessionalTraining from "@/components/admin/AdminProfessionalTrain
 import AdminSEO from "@/components/admin/AdminSEO";
 import AdminPerformance from "@/components/admin/AdminPerformance";
 import AdminSeoMonitor from "@/components/admin/AdminSeoMonitor";
+import AdminSecurityLogs from "@/components/admin/AdminSecurityLogs";
 
 type Tab =
   | "dashboard" | "analytics" | "site-settings" | "seo" | "seo-monitor" | "performance" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
   | "media" | "themes" | "atmosphere" | "education" | "experience"
-  | "achievements" | "approach" | "subjects" | "training";
+  | "achievements" | "approach" | "subjects" | "training" | "security-logs";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -59,6 +60,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "media", label: "Media Library", icon: Image },
   { id: "themes", label: "Themes", icon: Palette },
   { id: "atmosphere", label: "Atmosphere", icon: CloudSun },
+  { id: "security-logs", label: "Security Logs", icon: Shield },
 ];
 
 const AdminDashboard = () => {
@@ -89,6 +91,7 @@ const AdminDashboard = () => {
       case "media": return <AdminMediaLibrary />;
       case "themes": return <AdminThemes />;
       case "atmosphere": return <AdminAtmosphere />;
+      case "security-logs": return <AdminSecurityLogs />;
       default: return <AdminDashboardOverview onNavigate={(tab) => setActiveTab(tab as Tab)} />;
     }
   };

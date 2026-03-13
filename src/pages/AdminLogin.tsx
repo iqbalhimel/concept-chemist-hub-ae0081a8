@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { LogIn, ShieldAlert, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { checkRateLimit, recordFailedAttempt, resetRateLimit } from "@/lib/loginRateLimiter";
+import { logSecurityEvent } from "@/lib/securityLogger";
 
 const CAPTCHA_THRESHOLD = 3;
 
@@ -79,6 +80,12 @@ const AdminLogin = () => {
     const { error } = await signIn(email.trim(), password);
     if (error) {
       recordFailedAttempt();
+      logSecurityEvent({
+        event_type: "login_failed",
+        description: `Failed login attempt for ${email.trim()}`,
+        user_email: email.trim(),
+        metadata: { error: error.message },
+      });
       const recheck = checkRateLimit();
       const newCount = recheck.attemptCount ?? failCount + 1;
       setFailCount(newCount);
@@ -96,6 +103,11 @@ const AdminLogin = () => {
     resetRateLimit();
     setRateLimitMsg(null);
     setFailCount(0);
+    logSecurityEvent({
+      event_type: "login_success",
+      description: `Successful login for ${email.trim()}`,
+      user_email: email.trim(),
+    });
     setTimeout(() => {
       navigate("/admin", { replace: true });
       setSubmitting(false);
