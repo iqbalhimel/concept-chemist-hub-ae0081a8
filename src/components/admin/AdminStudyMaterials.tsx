@@ -75,6 +75,7 @@ const uploadToStorage = async (file: File) => {
 };
 
 const AdminStudyMaterials = () => {
+  const csrfGuard = useCsrfGuard();
   const [items, setItems] = useState<Material[]>([]);
   const [categories, setCategories] = useState<StudyCategory[]>([]);
   const [loading, setLoading] = useState(true);
