@@ -11,6 +11,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const IP_WINDOW_MS = 60_000;
+const IP_MAX_REQUESTS = 60;
+
+const ipWindow = new Map<string, { count: number; windowStart: number }>();
+
 function getCorsOrigin(req: Request): string {
   const origin = req.headers.get("origin") || "";
   return ALLOWED_ORIGINS.has(origin) ? origin : "";
@@ -24,11 +29,54 @@ function buildCorsHeaders(req: Request) {
   };
 }
 
+function getIp(req: Request): string {
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0].trim();
+  return req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || "unknown";
+}
+
+function isSuspiciousUserAgent(ua: string | null): boolean {
+  if (!ua || ua === "-" || ua.trim().length < 6) return true;
+  const patterns = [/curl/i, /wget/i, /python-requests/i, /httpclient/i, /bot/i, /crawler/i, /spider/i];
+  return patterns.some((re) => re.test(ua));
+}
+
+function checkRateLimit(ip: string, now: number): boolean {
+  const entry = ipWindow.get(ip) || { count: 0, windowStart: now };
+  if (now - entry.windowStart > IP_WINDOW_MS) {
+    entry.count = 0;
+    entry.windowStart = now;
+  }
+  entry.count += 1;
+  ipWindow.set(ip, entry);
+  return entry.count > IP_MAX_REQUESTS;
+}
+
 Deno.serve(async (req) => {
   const baseHeaders = buildCorsHeaders(req);
 
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: baseHeaders });
+  }
+
+  const ip = getIp(req);
+  const ua = req.headers.get("user-agent");
+
+  if (isSuspiciousUserAgent(ua)) {
+    console.warn("[log-security-event] Suspicious UA blocked:", ua, "ip:", ip);
+    return new Response(JSON.stringify({ error: "Blocked" }), {
+      status: 429,
+      headers: { ...baseHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const now = Date.now();
+  if (checkRateLimit(ip, now)) {
+    console.warn("[log-security-event] Rate limit exceeded for IP:", ip);
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { ...baseHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {
@@ -41,7 +89,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { event_type, description, user_email, user_id, metadata } = await req.json();
+    const raw = await req.text();
+    if (raw.length > 8000) {
+      console.warn("[log-security-event] Payload too large from ip:", ip);
+      return new Response(JSON.stringify({ error: "Payload too large" }), {
+        status: 413,
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      console.warn("[log-security-event] Invalid JSON from ip:", ip);
+      return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+        status: 400,
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { event_type, description, user_email, user_id, metadata } = parsed;
 
     if (!event_type || typeof event_type !== "string" || event_type.length > 100) {
       return new Response(JSON.stringify({ error: "Invalid event_type" }), {
@@ -70,11 +138,7 @@ Deno.serve(async (req) => {
     }
 
     // Extract IP from headers
-    const ip_address =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("cf-connecting-ip") ||
-      req.headers.get("x-real-ip") ||
-      "unknown";
+    const ip_address = ip;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

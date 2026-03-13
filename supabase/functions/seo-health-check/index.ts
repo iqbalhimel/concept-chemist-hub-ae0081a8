@@ -12,6 +12,11 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const IP_WINDOW_MS = 60_000;
+const IP_MAX_REQUESTS = 30;
+
+const ipWindow = new Map<string, { count: number; windowStart: number }>();
+
 function getCorsOrigin(req: Request): string {
   const origin = req.headers.get("origin") || "";
   return ALLOWED_ORIGINS.has(origin) ? origin : "";
@@ -23,6 +28,29 @@ function buildCorsHeaders(req: Request) {
     ...corsHeaders,
     ...(origin ? { "Access-Control-Allow-Origin": origin } : {}),
   };
+}
+
+function getIp(req: Request): string {
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0].trim();
+  return req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || "unknown";
+}
+
+function isSuspiciousUserAgent(ua: string | null): boolean {
+  if (!ua || ua === "-" || ua.trim().length < 6) return true;
+  const patterns = [/curl/i, /wget/i, /python-requests/i, /httpclient/i, /bot/i, /crawler/i, /spider/i];
+  return patterns.some((re) => re.test(ua));
+}
+
+function checkRateLimit(ip: string, now: number): boolean {
+  const entry = ipWindow.get(ip) || { count: 0, windowStart: now };
+  if (now - entry.windowStart > IP_WINDOW_MS) {
+    entry.count = 0;
+    entry.windowStart = now;
+  }
+  entry.count += 1;
+  ipWindow.set(ip, entry);
+  return entry.count > IP_MAX_REQUESTS;
 }
 
 async function checkPage(url: string): Promise<any> {
@@ -88,8 +116,48 @@ serve(async (req) => {
     return new Response(null, { headers: baseHeaders });
   }
 
+  const ip = getIp(req);
+  const ua = req.headers.get("user-agent");
+  const now = Date.now();
+
+  if (isSuspiciousUserAgent(ua)) {
+    console.warn("[seo-health-check] Suspicious UA blocked:", ua, "ip:", ip);
+    return new Response(JSON.stringify({ error: "Blocked" }), {
+      status: 429,
+      headers: { ...baseHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  if (checkRateLimit(ip, now)) {
+    console.warn("[seo-health-check] Rate limit exceeded for ip:", ip);
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { ...baseHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
-    const { siteUrl } = await req.json();
+    const raw = await req.text();
+    if (raw.length > 4000) {
+      console.warn("[seo-health-check] Payload too large from ip:", ip);
+      return new Response(JSON.stringify({ error: "Payload too large" }), {
+        status: 413,
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let body: any;
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      console.warn("[seo-health-check] Invalid JSON from ip:", ip);
+      return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+        status: 400,
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { siteUrl } = body;
     if (!siteUrl || typeof siteUrl !== "string" || siteUrl.length > 2048) {
       return new Response(JSON.stringify({ error: "siteUrl is required" }), {
         status: 400,

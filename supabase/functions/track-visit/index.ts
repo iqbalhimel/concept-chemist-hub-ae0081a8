@@ -12,6 +12,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const IP_WINDOW_MS = 60_000;
+const IP_MAX_REQUESTS = 120;
+const IP_BURST_WINDOW_MS = 5_000;
+const IP_MAX_BURST = 15;
+
+const ipWindow = new Map<string, { count: number; windowStart: number }>();
+const ipBurstWindow = new Map<string, { count: number; windowStart: number }>();
+
 function getCorsOrigin(req: Request): string {
   const origin = req.headers.get("origin") || "";
   return ALLOWED_ORIGINS.has(origin) ? origin : "";
@@ -23,6 +31,51 @@ function buildCorsHeaders(req: Request) {
     ...corsHeaders,
     ...(origin ? { "Access-Control-Allow-Origin": origin } : {}),
   };
+}
+
+function getIp(req: Request): string {
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0].trim();
+  return req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || "unknown";
+}
+
+function isSuspiciousUserAgent(ua: string | null): boolean {
+  if (!ua || ua === "-" || ua.trim().length < 6) return true;
+  const patterns = [
+    /curl/i,
+    /wget/i,
+    /python-requests/i,
+    /httpclient/i,
+    /scrapy/i,
+    /bot/i,
+    /crawler/i,
+    /spider/i,
+  ];
+  return patterns.some((re) => re.test(ua));
+}
+
+function checkRateLimit(ip: string, now: number): boolean {
+  // Long window
+  const long = ipWindow.get(ip) || { count: 0, windowStart: now };
+  if (now - long.windowStart > IP_WINDOW_MS) {
+    long.count = 0;
+    long.windowStart = now;
+  }
+  long.count += 1;
+  ipWindow.set(ip, long);
+
+  if (long.count > IP_MAX_REQUESTS) return true;
+
+  // Short burst window
+  const burst = ipBurstWindow.get(ip) || { count: 0, windowStart: now };
+  if (now - burst.windowStart > IP_BURST_WINDOW_MS) {
+    burst.count = 0;
+    burst.windowStart = now;
+  }
+  burst.count += 1;
+  ipBurstWindow.set(ip, burst);
+
+  return burst.count > IP_MAX_BURST;
 }
 
 interface TrackPayload {
@@ -59,12 +112,49 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: baseHeaders });
   }
 
-  try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+  const ip = getIp(req);
+  const ua = req.headers.get("user-agent");
+  const now = Date.now();
 
-    const payload: TrackPayload = await req.json();
+  // Very basic bot / abuse detection on UA
+  if (isSuspiciousUserAgent(ua)) {
+    console.warn("[track-visit] Suspicious user agent blocked:", ua, "ip:", ip);
+    return new Response(JSON.stringify({ error: "Blocked" }), {
+      status: 429,
+      headers: { ...baseHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Global per-IP rate limiting
+  if (checkRateLimit(ip, now)) {
+    console.warn("[track-visit] Rate limit exceeded for IP:", ip);
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { ...baseHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  try {
+    const raw = await req.text();
+    if (raw.length > 4000) {
+      console.warn("[track-visit] Payload too large from IP:", ip);
+      return new Response(JSON.stringify({ error: "Payload too large" }), {
+        status: 413,
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let payload: TrackPayload;
+    try {
+      payload = JSON.parse(raw) as TrackPayload;
+    } catch {
+      console.warn("[track-visit] Malformed JSON from IP:", ip);
+      return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+        status: 400,
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { action, session_id } = payload;
 
     if (!session_id || typeof session_id !== "string" || session_id.length > 128) {
@@ -91,36 +181,44 @@ Deno.serve(async (req) => {
         ? payload.pages_viewed
         : 1;
     const timeSpentSeconds =
-      typeof payload.time_spent_seconds === "number" && payload.time_spent_seconds >= 0 && payload.time_spent_seconds < 24 * 60 * 60
+      typeof payload.time_spent_seconds === "number" &&
+      payload.time_spent_seconds >= 0 &&
+      payload.time_spent_seconds < 24 * 60 * 60
         ? payload.time_spent_seconds
         : 0;
 
-    // Get client IP
-    const forwarded = req.headers.get("x-forwarded-for");
-    const ip = forwarded ? forwarded.split(",")[0].trim() : "Unknown";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     if (action === "start") {
       const geo = await getGeoData(ip);
 
-      await supabase.from("visitor_sessions").upsert({
-        session_id,
-        ip_address: ip,
-        country: geo.country,
-        city: geo.city,
-        latitude: geo.lat,
-        longitude: geo.lon,
-        device_type: typeof payload.device_type === "string" ? payload.device_type.slice(0, 50) : "Desktop",
-        os: typeof payload.os === "string" ? payload.os.slice(0, 50) : "Unknown",
-        browser: typeof payload.browser === "string" ? payload.browser.slice(0, 50) : "Unknown",
-        screen_resolution:
-          typeof payload.screen_resolution === "string" ? payload.screen_resolution.slice(0, 20) : "Unknown",
-        referrer: typeof payload.referrer === "string" ? payload.referrer.slice(0, 255) : "Direct",
-        entry_page: pagePath,
-        exit_page: pagePath,
-        pages_viewed: 1,
-        is_active: true,
-        started_at: new Date().toISOString(),
-      }, { onConflict: "session_id" });
+      await supabase.from("visitor_sessions").upsert(
+        {
+          session_id,
+          ip_address: ip,
+          country: geo.country,
+          city: geo.city,
+          latitude: geo.lat,
+          longitude: geo.lon,
+          device_type:
+            typeof payload.device_type === "string" ? payload.device_type.slice(0, 50) : "Desktop",
+          os: typeof payload.os === "string" ? payload.os.slice(0, 50) : "Unknown",
+          browser: typeof payload.browser === "string" ? payload.browser.slice(0, 50) : "Unknown",
+          screen_resolution:
+            typeof payload.screen_resolution === "string"
+              ? payload.screen_resolution.slice(0, 20)
+              : "Unknown",
+          referrer: typeof payload.referrer === "string" ? payload.referrer.slice(0, 255) : "Direct",
+          entry_page: pagePath,
+          exit_page: pagePath,
+          pages_viewed: 1,
+          is_active: true,
+          started_at: new Date().toISOString(),
+        },
+        { onConflict: "session_id" },
+      );
 
       // Record first page view
       await supabase.from("page_views").insert({
