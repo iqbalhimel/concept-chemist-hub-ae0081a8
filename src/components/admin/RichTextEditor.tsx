@@ -4,8 +4,8 @@ import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import Image from "@tiptap/extension-image";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { secureUpload } from "@/lib/secureUpload";
 import {
   Bold,
   Italic,
@@ -105,13 +105,8 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your content..
     }
     setUploading(true);
     try {
-      const fileName = `blog-images/${Date.now()}-${file.name}`;
-      const { error } = await supabase.storage
-        .from("media")
-        .upload(fileName, file, { contentType: file.type });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from("media").getPublicUrl(fileName);
-      editor?.chain().focus().setImage({ src: urlData.publicUrl, alt: file.name }).run();
+      const { publicUrl } = await secureUpload(file, file.type, file.name, { directory: "blog-images" });
+      editor?.chain().focus().setImage({ src: publicUrl, alt: file.name }).run();
       toast.success("Image inserted");
     } catch (err: any) {
       toast.error(err.message || "Upload failed");

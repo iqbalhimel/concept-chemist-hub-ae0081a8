@@ -7,6 +7,7 @@ import { Plus, Trash2, Save, Upload, GripVertical, Pencil, Search, X } from "luc
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import type { Tables } from "@/integrations/supabase/types";
 import { compressImage } from "@/lib/imageCompression";
+import { secureUpload } from "@/lib/secureUpload";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent,
 } from "@dnd-kit/core";
@@ -126,15 +127,16 @@ const AdminGallery = () => {
     const newItems: GalleryItem[] = [];
     for (let idx = 0; idx < files.length; idx++) {
       const file = files[idx];
-      const { blob, wasCompressed, extension, contentType } = await compressImage(file);
-      const path = `gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+      const { blob, contentType } = await compressImage(file);
 
-      const { error: uploadError } = await supabase.storage.from("media").upload(path, blob, {
-        contentType,
-      });
-      if (uploadError) { toast.error("Upload failed: " + uploadError.message); continue; }
-
-      const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
+      let result: { publicUrl: string };
+      try {
+        result = await secureUpload(blob, contentType, file.name, { directory: "gallery" });
+      } catch (uploadErr: any) {
+        toast.error(uploadErr.message || "Upload failed");
+        continue;
+      }
+      const urlData = result;
       const label = file.name.replace(/\.[^.]+$/, "");
 
       const { data, error } = await supabase.from("gallery").insert({

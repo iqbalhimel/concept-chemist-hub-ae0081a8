@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/slugify";
 import { compressImage } from "@/lib/imageCompression";
+import { secureUpload } from "@/lib/secureUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RichTextEditor from "@/components/admin/RichTextEditor";
@@ -42,12 +43,9 @@ const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string;
     if (!file.type.startsWith("image/")) { toast.error("Only images allowed"); return; }
     setUploading(true);
     try {
-      const { blob, wasCompressed, extension, contentType } = await compressImage(file, { maxWidth: 1920, maxHeight: 1080 });
-      const fileName = `blog-featured/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
-      const { error } = await supabase.storage.from("media").upload(fileName, blob, { contentType });
-      if (error) throw error;
-      const { data } = supabase.storage.from("media").getPublicUrl(fileName);
-      onUpload(data.publicUrl);
+      const { blob, wasCompressed, contentType } = await compressImage(file, { maxWidth: 1920, maxHeight: 1080 });
+      const { publicUrl } = await secureUpload(blob, contentType, file.name, { directory: "blog-featured" });
+      onUpload(publicUrl);
       toast.success(`Image uploaded${wasCompressed ? " (optimized)" : ""}`);
     } catch (err: any) {
       toast.error(err.message || "Upload failed");

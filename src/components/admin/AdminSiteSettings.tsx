@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Save, Upload, Globe, Search, Bell, MessageCircle, FileText, Settings2, Atom } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { compressImage } from "@/lib/imageCompression";
+import { secureUpload } from "@/lib/secureUpload";
 import { invalidateSiteSettings } from "@/hooks/useSiteSettings";
 
 type FieldDef = {
@@ -226,16 +227,14 @@ const AdminSiteSettings = () => {
     setUploading(uploadKey);
     try {
       let fileToUpload: File | Blob = file;
+      let contentType = file.type;
       if (file.type.startsWith("image/") && file.size > 200 * 1024) {
-        const { blob } = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 80 });
-        fileToUpload = blob;
+        const compressed = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 80 });
+        fileToUpload = compressed.blob;
+        contentType = compressed.contentType;
       }
-      const ext = file.name.split(".").pop();
-      const path = `settings/${sectionKey}-${fieldName}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("media").upload(path, fileToUpload);
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
-      updateField(sectionKey, fieldName, urlData.publicUrl);
+      const { publicUrl } = await secureUpload(fileToUpload, contentType, file.name, { directory: "settings" });
+      updateField(sectionKey, fieldName, publicUrl);
       toast.success("Image uploaded!");
     } catch (err: any) {
       toast.error("Upload failed: " + err.message);

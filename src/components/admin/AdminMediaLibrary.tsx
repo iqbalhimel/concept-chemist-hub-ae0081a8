@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Upload, Trash2, Copy, FileText, Search } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { compressImage } from "@/lib/imageCompression";
+import { secureUpload } from "@/lib/secureUpload";
 import AdminPagination, { paginateItems } from "./AdminPagination";
 
 type Media = Tables<"media_library">;
@@ -69,27 +70,28 @@ const AdminMediaLibrary = () => {
     setUploading(true);
 
     for (const file of Array.from(files)) {
-      const isImage = file.type.startsWith("image/");
-      const { blob, wasCompressed } = isImage ? await compressImage(file) : { blob: file as Blob, wasCompressed: false };
-      const ext = wasCompressed ? "jpg" : file.name.split(".").pop();
-      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      try {
+        const isImage = file.type.startsWith("image/");
+        const { blob, wasCompressed, contentType } = isImage
+          ? await compressImage(file)
+          : { blob: file as Blob, wasCompressed: false, contentType: file.type };
+        const finalType = wasCompressed ? "image/jpeg" : contentType;
 
-      const { error: uploadError } = await supabase.storage.from("media").upload(path, blob, {
-        contentType: wasCompressed ? "image/jpeg" : file.type,
-      });
-      if (uploadError) { toast.error("Upload failed: " + uploadError.message); continue; }
+        const { publicUrl } = await secureUpload(blob, finalType, file.name, { directory: "media" });
 
-      const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
+        const { data: inserted } = await supabase.from("media_library").insert({
+          name: file.name,
+          file_url: publicUrl,
+          file_type: finalType,
+          file_size: blob.size,
+        }).select().single();
 
-      const { data: inserted } = await supabase.from("media_library").insert({
-        name: file.name,
-        file_url: urlData.publicUrl,
-        file_type: wasCompressed ? "image/jpeg" : file.type,
-        file_size: blob.size,
-      }).select().single();
-
-      if (inserted) {
-        setItems(prev => [inserted, ...prev]);
+        if (inserted) {
+          setItems(prev => [inserted, ...prev]);
+        }
+      } catch (err: any) {
+        toast.error(err.message || "Upload failed");
+        continue;
       }
     }
 
