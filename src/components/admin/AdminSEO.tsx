@@ -98,16 +98,14 @@ const AdminSEO = () => {
     setUploading(true);
     try {
       let fileToUpload: File | Blob = file;
+      let contentType = file.type;
       if (file.type.startsWith("image/") && file.size > 200 * 1024) {
-        const { blob } = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 80 });
-        fileToUpload = blob;
+        const compressed = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 80 });
+        fileToUpload = compressed.blob;
+        contentType = compressed.contentType;
       }
-      const ext = file.name.split(".").pop();
-      const path = `settings/seo-${field}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("media").upload(path, fileToUpload);
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
-      update(field, urlData.publicUrl);
+      const { publicUrl } = await secureUpload(fileToUpload, contentType, file.name, { directory: "seo" });
+      update(field, publicUrl);
       toast.success("Image uploaded!");
     } catch (err: any) {
       toast.error("Upload failed: " + err.message);

@@ -68,13 +68,8 @@ const extractPdfMeta = async (file: File) => {
 };
 
 const uploadToStorage = async (file: File) => {
-  const fileName = `study-materials/${Date.now()}-${file.name}`;
-  const { error } = await supabase.storage
-    .from("media")
-    .upload(fileName, file, { contentType: "application/pdf" });
-  if (error) throw error;
-  const { data: urlData } = supabase.storage.from("media").getPublicUrl(fileName);
-  return urlData.publicUrl;
+  const { publicUrl } = await secureUpload(file, "application/pdf", file.name, { directory: "study-materials" });
+  return publicUrl;
 };
 
 const AdminStudyMaterials = () => {
