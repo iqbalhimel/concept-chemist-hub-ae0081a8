@@ -4,13 +4,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn } from "lucide-react";
+import { LogIn, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
+import { checkRateLimit, recordFailedAttempt, resetRateLimit } from "@/lib/loginRateLimiter";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [rateLimitMsg, setRateLimitMsg] = useState<string | null>(null);
   const { signIn, isAdmin, user } = useAuth();
   const navigate = useNavigate();
 
