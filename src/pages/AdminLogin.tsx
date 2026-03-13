@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { LogIn, ShieldAlert, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { checkRateLimit, recordFailedAttempt, resetRateLimit } from "@/lib/loginRateLimiter";
+import { logSecurityEvent } from "@/lib/securityLogger";
 
 const CAPTCHA_THRESHOLD = 3;
 
