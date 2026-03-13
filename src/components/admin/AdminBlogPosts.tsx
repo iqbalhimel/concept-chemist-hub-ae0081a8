@@ -324,7 +324,7 @@ const AdminBlogPosts = () => {
       setPosts(prev => prev.filter(p => p.id !== id));
       if (editingId === id) setEditingId(null);
       toast.success("Deleted");
-    });
+    }, "content_delete", "Deleted blog post");
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
