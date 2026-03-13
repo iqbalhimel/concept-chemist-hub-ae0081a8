@@ -107,15 +107,17 @@ const AdminTestimonials = () => {
     if (!form.student_name.trim()) { toast.error("Student name is required"); return; }
     if (!form.testimonial_text_en.trim() && !form.testimonial_text_bn.trim()) { toast.error("At least one testimonial text is required"); return; }
 
-    if (editId) {
-      const { error } = await supabase.from("testimonials").update(form).eq("id", editId);
-      if (error) toast.error("Update failed");
-      else { toast.success("Testimonial updated"); resetForm(); fetchItems(); }
-    } else {
-      const { error } = await supabase.from("testimonials").insert({ ...form, sort_order: items.length });
-      if (error) toast.error("Insert failed");
-      else { toast.success("Testimonial added"); resetForm(); fetchItems(); }
-    }
+    await csrfGuard(async () => {
+      if (editId) {
+        const { error } = await supabase.from("testimonials").update(form).eq("id", editId);
+        if (error) toast.error("Update failed");
+        else { toast.success("Testimonial updated"); resetForm(); fetchItems(); }
+      } else {
+        const { error } = await supabase.from("testimonials").insert({ ...form, sort_order: items.length });
+        if (error) toast.error("Insert failed");
+        else { toast.success("Testimonial added"); resetForm(); fetchItems(); }
+      }
+    });
   };
 
   const handleEdit = (item: Testimonial) => {
@@ -134,9 +136,11 @@ const AdminTestimonials = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this testimonial?")) return;
-    const { error } = await supabase.from("testimonials").delete().eq("id", id);
-    if (error) toast.error("Delete failed");
-    else { toast.success("Deleted"); if (editId === id) resetForm(); fetchItems(); }
+    await csrfGuard(async () => {
+      const { error } = await supabase.from("testimonials").delete().eq("id", id);
+      if (error) toast.error("Delete failed");
+      else { toast.success("Deleted"); if (editId === id) resetForm(); fetchItems(); }
+    });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -150,12 +154,14 @@ const AdminTestimonials = () => {
   };
 
   const saveOrder = async () => {
-    const updates = items.map((item, idx) =>
-      supabase.from("testimonials").update({ sort_order: idx }).eq("id", item.id)
-    );
-    await Promise.all(updates);
-    setOrderDirty(false);
-    toast.success("Order saved");
+    await csrfGuard(async () => {
+      const updates = items.map((item, idx) =>
+        supabase.from("testimonials").update({ sort_order: idx }).eq("id", item.id)
+      );
+      await Promise.all(updates);
+      setOrderDirty(false);
+      toast.success("Order saved");
+    });
   };
 
   const paginated = paginateItems(items, page, pageSize);
