@@ -4,8 +4,8 @@ import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import Image from "@tiptap/extension-image";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { secureUpload } from "@/lib/secureUpload";
 import {
   Bold,
   Italic,
