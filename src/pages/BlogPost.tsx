@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import BlogReactions from "@/components/BlogReactions";
 import BlogComments from "@/components/BlogComments";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 interface BlogPostType {
   id: string;
