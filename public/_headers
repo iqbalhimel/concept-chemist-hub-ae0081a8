@@ -1,0 +1,9 @@
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://evkbhalknerpptiofwsi.supabase.co; connect-src 'self' https://evkbhalknerpptiofwsi.supabase.co https://www.googleapis.com https://ip-api.com; img-src 'self' data: https://evkbhalknerpptiofwsi.supabase.co https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+*/
+
