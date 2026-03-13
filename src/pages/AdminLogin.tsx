@@ -80,6 +80,12 @@ const AdminLogin = () => {
     const { error } = await signIn(email.trim(), password);
     if (error) {
       recordFailedAttempt();
+      logSecurityEvent({
+        event_type: "login_failed",
+        description: `Failed login attempt for ${email.trim()}`,
+        user_email: email.trim(),
+        metadata: { error: error.message },
+      });
       const recheck = checkRateLimit();
       const newCount = recheck.attemptCount ?? failCount + 1;
       setFailCount(newCount);
