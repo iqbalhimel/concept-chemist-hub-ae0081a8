@@ -121,10 +121,12 @@ const AdminFAQ = () => {
   }, []);
 
   const saveOrder = async () => {
-    const promises = items.map((item, i) => supabase.from("faq").update({ sort_order: i }).eq("id", item.id));
-    await Promise.all(promises);
-    setOrderChanged(false);
-    toast.success("Order saved");
+    await csrfGuard(async () => {
+      const promises = items.map((item, i) => supabase.from("faq").update({ sort_order: i }).eq("id", item.id));
+      await Promise.all(promises);
+      setOrderChanged(false);
+      toast.success("Order saved");
+    });
   };
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
