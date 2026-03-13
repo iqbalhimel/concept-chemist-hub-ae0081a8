@@ -71,13 +71,15 @@ const AdminAchievements = () => {
   const handleSave = async () => {
     if ((!form.title_en.trim() && !form.title_bn.trim()) || !form.value.trim()) { toast.error("Title (EN or BN) and value are required"); return; }
     if (isNaN(Number(form.value.replace(/[^0-9.]/g, ""))) && !/^\d/.test(form.value)) { toast.error("Value must start with a number (e.g. 10, 500+, 95%)"); return; }
-    if (editing) { const { error } = await supabase.from("achievements").update(form).eq("id", editing); if (error) { toast.error(error.message); return; } toast.success("Updated!"); }
-    else { const { error } = await supabase.from("achievements").insert({ ...form, sort_order: items.length }); if (error) { toast.error(error.message); return; } toast.success("Added!"); }
-    setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    await csrfGuard(async () => {
+      if (editing) { const { error } = await supabase.from("achievements").update(form).eq("id", editing); if (error) { toast.error(error.message); return; } toast.success("Updated!"); }
+      else { const { error } = await supabase.from("achievements").insert({ ...form, sort_order: items.length }); if (error) { toast.error(error.message); return; } toast.success("Added!"); }
+      setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    });
   };
 
-  const handleDelete = async (id: string) => { await supabase.from("achievements").delete().eq("id", id); toast.success("Deleted!"); fetchAll(); };
-  const toggleActive = async (id: string, val: boolean) => { await supabase.from("achievements").update({ is_active: val }).eq("id", id); setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i)); };
+  const handleDelete = async (id: string) => { await csrfGuard(async () => { await supabase.from("achievements").delete().eq("id", id); toast.success("Deleted!"); fetchAll(); }); };
+  const toggleActive = async (id: string, val: boolean) => { await csrfGuard(async () => { await supabase.from("achievements").update({ is_active: val }).eq("id", id); setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i)); }); };
   const startEdit = (item: Achievement) => { setEditing(item.id); setForm({ title_en: item.title_en, title_bn: item.title_bn, value: item.value, icon: item.icon, sort_order: item.sort_order, is_active: item.is_active }); setAdding(false); };
 
   const handleDragEnd = (event: DragEndEvent) => { const { active, over } = event; if (!over || active.id === over.id) return; setItems(prev => arrayMove(prev, prev.findIndex(i => i.id === active.id), prev.findIndex(i => i.id === over.id))); setOrderChanged(true); };
