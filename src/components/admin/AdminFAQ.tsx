@@ -99,7 +99,7 @@ const AdminFAQ = () => {
       setItems(prev => prev.filter(n => n.id !== id));
       setExpandedDeleteId(null);
       toast.success("Deleted");
-    });
+    }, "content_delete", "Deleted FAQ item");
   };
 
   const updateLocal = (id: string, field: string, value: string) => {
