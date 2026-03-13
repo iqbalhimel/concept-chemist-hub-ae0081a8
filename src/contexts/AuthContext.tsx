@@ -63,6 +63,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    logSecurityEvent({
+      event_type: "logout",
+      description: `Admin logged out: ${user?.email}`,
+      user_email: user?.email || undefined,
+      user_id: user?.id || undefined,
+    });
     await supabase.auth.signOut();
     setIsAdmin(false);
   };
