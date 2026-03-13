@@ -278,54 +278,53 @@ const AdminBlogPosts = () => {
   };
 
   const savePost = async (post: Post) => {
-    // Validate required fields
     const titleErr = validateTextInput(post.title, "Title", { required: true, maxLength: 300 });
     if (titleErr) { toast.error(titleErr); return; }
-
     const categoryErr = validateTextInput(post.category, "Category", { required: true, maxLength: 100 });
     if (categoryErr) { toast.error(categoryErr); return; }
-
-    // Sanitize HTML content before saving
-    const sanitizedContent = post.content ? sanitizeHtml(post.content) : null;
-
-    const { error } = await supabase.from("blog_posts").update({
-      title: stripHtml(post.title).trim(),
-      category: stripHtml(post.category).trim(),
-      excerpt: post.excerpt ? stripHtml(post.excerpt).trim() : null,
-      content: sanitizedContent,
-      read_time: post.read_time,
-      is_published: post.is_published,
-      featured_image: (post as any).featured_image || null,
-      scheduled_at: (post as any).scheduled_at || null,
-      slug: (post as any).slug || null,
-      seo_title: (post as any).seo_title || null,
-      seo_description: (post as any).seo_description || null,
-      seo_keywords: (post as any).seo_keywords || null,
-      seo_canonical_url: (post as any).seo_canonical_url || null,
-      seo_og_title: (post as any).seo_og_title || null,
-      seo_og_description: (post as any).seo_og_description || null,
-      seo_og_image: (post as any).seo_og_image || null,
-      seo_twitter_title: (post as any).seo_twitter_title || null,
-      seo_twitter_description: (post as any).seo_twitter_description || null,
-      seo_twitter_image: (post as any).seo_twitter_image || null,
-    } as any).eq("id", post.id);
-    if (error) {
-      if (error.message.includes("blog_posts_slug_unique")) {
-        toast.error("This slug is already in use. Please choose a different one.");
+    await csrfGuard(async () => {
+      const sanitizedContent = post.content ? sanitizeHtml(post.content) : null;
+      const { error } = await supabase.from("blog_posts").update({
+        title: stripHtml(post.title).trim(),
+        category: stripHtml(post.category).trim(),
+        excerpt: post.excerpt ? stripHtml(post.excerpt).trim() : null,
+        content: sanitizedContent,
+        read_time: post.read_time,
+        is_published: post.is_published,
+        featured_image: (post as any).featured_image || null,
+        scheduled_at: (post as any).scheduled_at || null,
+        slug: (post as any).slug || null,
+        seo_title: (post as any).seo_title || null,
+        seo_description: (post as any).seo_description || null,
+        seo_keywords: (post as any).seo_keywords || null,
+        seo_canonical_url: (post as any).seo_canonical_url || null,
+        seo_og_title: (post as any).seo_og_title || null,
+        seo_og_description: (post as any).seo_og_description || null,
+        seo_og_image: (post as any).seo_og_image || null,
+        seo_twitter_title: (post as any).seo_twitter_title || null,
+        seo_twitter_description: (post as any).seo_twitter_description || null,
+        seo_twitter_image: (post as any).seo_twitter_image || null,
+      } as any).eq("id", post.id);
+      if (error) {
+        if (error.message.includes("blog_posts_slug_unique")) {
+          toast.error("This slug is already in use. Please choose a different one.");
+        } else {
+          toast.error(error.message);
+        }
       } else {
-        toast.error(error.message);
+        toast.success("Post saved");
       }
-    } else {
-      toast.success("Post saved");
-    }
+    });
   };
 
   const remove = async (id: string) => {
     if (!window.confirm("Delete this post? This cannot be undone.")) return;
-    await supabase.from("blog_posts").delete().eq("id", id);
-    setPosts(prev => prev.filter(p => p.id !== id));
-    if (editingId === id) setEditingId(null);
-    toast.success("Deleted");
+    await csrfGuard(async () => {
+      await supabase.from("blog_posts").delete().eq("id", id);
+      setPosts(prev => prev.filter(p => p.id !== id));
+      if (editingId === id) setEditingId(null);
+      toast.success("Deleted");
+    });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
