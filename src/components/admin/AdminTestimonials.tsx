@@ -59,6 +59,8 @@ const StarRating = ({ value, onChange }: { value: number; onChange: (v: number) 
 );
 
 const AdminTestimonials = () => {
+  const csrfGuard = useCsrfGuard();
+  const csrfToken = useCsrfToken();
   const [items, setItems] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [editId, setEditId] = useState<string | null>(null);
