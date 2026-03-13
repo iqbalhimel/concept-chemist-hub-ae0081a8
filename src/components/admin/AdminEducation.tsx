@@ -118,10 +118,12 @@ const AdminEducation = () => {
   };
 
   const saveOrder = async () => {
-    const updates = items.map((item, i) => supabase.from("education").update({ sort_order: i }).eq("id", item.id));
-    await Promise.all(updates);
-    setOrderChanged(false);
-    toast.success("Order saved!");
+    await csrfGuard(async () => {
+      const updates = items.map((item, i) => supabase.from("education").update({ sort_order: i }).eq("id", item.id));
+      await Promise.all(updates);
+      setOrderChanged(false);
+      toast.success("Order saved!");
+    });
   };
 
   const paginated = paginateItems(items, page, pageSize);
