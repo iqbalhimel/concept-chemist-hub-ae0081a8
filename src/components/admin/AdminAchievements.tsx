@@ -53,6 +53,8 @@ const SortableCard = ({ item, toggleActive, startEdit, handleDelete }: {
 };
 
 const AdminAchievements = () => {
+  const csrfGuard = useCsrfGuard();
+  const csrfToken = useCsrfToken();
   const [items, setItems] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<string | null>(null);
