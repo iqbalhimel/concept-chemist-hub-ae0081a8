@@ -4,6 +4,7 @@ import { BookOpen, Monitor, Users, Lightbulb, MapPin, Calendar, Clock, UsersRoun
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { supabase } from "@/integrations/supabase/client";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type CoachingInfo = Record<string, string>;
 
