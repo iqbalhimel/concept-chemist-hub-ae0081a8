@@ -274,11 +274,21 @@ const AdminBlogPosts = () => {
   };
 
   const savePost = async (post: Post) => {
+    // Validate required fields
+    const titleErr = validateTextInput(post.title, "Title", { required: true, maxLength: 300 });
+    if (titleErr) { toast.error(titleErr); return; }
+
+    const categoryErr = validateTextInput(post.category, "Category", { required: true, maxLength: 100 });
+    if (categoryErr) { toast.error(categoryErr); return; }
+
+    // Sanitize HTML content before saving
+    const sanitizedContent = post.content ? sanitizeHtml(post.content) : null;
+
     const { error } = await supabase.from("blog_posts").update({
-      title: post.title,
-      category: post.category,
-      excerpt: post.excerpt,
-      content: post.content,
+      title: stripHtml(post.title).trim(),
+      category: stripHtml(post.category).trim(),
+      excerpt: post.excerpt ? stripHtml(post.excerpt).trim() : null,
+      content: sanitizedContent,
       read_time: post.read_time,
       is_published: post.is_published,
       featured_image: (post as any).featured_image || null,

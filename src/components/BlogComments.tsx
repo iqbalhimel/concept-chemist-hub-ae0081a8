@@ -20,8 +20,9 @@ interface Props {
   postId: string;
 }
 
-const sanitize = (str: string) =>
-  str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+import { escapeHtml, validateTextInput } from "@/lib/sanitize";
+
+const sanitize = (str: string) => escapeHtml(str);
 
 /* ── Comment Form ──────────────────────────── */
 

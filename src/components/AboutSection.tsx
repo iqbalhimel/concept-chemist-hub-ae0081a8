@@ -62,19 +62,19 @@ const AboutSection = () => {
           <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">{t.about.subtitle}</p>
 
           <div className="glass-card p-8 md:p-12 mb-10">
-            <p className="text-secondary-foreground leading-relaxed text-lg mb-6" dangerouslySetInnerHTML={{ __html: intro }} />
+            <p className="text-secondary-foreground leading-relaxed text-lg mb-6" dangerouslySetInnerHTML={{ __html: sanitizeHtml(intro) }} />
             <ul className="space-y-3 text-secondary-foreground text-base">
               <li className="flex items-start gap-3">
                 <span className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />
-                <span dangerouslySetInnerHTML={{ __html: point1 }} />
+                <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(point1) }} />
               </li>
               <li className="flex items-start gap-3">
                 <span className="mt-1.5 w-2 h-2 rounded-full bg-accent shrink-0" />
-                <span dangerouslySetInnerHTML={{ __html: point2 }} />
+                <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(point2) }} />
               </li>
               <li className="flex items-start gap-3">
                 <span className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />
-                <span dangerouslySetInnerHTML={{ __html: point3 }} />
+                <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(point3) }} />
               </li>
             </ul>
           </div>

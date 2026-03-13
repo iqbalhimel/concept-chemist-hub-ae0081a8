@@ -251,7 +251,7 @@ const BlogPost = () => {
 
           <div
             className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-display prose-a:text-primary prose-img:rounded-lg"
-            dangerouslySetInnerHTML={{ __html: post.content || `<p>${t.blog_post.no_content}</p>` }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content || `<p>${t.blog_post.no_content}</p>`) }}
           />
 
           <div className="mt-10 pt-6 border-t border-border">
