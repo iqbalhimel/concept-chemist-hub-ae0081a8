@@ -81,6 +81,13 @@ const AdminLogin = () => {
           <p className="text-muted-foreground text-sm mt-1">Sign in to manage your website</p>
         </div>
 
+        {rateLimitMsg && (
+          <div className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm mb-2">
+            <ShieldAlert className="shrink-0" size={20} />
+            <span>{rateLimitMsg}</span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="email">Email</Label>
