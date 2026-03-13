@@ -55,20 +55,22 @@ const AdminExperience = () => {
 
   const handleSave = async () => {
     if (!form.job_title_en.trim() && !form.job_title_bn.trim()) { toast.error("Job title (EN or BN) is required"); return; }
-    if (editing) {
-      const { error } = await supabase.from("experience").update(form).eq("id", editing);
-      if (error) { toast.error(error.message); return; }
-      toast.success("Updated!");
-    } else {
-      const { error } = await supabase.from("experience").insert({ ...form, sort_order: items.length });
-      if (error) { toast.error(error.message); return; }
-      toast.success("Added!");
-    }
-    setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    await csrfGuard(async () => {
+      if (editing) {
+        const { error } = await supabase.from("experience").update(form).eq("id", editing);
+        if (error) { toast.error(error.message); return; }
+        toast.success("Updated!");
+      } else {
+        const { error } = await supabase.from("experience").insert({ ...form, sort_order: items.length });
+        if (error) { toast.error(error.message); return; }
+        toast.success("Added!");
+      }
+      setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    });
   };
 
-  const handleDelete = async (id: string) => { const { error } = await supabase.from("experience").delete().eq("id", id); if (error) { toast.error(error.message); return; } toast.success("Deleted!"); fetchAll(); };
-  const toggleActive = async (id: string, val: boolean) => { await supabase.from("experience").update({ is_active: val }).eq("id", id); setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i)); };
+  const handleDelete = async (id: string) => { await csrfGuard(async () => { const { error } = await supabase.from("experience").delete().eq("id", id); if (error) { toast.error(error.message); return; } toast.success("Deleted!"); fetchAll(); }); };
+  const toggleActive = async (id: string, val: boolean) => { await csrfGuard(async () => { await supabase.from("experience").update({ is_active: val }).eq("id", id); setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i)); }); };
   const startEdit = (item: Experience) => { setEditing(item.id); setForm({ job_title_en: item.job_title_en, job_title_bn: item.job_title_bn, institution_en: item.institution_en, institution_bn: item.institution_bn, duration_en: item.duration_en, duration_bn: item.duration_bn, description_en: item.description_en, description_bn: item.description_bn, sort_order: item.sort_order, is_active: item.is_active }); setAdding(false); };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -77,7 +79,7 @@ const AdminExperience = () => {
     setItems(prev => { const o = prev.findIndex(i => i.id === active.id); const n = prev.findIndex(i => i.id === over.id); return arrayMove(prev, o, n); });
     setOrderChanged(true);
   };
-  const saveOrder = async () => { await Promise.all(items.map((item, i) => supabase.from("experience").update({ sort_order: i }).eq("id", item.id))); setOrderChanged(false); toast.success("Order saved!"); };
+  const saveOrder = async () => { await csrfGuard(async () => { await Promise.all(items.map((item, i) => supabase.from("experience").update({ sort_order: i }).eq("id", item.id))); setOrderChanged(false); toast.success("Order saved!"); }); };
 
   const paginated = paginateItems(items, page, pageSize);
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
