@@ -29,6 +29,7 @@ import AdminProfessionalTraining from "@/components/admin/AdminProfessionalTrain
 import AdminSEO from "@/components/admin/AdminSEO";
 import AdminPerformance from "@/components/admin/AdminPerformance";
 import AdminSeoMonitor from "@/components/admin/AdminSeoMonitor";
+import AdminSecurityLogs from "@/components/admin/AdminSecurityLogs";
 
 type Tab =
   | "dashboard" | "analytics" | "site-settings" | "seo" | "seo-monitor" | "performance" | "notices" | "study-materials"
