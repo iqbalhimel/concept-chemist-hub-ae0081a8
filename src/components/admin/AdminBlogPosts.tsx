@@ -23,6 +23,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Tables } from "@/integrations/supabase/types";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 type Post = Tables<"blog_posts">;
 
