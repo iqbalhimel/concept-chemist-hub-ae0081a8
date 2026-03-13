@@ -8,6 +8,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { compressImage } from "@/lib/imageCompression";
 import { secureUpload } from "@/lib/secureUpload";
 import AdminPagination, { paginateItems } from "./AdminPagination";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 type Media = Tables<"media_library">;
 
