@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Trash2, MessageSquare, Reply, User } from "lucide-react";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 interface Comment {
   id: string;
