@@ -241,6 +241,7 @@ const EditPanel = ({
 /* ── Main Component ──────────────────────────────── */
 
 const AdminBlogPosts = () => {
+  const csrfGuard = useCsrfGuard();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
