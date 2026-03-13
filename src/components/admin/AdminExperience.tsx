@@ -66,7 +66,7 @@ const AdminExperience = () => {
         toast.success("Added!");
       }
       setEditing(null); setAdding(false); setForm(empty); fetchAll();
-    });
+    }, editing ? "content_update" : "content_create", `${editing ? "Updated" : "Created"} experience: ${form.job_title_en}`);
   };
 
   const handleDelete = async (id: string) => { await csrfGuard(async () => { const { error } = await supabase.from("experience").delete().eq("id", id); if (error) { toast.error(error.message); return; } toast.success("Deleted!"); fetchAll(); }); };
