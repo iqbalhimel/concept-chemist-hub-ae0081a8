@@ -67,7 +67,7 @@ export function checkRateLimit(): {
     };
   }
 
-  return { allowed: true };
+  return { allowed: true, attemptCount: recentAttempts.length };
 }
 
 /**
