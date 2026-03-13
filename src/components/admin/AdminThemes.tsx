@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Check, Palette } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 type Theme = Tables<"themes">;
 
