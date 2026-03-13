@@ -1,6 +1,7 @@
 name: Deploy to Hostinger
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -18,9 +19,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build project
         run: npm run build
@@ -31,5 +33,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
           local-dir: dist/
           server-dir: public_html/
