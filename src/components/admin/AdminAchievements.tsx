@@ -83,7 +83,7 @@ const AdminAchievements = () => {
   const startEdit = (item: Achievement) => { setEditing(item.id); setForm({ title_en: item.title_en, title_bn: item.title_bn, value: item.value, icon: item.icon, sort_order: item.sort_order, is_active: item.is_active }); setAdding(false); };
 
   const handleDragEnd = (event: DragEndEvent) => { const { active, over } = event; if (!over || active.id === over.id) return; setItems(prev => arrayMove(prev, prev.findIndex(i => i.id === active.id), prev.findIndex(i => i.id === over.id))); setOrderChanged(true); };
-  const saveOrder = async () => { await Promise.all(items.map((item, i) => supabase.from("achievements").update({ sort_order: i }).eq("id", item.id))); setOrderChanged(false); toast.success("Order saved!"); };
+  const saveOrder = async () => { await csrfGuard(async () => { await Promise.all(items.map((item, i) => supabase.from("achievements").update({ sort_order: i }).eq("id", item.id))); setOrderChanged(false); toast.success("Order saved!"); }); };
 
   const paginated = paginateItems(items, page, pageSize);
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
