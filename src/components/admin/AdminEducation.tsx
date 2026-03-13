@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, GripVertical, Pencil, X } from "lucide-react";
+import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent,
