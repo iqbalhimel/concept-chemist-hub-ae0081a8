@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, BookOpen, Bell, Download,
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
-  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp
+  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp, Shield
 } from "lucide-react";
 import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminNotices from "@/components/admin/AdminNotices";
