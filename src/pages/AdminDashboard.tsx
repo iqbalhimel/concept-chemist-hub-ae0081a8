@@ -60,6 +60,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "media", label: "Media Library", icon: Image },
   { id: "themes", label: "Themes", icon: Palette },
   { id: "atmosphere", label: "Atmosphere", icon: CloudSun },
+  { id: "security-logs", label: "Security Logs", icon: Shield },
 ];
 
 const AdminDashboard = () => {
