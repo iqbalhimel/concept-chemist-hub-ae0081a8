@@ -181,6 +181,7 @@ const sections: SectionDef[] = [
 ];
 
 const AdminSiteSettings = () => {
+  const csrfGuard = useCsrfGuard();
   const [settings, setSettings] = useState<Record<string, Record<string, string>>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
