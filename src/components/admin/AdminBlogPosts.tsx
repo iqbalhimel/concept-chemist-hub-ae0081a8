@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/slugify";
 import { compressImage } from "@/lib/imageCompression";
 import { secureUpload } from "@/lib/secureUpload";
+import { validateTextInput, stripHtml, sanitizeHtml } from "@/lib/sanitize";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RichTextEditor from "@/components/admin/RichTextEditor";
