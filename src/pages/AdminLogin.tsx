@@ -77,41 +77,45 @@ const AdminLogin = () => {
     }
 
     setSubmitting(true);
-    const { error } = await signIn(email.trim(), password);
-    if (error) {
-      recordFailedAttempt();
-      logSecurityEvent({
-        event_type: "login_failed",
-        description: `Failed login attempt for ${email.trim()}`,
-        user_email: email.trim(),
-        metadata: { error: error.message },
-      });
-      const recheck = checkRateLimit();
-      const newCount = recheck.attemptCount ?? failCount + 1;
-      setFailCount(newCount);
-      if (!recheck.allowed) {
-        setRateLimitMsg(recheck.message || null);
-        toast.error(recheck.message || "Too many login attempts.");
-      } else {
-        toast.error("Login failed: " + error.message);
+    try {
+      const { error } = await signIn(email.trim(), password);
+      if (error) {
+        recordFailedAttempt();
+        logSecurityEvent({
+          event_type: "login_failed",
+          description: `Failed login attempt for ${email.trim()}`,
+          user_email: email.trim(),
+          metadata: { error: error.message },
+        });
+        const recheck = checkRateLimit();
+        const newCount = recheck.attemptCount ?? failCount + 1;
+        setFailCount(newCount);
+        if (!recheck.allowed) {
+          setRateLimitMsg(recheck.message || null);
+          toast.error(recheck.message || "Too many login attempts.");
+        } else {
+          toast.error("Login failed: " + error.message);
+        }
+        refreshCaptcha();
+        setSubmitting(false);
+        return;
       }
-      refreshCaptcha();
+      // Success — reset everything
+      resetRateLimit();
+      setRateLimitMsg(null);
+      setFailCount(0);
+      logSecurityEvent({
+        event_type: "login_success",
+        description: `Successful login for ${email.trim()}`,
+        user_email: email.trim(),
+      });
+      // Don't navigate here — let the useEffect handle it when isAdmin becomes true
       setSubmitting(false);
-      return;
+    } catch (err) {
+      console.error("[AdminLogin] Unexpected error:", err);
+      toast.error("An unexpected error occurred. Please try again.");
+      setSubmitting(false);
     }
-    // Success — reset everything
-    resetRateLimit();
-    setRateLimitMsg(null);
-    setFailCount(0);
-    logSecurityEvent({
-      event_type: "login_success",
-      description: `Successful login for ${email.trim()}`,
-      user_email: email.trim(),
-    });
-    setTimeout(() => {
-      navigate("/admin", { replace: true });
-      setSubmitting(false);
-    }, 500);
   };
 
   return (
