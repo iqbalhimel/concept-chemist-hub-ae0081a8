@@ -100,6 +100,7 @@ const App = () => (
       <Sonner />
       <BrightnessProvider>
         <AuthProvider>
+          <CsrfProvider>
           <ThemeLoader />
           <PerformanceApplier />
           <BrowserRouter>
