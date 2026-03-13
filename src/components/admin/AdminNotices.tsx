@@ -46,6 +46,7 @@ const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }
 };
 
 const AdminNotices = () => {
+  const csrfGuard = useCsrfGuard();
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [orderDirty, setOrderDirty] = useState(false);
