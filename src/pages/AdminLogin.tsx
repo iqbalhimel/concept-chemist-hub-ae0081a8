@@ -113,8 +113,8 @@ const AdminLogin = () => {
               className="mt-1"
             />
           </div>
-          <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? "Signing in..." : "Sign In"}
+          <Button type="submit" className="w-full" disabled={submitting || !!rateLimitMsg}>
+            {submitting ? "Signing in..." : rateLimitMsg ? "Temporarily Blocked" : "Sign In"}
           </Button>
         </form>
         <div className="mt-4 text-center">
