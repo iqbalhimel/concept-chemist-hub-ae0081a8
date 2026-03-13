@@ -263,12 +263,14 @@ const AdminBlogPosts = () => {
   };
 
   const add = async () => {
-    const maxOrder = posts.length > 0 ? Math.max(...posts.map(p => (p as any).sort_order ?? 0)) + 1 : 0;
-    const newSlug = slugify("new-post") + "-" + Date.now().toString(36);
-    const { error } = await supabase.from("blog_posts").insert({ title: "New Post", category: "General", excerpt: "", content: "", sort_order: maxOrder, slug: newSlug } as any);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Post added");
-    fetchAll();
+    await csrfGuard(async () => {
+      const maxOrder = posts.length > 0 ? Math.max(...posts.map(p => (p as any).sort_order ?? 0)) + 1 : 0;
+      const newSlug = slugify("new-post") + "-" + Date.now().toString(36);
+      const { error } = await supabase.from("blog_posts").insert({ title: "New Post", category: "General", excerpt: "", content: "", sort_order: maxOrder, slug: newSlug } as any);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Post added");
+      fetchAll();
+    });
   };
 
   const updateLocal = (id: string, field: string, value: string | boolean) => {
