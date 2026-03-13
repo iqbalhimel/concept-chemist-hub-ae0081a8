@@ -71,27 +71,33 @@ const AdminEducation = () => {
 
   const handleSave = async () => {
     if (!form.degree_title_en.trim()) { toast.error("Degree title (EN) is required"); return; }
-    if (editing) {
-      const { error } = await supabase.from("education").update(form).eq("id", editing);
-      if (error) { toast.error(error.message); return; }
-      toast.success("Updated!");
-    } else {
-      const { error } = await supabase.from("education").insert({ ...form, sort_order: items.length });
-      if (error) { toast.error(error.message); return; }
-      toast.success("Added!");
-    }
-    setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    await csrfGuard(async () => {
+      if (editing) {
+        const { error } = await supabase.from("education").update(form).eq("id", editing);
+        if (error) { toast.error(error.message); return; }
+        toast.success("Updated!");
+      } else {
+        const { error } = await supabase.from("education").insert({ ...form, sort_order: items.length });
+        if (error) { toast.error(error.message); return; }
+        toast.success("Added!");
+      }
+      setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    });
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("education").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Deleted!"); fetchAll();
+    await csrfGuard(async () => {
+      const { error } = await supabase.from("education").delete().eq("id", id);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Deleted!"); fetchAll();
+    });
   };
 
   const toggleActive = async (id: string, val: boolean) => {
-    await supabase.from("education").update({ is_active: val }).eq("id", id);
-    setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i));
+    await csrfGuard(async () => {
+      await supabase.from("education").update({ is_active: val }).eq("id", id);
+      setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i));
+    });
   };
 
   const startEdit = (item: Education) => {
