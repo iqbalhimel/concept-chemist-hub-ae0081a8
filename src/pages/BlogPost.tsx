@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Clock, User, Calendar, ArrowUpRight, Share2, Link2, Check } from "lucide-react";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import BlogReactions from "@/components/BlogReactions";
 import BlogComments from "@/components/BlogComments";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 interface BlogPostType {
   id: string;
@@ -250,7 +251,7 @@ const BlogPost = () => {
 
           <div
             className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-display prose-a:text-primary prose-img:rounded-lg"
-            dangerouslySetInnerHTML={{ __html: post.content || `<p>${t.blog_post.no_content}</p>` }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content || `<p>${t.blog_post.no_content}</p>`) }}
           />
 
           <div className="mt-10 pt-6 border-t border-border">

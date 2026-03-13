@@ -16,6 +16,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { Tables } from "@/integrations/supabase/types";
 import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
+import { validateTextInput, stripHtml } from "@/lib/sanitize";
 
 type Notice = Tables<"notices">;
 
@@ -102,9 +103,15 @@ const AdminNotices = () => {
   };
 
   const updateNotice = async (n: Notice) => {
+    // Validate title
+    const titleErr = validateTextInput(n.title, "Title", { required: true, maxLength: 300 });
+    if (titleErr) { toast.error(titleErr); return; }
+
     const a = n as any;
     const { error } = await supabase.from("notices").update({
-      title: n.title, description: n.description, date: n.date,
+      title: stripHtml(n.title).trim(),
+      description: n.description,
+      date: n.date,
       is_active: n.is_active, is_pinned: a.is_pinned, expires_at: a.expires_at || null,
       seo_title: a.seo_title || null, seo_description: a.seo_description || null,
       seo_keywords: a.seo_keywords || null, seo_canonical_url: a.seo_canonical_url || null,
