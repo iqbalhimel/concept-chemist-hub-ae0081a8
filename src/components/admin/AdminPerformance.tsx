@@ -14,6 +14,7 @@ import {
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 const AdminPerformance = () => {
+  const csrfGuard = useCsrfGuard();
   const { get, loaded } = useSiteSettings();
   const [saving, setSaving] = useState(false);
   const [clearing, setClearing] = useState(false);
