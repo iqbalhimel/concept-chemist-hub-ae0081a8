@@ -104,14 +104,16 @@ const AdminMediaLibrary = () => {
   };
 
   const remove = async (item: Media) => {
-    const urlParts = item.file_url.split("/media/");
-    if (urlParts[1]) {
-      await supabase.storage.from("media").remove([urlParts[1]]);
-    }
-    await supabase.from("media_library").delete().eq("id", item.id);
-    setItems(prev => prev.filter(n => n.id !== item.id));
-    setExpandedDeleteId(null);
-    toast.success("Deleted");
+    await csrfGuard(async () => {
+      const urlParts = item.file_url.split("/media/");
+      if (urlParts[1]) {
+        await supabase.storage.from("media").remove([urlParts[1]]);
+      }
+      await supabase.from("media_library").delete().eq("id", item.id);
+      setItems(prev => prev.filter(n => n.id !== item.id));
+      setExpandedDeleteId(null);
+      toast.success("Deleted");
+    });
   };
 
   const copyUrl = (url: string) => {

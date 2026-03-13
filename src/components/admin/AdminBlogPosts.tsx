@@ -340,12 +340,14 @@ const AdminBlogPosts = () => {
 
   const saveOrder = async () => {
     setSavingOrder(true);
-    for (let i = 0; i < posts.length; i++) {
-      await supabase.from("blog_posts").update({ sort_order: i } as any).eq("id", posts[i].id);
-    }
-    setOrderChanged(false);
+    await csrfGuard(async () => {
+      for (let i = 0; i < posts.length; i++) {
+        await supabase.from("blog_posts").update({ sort_order: i } as any).eq("id", posts[i].id);
+      }
+      setOrderChanged(false);
+      toast.success("Order saved");
+    });
     setSavingOrder(false);
-    toast.success("Order saved");
   };
 
   const categories = useMemo(() => [...new Set(posts.map(p => p.category))].sort(), [posts]);

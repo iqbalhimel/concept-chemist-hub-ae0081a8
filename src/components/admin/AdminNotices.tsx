@@ -180,13 +180,15 @@ const AdminNotices = () => {
   };
 
   const saveOrder = useCallback(async () => {
-    setSavingOrder(true);
-    for (let i = 0; i < notices.length; i++) {
-      await supabase.from("notices").update({ sort_order: i }).eq("id", notices[i].id);
-    }
-    setOrderDirty(false); setSavingOrder(false);
-    toast.success("Order saved");
-  }, [notices]);
+    await csrfGuard(async () => {
+      setSavingOrder(true);
+      for (let i = 0; i < notices.length; i++) {
+        await supabase.from("notices").update({ sort_order: i }).eq("id", notices[i].id);
+      }
+      setOrderDirty(false); setSavingOrder(false);
+      toast.success("Order saved");
+    });
+  }, [notices, csrfGuard]);
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 

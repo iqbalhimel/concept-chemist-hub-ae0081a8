@@ -271,14 +271,16 @@ const AdminStudyMaterials = () => {
   }, [items]);
 
   const saveOrder = useCallback(async () => {
-    setSavingOrder(true);
-    for (let i = 0; i < items.length; i++) {
-      await supabase.from("study_materials").update({ sort_order: i }).eq("id", items[i].id);
-    }
-    setOrderDirty(false);
-    setSavingOrder(false);
-    toast.success("Order saved");
-  }, [items]);
+    await csrfGuard(async () => {
+      setSavingOrder(true);
+      for (let i = 0; i < items.length; i++) {
+        await supabase.from("study_materials").update({ sort_order: i }).eq("id", items[i].id);
+      }
+      setOrderDirty(false);
+      setSavingOrder(false);
+      toast.success("Order saved");
+    });
+  }, [items, csrfGuard]);
 
   // --- Category CRUD ---
   const addCategory = async () => {

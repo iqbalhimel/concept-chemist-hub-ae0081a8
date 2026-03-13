@@ -189,19 +189,23 @@ const AdminGallery = () => {
   };
 
   const update = async (item: GalleryItem) => {
-    const { error } = await supabase.from("gallery").update({ image_url: item.image_url, label: item.label, alt: item.alt, span: item.span }).eq("id", item.id);
-    if (error) toast.error(error.message); else toast.success("Updated");
+    await csrfGuard(async () => {
+      const { error } = await supabase.from("gallery").update({ image_url: item.image_url, label: item.label, alt: item.alt, span: item.span }).eq("id", item.id);
+      if (error) toast.error(error.message); else toast.success("Updated");
+    });
   };
 
   const remove = async (id: string, imageUrl: string) => {
-    const urlParts = imageUrl.split("/media/");
-    if (urlParts[1]) {
-      await supabase.storage.from("media").remove([urlParts[1]]);
-    }
-    await supabase.from("gallery").delete().eq("id", id);
-    setItems(prev => prev.filter(n => n.id !== id));
-    setExpandedDeleteId(null);
-    toast.success("Deleted");
+    await csrfGuard(async () => {
+      const urlParts = imageUrl.split("/media/");
+      if (urlParts[1]) {
+        await supabase.storage.from("media").remove([urlParts[1]]);
+      }
+      await supabase.from("gallery").delete().eq("id", id);
+      setItems(prev => prev.filter(n => n.id !== id));
+      setExpandedDeleteId(null);
+      toast.success("Deleted");
+    });
   };
 
   const updateLocal = (id: string, field: string, value: string) => {
