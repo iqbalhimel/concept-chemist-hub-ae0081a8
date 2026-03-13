@@ -156,12 +156,14 @@ const AdminNotices = () => {
   const bulkDelete = async () => {
     if (selectedIds.size === 0) return;
     if (!window.confirm(`Delete ${selectedIds.size} selected notice(s)?`)) return;
-    setBulkDeleting(true);
-    for (const id of selectedIds) { await supabase.from("notices").delete().eq("id", id); }
-    setNotices(prev => prev.filter(n => !selectedIds.has(n.id)));
-    toast.success(`${selectedIds.size} notice(s) deleted`);
-    setSelectedIds(new Set());
-    setBulkDeleting(false);
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      for (const id of selectedIds) { await supabase.from("notices").delete().eq("id", id); }
+      setNotices(prev => prev.filter(n => !selectedIds.has(n.id)));
+      toast.success(`${selectedIds.size} notice(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    });
   };
 
   const updateLocal = (id: string, updates: Record<string, any>) => {
