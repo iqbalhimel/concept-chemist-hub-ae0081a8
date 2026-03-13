@@ -314,7 +314,7 @@ const AdminBlogPosts = () => {
       } else {
         toast.success("Post saved");
       }
-    });
+    }, "content_update", `Updated blog post: ${post.title}`);
   };
 
   const remove = async (id: string) => {
