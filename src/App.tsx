@@ -111,6 +111,7 @@ const App = () => (
           <Suspense fallback={null}>
             <AtmosphereDebugBadge />
           </Suspense>
+        </CsrfProvider>
         </AuthProvider>
       </BrightnessProvider>
     </TooltipProvider>
