@@ -16,6 +16,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { Tables } from "@/integrations/supabase/types";
 import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
+import { validateTextInput, stripHtml } from "@/lib/sanitize";
 
 type Notice = Tables<"notices">;
 
