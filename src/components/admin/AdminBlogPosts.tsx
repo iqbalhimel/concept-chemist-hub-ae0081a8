@@ -270,7 +270,7 @@ const AdminBlogPosts = () => {
       if (error) { toast.error(error.message); return; }
       toast.success("Post added");
       fetchAll();
-    });
+    }, "content_create", "Created new blog post");
   };
 
   const updateLocal = (id: string, field: string, value: string | boolean) => {
