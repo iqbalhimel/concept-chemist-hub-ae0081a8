@@ -1,20 +1,38 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, ShieldAlert } from "lucide-react";
+import { LogIn, ShieldAlert, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { checkRateLimit, recordFailedAttempt, resetRateLimit } from "@/lib/loginRateLimiter";
+
+const CAPTCHA_THRESHOLD = 3;
+
+function generateCaptcha() {
+  const a = Math.floor(Math.random() * 20) + 1;
+  const b = Math.floor(Math.random() * 20) + 1;
+  return { question: `${a} + ${b} = ?`, answer: a + b };
+}
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [rateLimitMsg, setRateLimitMsg] = useState<string | null>(null);
+  const [failCount, setFailCount] = useState(0);
+  const [captcha, setCaptcha] = useState(generateCaptcha);
+  const [captchaInput, setCaptchaInput] = useState("");
   const { signIn, isAdmin, user } = useAuth();
   const navigate = useNavigate();
+
+  const showCaptcha = failCount >= CAPTCHA_THRESHOLD;
+
+  const refreshCaptcha = useCallback(() => {
+    setCaptcha(generateCaptcha());
+    setCaptchaInput("");
+  }, []);
 
   // Redirect if already logged in as admin
   useEffect(() => {
@@ -23,11 +41,12 @@ const AdminLogin = () => {
     }
   }, [user, isAdmin, navigate]);
 
-  // Re-check rate limit on mount & periodically to clear expired lockouts
+  // Re-check rate limit on mount & periodically
   useEffect(() => {
     const check = () => {
       const result = checkRateLimit();
       setRateLimitMsg(result.allowed ? null : result.message || null);
+      if (result.attemptCount !== undefined) setFailCount(result.attemptCount);
     };
     check();
     const interval = setInterval(check, 10_000);
@@ -38,7 +57,7 @@ const AdminLogin = () => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
 
-    // Check rate limit before attempting login
+    // Check rate limit
     const limitCheck = checkRateLimit();
     if (!limitCheck.allowed) {
       setRateLimitMsg(limitCheck.message || "Too many attempts.");
@@ -46,24 +65,37 @@ const AdminLogin = () => {
       return;
     }
 
+    // Validate CAPTCHA if shown
+    if (showCaptcha) {
+      const parsed = parseInt(captchaInput, 10);
+      if (isNaN(parsed) || parsed !== captcha.answer) {
+        toast.error("Incorrect CAPTCHA answer. Please try again.");
+        refreshCaptcha();
+        return;
+      }
+    }
+
     setSubmitting(true);
     const { error } = await signIn(email.trim(), password);
     if (error) {
       recordFailedAttempt();
-      // Re-check after recording
       const recheck = checkRateLimit();
+      const newCount = recheck.attemptCount ?? failCount + 1;
+      setFailCount(newCount);
       if (!recheck.allowed) {
         setRateLimitMsg(recheck.message || null);
         toast.error(recheck.message || "Too many login attempts.");
       } else {
         toast.error("Login failed: " + error.message);
       }
+      refreshCaptcha();
       setSubmitting(false);
       return;
     }
-    // Success — reset rate limiter
+    // Success — reset everything
     resetRateLimit();
     setRateLimitMsg(null);
+    setFailCount(0);
     setTimeout(() => {
       navigate("/admin", { replace: true });
       setSubmitting(false);
@@ -113,6 +145,39 @@ const AdminLogin = () => {
               className="mt-1"
             />
           </div>
+
+          {showCaptcha && !rateLimitMsg && (
+            <div className="p-4 rounded-lg border border-accent/30 bg-accent/5 space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="captcha" className="text-sm font-medium text-foreground">
+                  Security Check
+                </Label>
+                <button
+                  type="button"
+                  onClick={refreshCaptcha}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  title="New question"
+                >
+                  <RefreshCw size={14} />
+                </button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Solve to continue: <span className="font-mono font-bold text-foreground">{captcha.question}</span>
+              </p>
+              <Input
+                id="captcha"
+                type="text"
+                inputMode="numeric"
+                value={captchaInput}
+                onChange={(e) => setCaptchaInput(e.target.value)}
+                placeholder="Your answer"
+                required
+                className="mt-1"
+                autoComplete="off"
+              />
+            </div>
+          )}
+
           <Button type="submit" className="w-full" disabled={submitting || !!rateLimitMsg}>
             {submitting ? "Signing in..." : rateLimitMsg ? "Temporarily Blocked" : "Sign In"}
           </Button>
