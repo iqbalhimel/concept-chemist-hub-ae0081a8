@@ -189,29 +189,34 @@ const AdminStudyMaterials = () => {
 
   // --- Material CRUD ---
   const add = async () => {
-    const defaultCat = activeCategoryNames[0] || "Uncategorized";
-    const { data, error } = await supabase.from("study_materials").insert({ title: "New Material", category: defaultCat, sort_order: 0 }).select().single();
-    if (error || !data) { toast.error(error?.message || "Failed"); return; }
-    // Shift existing sort_orders
-    const updated = items.map((n, i) => ({ ...n, sort_order: i + 1 }));
-    for (const u of updated) {
-      await supabase.from("study_materials").update({ sort_order: u.sort_order }).eq("id", u.id);
-    }
-    setItems([data, ...updated]);
-    setNewItemId(data.id);
-    toast.success("Added");
+    await csrfGuard(async () => {
+      const defaultCat = activeCategoryNames[0] || "Uncategorized";
+      const { data, error } = await supabase.from("study_materials").insert({ title: "New Material", category: defaultCat, sort_order: 0 }).select().single();
+      if (error || !data) { toast.error(error?.message || "Failed"); return; }
+      const updated = items.map((n, i) => ({ ...n, sort_order: i + 1 }));
+      for (const u of updated) {
+        await supabase.from("study_materials").update({ sort_order: u.sort_order }).eq("id", u.id);
+      }
+      setItems([data, ...updated]);
+      setNewItemId(data.id);
+      toast.success("Added");
+    });
   };
 
   const update = async (id: string, updates: Partial<Material>) => {
-    const { error } = await supabase.from("study_materials").update(updates).eq("id", id);
-    if (error) toast.error(error.message); else toast.success("Updated");
+    await csrfGuard(async () => {
+      const { error } = await supabase.from("study_materials").update(updates).eq("id", id);
+      if (error) toast.error(error.message); else toast.success("Updated");
+    });
   };
 
   const remove = async (id: string) => {
-    await supabase.from("study_materials").delete().eq("id", id);
-    setItems(prev => prev.filter(n => n.id !== id));
-    setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
-    toast.success("Deleted");
+    await csrfGuard(async () => {
+      await supabase.from("study_materials").delete().eq("id", id);
+      setItems(prev => prev.filter(n => n.id !== id));
+      setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
+      toast.success("Deleted");
+    });
   };
 
   const toggleSelect = (id: string) => {
