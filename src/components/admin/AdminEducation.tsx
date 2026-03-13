@@ -82,7 +82,7 @@ const AdminEducation = () => {
         toast.success("Added!");
       }
       setEditing(null); setAdding(false); setForm(empty); fetchAll();
-    });
+    }, editing ? "content_update" : "content_create", `${editing ? "Updated" : "Created"} education: ${form.degree_title_en}`);
   };
 
   const handleDelete = async (id: string) => {
