@@ -37,6 +37,8 @@ const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }
 };
 
 const AdminFAQ = () => {
+  const csrfGuard = useCsrfGuard();
+  const csrfToken = useCsrfToken();
   const [items, setItems] = useState<FAQItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedEditId, setExpandedEditId] = useState<string | null>(null);
