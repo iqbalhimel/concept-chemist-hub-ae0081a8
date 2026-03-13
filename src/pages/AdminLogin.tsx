@@ -103,6 +103,11 @@ const AdminLogin = () => {
     resetRateLimit();
     setRateLimitMsg(null);
     setFailCount(0);
+    logSecurityEvent({
+      event_type: "login_success",
+      description: `Successful login for ${email.trim()}`,
+      user_email: email.trim(),
+    });
     setTimeout(() => {
       navigate("/admin", { replace: true });
       setSubmitting(false);
