@@ -9,6 +9,7 @@ import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 type Theme = Tables<"themes">;
 
 const AdminThemes = () => {
+  const csrfGuard = useCsrfGuard();
   const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(true);
   const [activating, setActivating] = useState<string | null>(null);
