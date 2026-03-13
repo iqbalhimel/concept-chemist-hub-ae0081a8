@@ -97,7 +97,10 @@ const AdminMediaLibrary = () => {
         continue;
       }
     }
-
+    logSecurityEvent({
+      event_type: "file_upload",
+      description: `Uploaded ${Array.from(files).length} file(s) to media library`,
+    });
     toast.success("Upload complete");
     setUploading(false);
     setPage(1);
