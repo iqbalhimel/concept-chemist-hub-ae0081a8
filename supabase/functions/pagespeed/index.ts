@@ -29,10 +29,30 @@ type PageSpeedResult = {
   message?: string;
 };
 
+const ALLOWED_ORIGINS = new Set<string>([
+  "https://iqbalsir.bd",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+]);
+
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Origin": "",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+function getCorsOrigin(req: Request): string {
+  const origin = req.headers.get("origin") || "";
+  return ALLOWED_ORIGINS.has(origin) ? origin : "";
+}
+
+function buildCorsHeaders(req: Request) {
+  const origin = getCorsOrigin(req);
+  return {
+    ...corsHeaders,
+    ...(origin ? { "Access-Control-Allow-Origin": origin } : {}),
+  };
+}
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
 const QUOTA_COOLDOWN_MS = 60 * 60 * 1000;
@@ -69,19 +89,21 @@ function emptyResult(url: string, strategy: "mobile" | "desktop", message: strin
 }
 
 serve(async (req) => {
+  const baseHeaders = buildCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: baseHeaders });
   }
 
   try {
     const body = await req.json();
-    const url = body?.url as string | undefined;
+    const url = (body?.url as string | undefined) || "";
     const strategy = body?.strategy === "desktop" ? "desktop" : "mobile";
 
-    if (!url) {
+    if (!url || url.length > 2048) {
       return new Response(JSON.stringify({ error: "URL is required" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -89,7 +111,7 @@ serve(async (req) => {
     const cached = cache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
       return new Response(JSON.stringify({ ...cached.data, status: "ok" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -98,37 +120,50 @@ serve(async (req) => {
       const message = "PageSpeed daily quota is exhausted. Please try again later.";
       const fallback = cached?.data
         ? { ...cached.data, status: "cached_quota" as const, quotaExceeded: true, message }
-        : { ...emptyResult(url, strategy, message), status: "quota_exceeded" as const, quotaExceeded: true, message };
+        : {
+            ...emptyResult(url, strategy, message),
+            status: "quota_exceeded" as const,
+            quotaExceeded: true,
+            message,
+          };
 
       return new Response(JSON.stringify(fallback), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=${strategy}&category=performance&category=seo&category=accessibility&category=best-practices`;
+    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(
+      url,
+    )}&strategy=${strategy}&category=performance&category=seo&category=accessibility&category=best-practices`;
 
     const response = await fetch(apiUrl);
     const data = await response.json();
 
     if (!response.ok) {
       const message = data?.error?.message || "PageSpeed API error";
-      const isQuotaError = response.status === 429 || /quota/i.test(message) || /queries per day/i.test(message);
+      const isQuotaError =
+        response.status === 429 || /quota/i.test(message) || /queries per day/i.test(message);
 
       if (isQuotaError) {
         quotaCooldown.set(strategy, Date.now() + QUOTA_COOLDOWN_MS);
 
         const fallback = cached?.data
           ? { ...cached.data, status: "cached_quota" as const, quotaExceeded: true, message }
-          : { ...emptyResult(url, strategy, message), status: "quota_exceeded" as const, quotaExceeded: true, message };
+          : {
+              ...emptyResult(url, strategy, message),
+              status: "quota_exceeded" as const,
+              quotaExceeded: true,
+              message,
+            };
 
         return new Response(JSON.stringify(fallback), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...baseHeaders, "Content-Type": "application/json" },
         });
       }
 
       return new Response(JSON.stringify({ error: message }), {
         status: response.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -155,7 +190,10 @@ serve(async (req) => {
         tti: audits["interactive"]?.numericValue || 0,
       },
       diagnostics: Object.entries(audits)
-        .filter(([_, audit]: [string, any]) => audit.score !== null && audit.score < 1 && audit.details?.type === "opportunity")
+        .filter(
+          ([_, audit]: [string, any]) =>
+            audit.score !== null && audit.score < 1 && audit.details?.type === "opportunity",
+        )
         .slice(0, 5)
         .map(([_, audit]: [string, any]) => ({
           title: audit.title,
@@ -170,13 +208,13 @@ serve(async (req) => {
     cache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, data: result });
 
     return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...baseHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...baseHeaders, "Content-Type": "application/json" },
     });
   }
 });

@@ -1,9 +1,29 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+const ALLOWED_ORIGINS = new Set<string>([
+  "https://iqbalsir.bd",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+]);
+
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  "Access-Control-Allow-Origin": "",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+function getCorsOrigin(req: Request): string {
+  const origin = req.headers.get("origin") || "";
+  return ALLOWED_ORIGINS.has(origin) ? origin : "";
+}
+
+function buildCorsHeaders(req: Request) {
+  const origin = getCorsOrigin(req);
+  return {
+    ...corsHeaders,
+    ...(origin ? { "Access-Control-Allow-Origin": origin } : {}),
+  };
+}
 
 async function checkPage(url: string): Promise<any> {
   try {
@@ -62,79 +82,90 @@ async function checkPage(url: string): Promise<any> {
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+  const baseHeaders = buildCorsHeaders(req);
+
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: baseHeaders });
   }
 
   try {
     const { siteUrl } = await req.json();
-    if (!siteUrl) {
-      return new Response(JSON.stringify({ error: 'siteUrl is required' }), {
+    if (!siteUrl || typeof siteUrl !== "string" || siteUrl.length > 2048) {
+      return new Response(JSON.stringify({ error: "siteUrl is required" }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const base = siteUrl.replace(/\/$/, '');
+    const base = siteUrl.replace(/\/$/, "");
     const pages = [
-      { path: '/', label: 'Homepage' },
-      { path: '/en', label: 'Homepage (EN)' },
-      { path: '/bn', label: 'Homepage (BN)' },
-      { path: '/en/blog', label: 'Blog' },
-      { path: '/en/resources', label: 'Resources' },
-      { path: '/en/notices', label: 'Notices' },
-      { path: '/en/testimonials', label: 'Testimonials' },
+      { path: "/", label: "Homepage" },
+      { path: "/en", label: "Homepage (EN)" },
+      { path: "/bn", label: "Homepage (BN)" },
+      { path: "/en/blog", label: "Blog" },
+      { path: "/en/resources", label: "Resources" },
+      { path: "/en/notices", label: "Notices" },
+      { path: "/en/testimonials", label: "Testimonials" },
     ];
 
     // Check sitemap and robots
-    let sitemapStatus = 'unknown';
-    let robotsStatus = 'unknown';
+    let sitemapStatus = "unknown";
+    let robotsStatus = "unknown";
 
     try {
       const sitemapRes = await fetch(`${base}/sitemap.xml`);
       await sitemapRes.text();
-      sitemapStatus = sitemapRes.ok ? 'ok' : 'missing';
-    } catch { sitemapStatus = 'error'; }
+      sitemapStatus = sitemapRes.ok ? "ok" : "missing";
+    } catch {
+      sitemapStatus = "error";
+    }
 
     try {
       const robotsRes = await fetch(`${base}/robots.txt`);
       await robotsRes.text();
-      robotsStatus = robotsRes.ok ? 'ok' : 'missing';
-    } catch { robotsStatus = 'error'; }
+      robotsStatus = robotsRes.ok ? "ok" : "missing";
+    } catch {
+      robotsStatus = "error";
+    }
 
     const pageResults = await Promise.all(
-      pages.map(p => checkPage(`${base}${p.path}`).then(r => ({ ...r, label: p.label })))
+      pages.map((p) => checkPage(`${base}${p.path}`).then((r) => ({ ...r, label: p.label })))
     );
 
     // Check for duplicate titles
     const titles = pageResults.filter(p => p.title).map(p => p.title);
     const duplicateTitles = titles.filter((t, i) => titles.indexOf(t) !== i);
 
-    const totalIssues = pageResults.reduce((sum, p) => sum + p.issues.length, 0)
-      + (sitemapStatus !== 'ok' ? 1 : 0)
-      + (robotsStatus !== 'ok' ? 1 : 0)
-      + duplicateTitles.length;
+    const totalIssues =
+      pageResults.reduce((sum, p) => sum + p.issues.length, 0) +
+      (sitemapStatus !== "ok" ? 1 : 0) +
+      (robotsStatus !== "ok" ? 1 : 0) +
+      duplicateTitles.length;
 
-    const overallScore = Math.max(0, Math.round(
-      pageResults.reduce((sum, p) => sum + p.score, 0) / pageResults.length
-    ));
+    const overallScore = Math.max(
+      0,
+      Math.round(pageResults.reduce((sum, p) => sum + p.score, 0) / pageResults.length),
+    );
 
-    return new Response(JSON.stringify({
-      overallScore,
-      totalIssues,
-      sitemapStatus,
-      robotsStatus,
-      duplicateTitles: [...new Set(duplicateTitles)],
-      pages: pageResults,
-      checkedAt: new Date().toISOString(),
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        overallScore,
+        totalIssues,
+        sitemapStatus,
+        robotsStatus,
+        duplicateTitles: [...new Set(duplicateTitles)],
+        pages: pageResults,
+        checkedAt: new Date().toISOString(),
+      }),
+      {
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...baseHeaders, "Content-Type": "application/json" },
     });
   }
 });
