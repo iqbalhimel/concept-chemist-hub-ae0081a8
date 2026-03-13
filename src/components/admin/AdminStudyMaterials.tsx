@@ -244,14 +244,16 @@ const AdminStudyMaterials = () => {
   const bulkDelete = async () => {
     if (selectedIds.size === 0) return;
     if (!window.confirm(`Delete ${selectedIds.size} selected item(s)? This cannot be undone.`)) return;
-    setBulkDeleting(true);
-    for (const id of selectedIds) {
-      await supabase.from("study_materials").delete().eq("id", id);
-    }
-    setItems(prev => prev.filter(n => !selectedIds.has(n.id)));
-    toast.success(`${selectedIds.size} item(s) deleted`);
-    setSelectedIds(new Set());
-    setBulkDeleting(false);
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      for (const id of selectedIds) {
+        await supabase.from("study_materials").delete().eq("id", id);
+      }
+      setItems(prev => prev.filter(n => !selectedIds.has(n.id)));
+      toast.success(`${selectedIds.size} item(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    });
   };
 
   const updateLocal = (id: string, field: string, value: string | number | boolean | null) => {
