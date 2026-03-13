@@ -34,6 +34,7 @@ export function checkRateLimit(): {
   allowed: boolean;
   retryAfterSeconds?: number;
   message?: string;
+  attemptCount?: number;
 } {
   const now = Date.now();
   const state = getState();
