@@ -62,23 +62,7 @@ Deno.serve(async (req) => {
   const ip = getIp(req);
   const ua = req.headers.get("user-agent");
 
-  if (isSuspiciousUserAgent(ua)) {
-    console.warn("[log-security-event] Suspicious UA blocked:", ua, "ip:", ip);
-    return new Response(JSON.stringify({ error: "Blocked" }), {
-      status: 429,
-      headers: { ...baseHeaders, "Content-Type": "application/json" },
-    });
-  }
-
   const now = Date.now();
-  if (checkRateLimit(ip, now)) {
-    console.warn("[log-security-event] Rate limit exceeded for IP:", ip);
-    return new Response(JSON.stringify({ error: "Too many requests" }), {
-      status: 429,
-      headers: { ...baseHeaders, "Content-Type": "application/json" },
-    });
-  }
-
   try {
     // Require a valid Supabase JWT so only calls coming through Supabase clients are accepted
     const authHeader = req.headers.get("authorization") || "";
@@ -143,6 +127,38 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    if (isSuspiciousUserAgent(ua)) {
+      console.warn("[log-security-event] Suspicious UA blocked:", ua, "ip:", ip);
+      await supabase.from("security_logs").insert({
+        event_type: "suspicious_activity",
+        description: "Suspicious user-agent blocked at log-security-event",
+        ip_address: ip,
+        user_email: null,
+        user_id: null,
+        metadata: { severity: "high", reason: "suspicious_user_agent" },
+      });
+      return new Response(JSON.stringify({ error: "Blocked" }), {
+        status: 429,
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (checkRateLimit(ip, now)) {
+      console.warn("[log-security-event] Rate limit exceeded for IP:", ip);
+      await supabase.from("security_logs").insert({
+        event_type: "suspicious_activity",
+        description: "Rate limit exceeded at log-security-event",
+        ip_address: ip,
+        user_email: null,
+        user_id: null,
+        metadata: { severity: "high", reason: "rate_limit_exceeded" },
+      });
+      return new Response(JSON.stringify({ error: "Too many requests" }), {
+        status: 429,
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const { error } = await supabase.from("security_logs").insert({
       event_type,

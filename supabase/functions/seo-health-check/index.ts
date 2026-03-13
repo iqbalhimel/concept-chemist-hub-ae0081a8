@@ -120,22 +120,6 @@ serve(async (req) => {
   const ua = req.headers.get("user-agent");
   const now = Date.now();
 
-  if (isSuspiciousUserAgent(ua)) {
-    console.warn("[seo-health-check] Suspicious UA blocked:", ua, "ip:", ip);
-    return new Response(JSON.stringify({ error: "Blocked" }), {
-      status: 429,
-      headers: { ...baseHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  if (checkRateLimit(ip, now)) {
-    console.warn("[seo-health-check] Rate limit exceeded for ip:", ip);
-    return new Response(JSON.stringify({ error: "Too many requests" }), {
-      status: 429,
-      headers: { ...baseHeaders, "Content-Type": "application/json" },
-    });
-  }
-
   try {
     const raw = await req.text();
     if (raw.length > 4000) {

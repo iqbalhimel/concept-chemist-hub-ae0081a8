@@ -117,23 +117,6 @@ Deno.serve(async (req) => {
   const now = Date.now();
 
   // Very basic bot / abuse detection on UA
-  if (isSuspiciousUserAgent(ua)) {
-    console.warn("[track-visit] Suspicious user agent blocked:", ua, "ip:", ip);
-    return new Response(JSON.stringify({ error: "Blocked" }), {
-      status: 429,
-      headers: { ...baseHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  // Global per-IP rate limiting
-  if (checkRateLimit(ip, now)) {
-    console.warn("[track-visit] Rate limit exceeded for IP:", ip);
-    return new Response(JSON.stringify({ error: "Too many requests" }), {
-      status: 429,
-      headers: { ...baseHeaders, "Content-Type": "application/json" },
-    });
-  }
-
   try {
     const raw = await req.text();
     if (raw.length > 4000) {
@@ -190,6 +173,40 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    if (isSuspiciousUserAgent(ua)) {
+      console.warn("[track-visit] Suspicious user agent blocked:", ua, "ip:", ip);
+      // Log a high-severity analytics abuse event
+      await supabase.from("security_logs").insert({
+        event_type: "analytics_abuse_detected",
+        description: "Suspicious analytics user-agent blocked at track-visit",
+        ip_address: ip,
+        user_email: null,
+        user_id: null,
+        metadata: { severity: "high", reason: "suspicious_user_agent" },
+      });
+      return new Response(JSON.stringify({ error: "Blocked" }), {
+        status: 429,
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Global per-IP rate limiting
+    if (checkRateLimit(ip, now)) {
+      console.warn("[track-visit] Rate limit exceeded for IP:", ip);
+      await supabase.from("security_logs").insert({
+        event_type: "analytics_abuse_detected",
+        description: "Rate limit exceeded at track-visit",
+        ip_address: ip,
+        user_email: null,
+        user_id: null,
+        metadata: { severity: "high", reason: "rate_limit_exceeded" },
+      });
+      return new Response(JSON.stringify({ error: "Too many requests" }), {
+        status: 429,
+        headers: { ...baseHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (action === "start") {
       const geo = await getGeoData(ip);
