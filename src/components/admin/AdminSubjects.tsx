@@ -49,17 +49,19 @@ const AdminSubjects = () => {
     if (!form.subject_name_en.trim() && !form.subject_name_bn.trim()) { toast.error("Subject name (EN or BN) is required"); return; }
     if (!form.category) { toast.error("Category is required"); return; }
     if (!form.icon) { toast.error("Icon is required"); return; }
-    if (editing) { const { error } = await supabase.from("subjects").update(form).eq("id", editing); if (error) { toast.error(error.message); return; } toast.success("Updated!"); }
-    else { const { error } = await supabase.from("subjects").insert({ ...form, sort_order: items.length }); if (error) { toast.error(error.message); return; } toast.success("Added!"); }
-    setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    await csrfGuard(async () => {
+      if (editing) { const { error } = await supabase.from("subjects").update(form).eq("id", editing); if (error) { toast.error(error.message); return; } toast.success("Updated!"); }
+      else { const { error } = await supabase.from("subjects").insert({ ...form, sort_order: items.length }); if (error) { toast.error(error.message); return; } toast.success("Added!"); }
+      setEditing(null); setAdding(false); setForm(empty); fetchAll();
+    });
   };
 
-  const handleDelete = async (id: string) => { await supabase.from("subjects").delete().eq("id", id); toast.success("Deleted!"); fetchAll(); };
-  const toggleActive = async (id: string, val: boolean) => { await supabase.from("subjects").update({ is_active: val }).eq("id", id); setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i)); };
+  const handleDelete = async (id: string) => { await csrfGuard(async () => { await supabase.from("subjects").delete().eq("id", id); toast.success("Deleted!"); fetchAll(); }); };
+  const toggleActive = async (id: string, val: boolean) => { await csrfGuard(async () => { await supabase.from("subjects").update({ is_active: val }).eq("id", id); setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: val } : i)); }); };
   const startEdit = (item: Subject) => { setEditing(item.id); setForm({ category: item.category, subject_name_en: item.subject_name_en, subject_name_bn: item.subject_name_bn, icon: item.icon, sort_order: item.sort_order, is_active: item.is_active }); setAdding(false); };
 
   const handleDragEnd = (event: DragEndEvent) => { const { active, over } = event; if (!over || active.id === over.id) return; setItems(prev => arrayMove(prev, prev.findIndex(i => i.id === active.id), prev.findIndex(i => i.id === over.id))); setOrderChanged(true); };
-  const saveOrder = async () => { await Promise.all(items.map((item, i) => supabase.from("subjects").update({ sort_order: i }).eq("id", item.id))); setOrderChanged(false); toast.success("Order saved!"); };
+  const saveOrder = async () => { await csrfGuard(async () => { await Promise.all(items.map((item, i) => supabase.from("subjects").update({ sort_order: i }).eq("id", item.id))); setOrderChanged(false); toast.success("Order saved!"); }); };
 
   const paginated = paginateItems(items, page, pageSize);
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
