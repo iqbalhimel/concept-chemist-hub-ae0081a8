@@ -4,13 +4,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn } from "lucide-react";
+import { LogIn, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
+import { checkRateLimit, recordFailedAttempt, resetRateLimit } from "@/lib/loginRateLimiter";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [rateLimitMsg, setRateLimitMsg] = useState<string | null>(null);
   const { signIn, isAdmin, user } = useAuth();
   const navigate = useNavigate();
 
@@ -21,17 +23,47 @@ const AdminLogin = () => {
     }
   }, [user, isAdmin, navigate]);
 
+  // Re-check rate limit on mount & periodically to clear expired lockouts
+  useEffect(() => {
+    const check = () => {
+      const result = checkRateLimit();
+      setRateLimitMsg(result.allowed ? null : result.message || null);
+    };
+    check();
+    const interval = setInterval(check, 10_000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
+
+    // Check rate limit before attempting login
+    const limitCheck = checkRateLimit();
+    if (!limitCheck.allowed) {
+      setRateLimitMsg(limitCheck.message || "Too many attempts.");
+      toast.error(limitCheck.message || "Too many login attempts.");
+      return;
+    }
+
     setSubmitting(true);
     const { error } = await signIn(email.trim(), password);
     if (error) {
-      toast.error("Login failed: " + error.message);
+      recordFailedAttempt();
+      // Re-check after recording
+      const recheck = checkRateLimit();
+      if (!recheck.allowed) {
+        setRateLimitMsg(recheck.message || null);
+        toast.error(recheck.message || "Too many login attempts.");
+      } else {
+        toast.error("Login failed: " + error.message);
+      }
       setSubmitting(false);
       return;
     }
-    // Wait a moment for auth state to propagate, then check admin
+    // Success — reset rate limiter
+    resetRateLimit();
+    setRateLimitMsg(null);
     setTimeout(() => {
       navigate("/admin", { replace: true });
       setSubmitting(false);
@@ -48,6 +80,13 @@ const AdminLogin = () => {
           <h1 className="font-display text-2xl font-bold text-foreground">Admin Login</h1>
           <p className="text-muted-foreground text-sm mt-1">Sign in to manage your website</p>
         </div>
+
+        {rateLimitMsg && (
+          <div className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm mb-2">
+            <ShieldAlert className="shrink-0" size={20} />
+            <span>{rateLimitMsg}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -74,8 +113,8 @@ const AdminLogin = () => {
               className="mt-1"
             />
           </div>
-          <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? "Signing in..." : "Sign In"}
+          <Button type="submit" className="w-full" disabled={submitting || !!rateLimitMsg}>
+            {submitting ? "Signing in..." : rateLimitMsg ? "Temporarily Blocked" : "Sign In"}
           </Button>
         </form>
         <div className="mt-4 text-center">
