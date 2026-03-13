@@ -60,27 +60,33 @@ const AdminProfessionalTraining = () => {
 
   const handleSave = async () => {
     if (!form.title_en.trim()) { toast.error("English title is required"); return; }
-    if (editing) {
-      await supabase.from("professional_training").update(form).eq("id", editing);
-      toast.success("Updated");
-    } else {
-      await supabase.from("professional_training").insert({ ...form, sort_order: items.length });
-      toast.success("Added");
-    }
-    setEditing(null);
-    setForm(empty);
-    fetchAll();
+    await csrfGuard(async () => {
+      if (editing) {
+        await supabase.from("professional_training").update(form).eq("id", editing);
+        toast.success("Updated");
+      } else {
+        await supabase.from("professional_training").insert({ ...form, sort_order: items.length });
+        toast.success("Added");
+      }
+      setEditing(null);
+      setForm(empty);
+      fetchAll();
+    });
   };
 
   const handleDelete = async (id: string) => {
-    await supabase.from("professional_training").delete().eq("id", id);
-    toast.success("Deleted");
-    fetchAll();
+    await csrfGuard(async () => {
+      await supabase.from("professional_training").delete().eq("id", id);
+      toast.success("Deleted");
+      fetchAll();
+    });
   };
 
   const toggleActive = async (id: string, val: boolean) => {
-    await supabase.from("professional_training").update({ is_active: val }).eq("id", id);
-    fetchAll();
+    await csrfGuard(async () => {
+      await supabase.from("professional_training").update({ is_active: val }).eq("id", id);
+      fetchAll();
+    });
   };
 
   const startEdit = (item: Training) => {
@@ -100,9 +106,11 @@ const AdminProfessionalTraining = () => {
   };
 
   const saveOrder = async () => {
-    await Promise.all(items.map((it, i) => supabase.from("professional_training").update({ sort_order: i }).eq("id", it.id)));
-    setOrderChanged(false);
-    toast.success("Order saved");
+    await csrfGuard(async () => {
+      await Promise.all(items.map((it, i) => supabase.from("professional_training").update({ sort_order: i }).eq("id", it.id)));
+      setOrderChanged(false);
+      toast.success("Order saved");
+    });
   };
 
   const paged = paginateItems(items, page, pageSize);

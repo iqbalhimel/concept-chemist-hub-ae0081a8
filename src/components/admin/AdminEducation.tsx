@@ -155,6 +155,7 @@ const AdminEducation = () => {
             <div><Label>Year</Label><Input value={form.year} onChange={e => setForm({ ...form, year: e.target.value })} className="mt-1" /></div>
           </div>
           <div className="flex items-center gap-2"><Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} /><Label>Active</Label></div>
+          <input type="hidden" name="_csrf" value={csrfToken || ""} />
           <Button onClick={handleSave}><Save size={14} className="mr-1" />Save</Button>
         </div>
       )}

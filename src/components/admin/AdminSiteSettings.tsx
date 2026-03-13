@@ -204,17 +204,20 @@ const AdminSiteSettings = () => {
 
   const handleSave = async (key: string) => {
     setSaving(key);
-    const value = settings[key] || {};
-    const { error } = await supabase
-      .from("site_settings")
-      .upsert({ key, value }, { onConflict: "key" });
+    await csrfGuard(async () => {
+      const value = settings[key] || {};
+      const { error } = await supabase
+        .from("site_settings")
+        .upsert({ key, value }, { onConflict: "key" });
+      setSaving(null);
+      if (error) {
+        toast.error("Failed to save: " + error.message);
+      } else {
+        invalidateSiteSettings();
+        toast.success(`${sections.find(s => s.key === key)?.label || key} saved!`);
+      }
+    });
     setSaving(null);
-    if (error) {
-      toast.error("Failed to save: " + error.message);
-    } else {
-      invalidateSiteSettings();
-      toast.success(`${sections.find(s => s.key === key)?.label || key} saved!`);
-    }
   };
 
   const updateField = (section: string, field: string, value: string) => {

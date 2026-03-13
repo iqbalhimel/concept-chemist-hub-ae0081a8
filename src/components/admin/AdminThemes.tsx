@@ -31,18 +31,17 @@ const AdminThemes = () => {
 
   const activateTheme = async (id: string) => {
     setActivating(id);
-    // Deactivate all, then activate selected
-    await supabase.from("themes").update({ is_active: false }).neq("id", id);
-    const { error } = await supabase.from("themes").update({ is_active: true }).eq("id", id);
-    if (error) { toast.error(error.message); setActivating(null); return; }
-
-    // Apply instantly
-    const theme = themes.find(t => t.id === id);
-    if (theme) applyTheme(theme.colors as Record<string, string>);
-
-    setThemes(prev => prev.map(t => ({ ...t, is_active: t.id === id })));
+    await csrfGuard(async () => {
+      await supabase.from("themes").update({ is_active: false }).neq("id", id);
+      const { error } = await supabase.from("themes").update({ is_active: true }).eq("id", id);
+      if (error) { toast.error(error.message); setActivating(null); return; }
+      const theme = themes.find(t => t.id === id);
+      if (theme) applyTheme(theme.colors as Record<string, string>);
+      setThemes(prev => prev.map(t => ({ ...t, is_active: t.id === id })));
+      setActivating(null);
+      toast.success("Theme activated! Applied across the entire site.");
+    });
     setActivating(null);
-    toast.success("Theme activated! Applied across the entire site.");
   };
 
   const getPreviewColors = (colors: Record<string, string>) => ({

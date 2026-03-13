@@ -194,6 +194,7 @@ const AdminFAQ = () => {
                       <Textarea value={item.answer_bn} onChange={e => updateLocal(item.id, "answer_bn", e.target.value)} placeholder="বাংলায় উত্তর লিখুন" rows={3} className="mt-1" />
                     </div>
                     <div className="flex gap-2">
+                      <input type="hidden" name="_csrf" value={csrfToken || ""} />
                       <Button size="sm" onClick={() => update(item.id, { question: item.question, answer: item.answer, question_bn: item.question_bn, answer_bn: item.answer_bn })}><Save size={14} className="mr-1" /> Save</Button>
                       <Button size="sm" variant="outline" onClick={() => setExpandedEditId(null)}><X size={14} className="mr-1" /> Cancel</Button>
                     </div>

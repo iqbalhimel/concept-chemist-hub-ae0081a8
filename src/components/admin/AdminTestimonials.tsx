@@ -227,6 +227,7 @@ const AdminTestimonials = () => {
             </div>
           </div>
           <div className="flex gap-2 pt-2">
+            <input type="hidden" name="_csrf" value={csrfToken || ""} />
             <Button onClick={handleSave} size="sm"><Save size={14} className="mr-1" /> Save</Button>
             <Button variant="ghost" size="sm" onClick={resetForm}>Cancel</Button>
           </div>

@@ -44,21 +44,23 @@ const AdminComments = () => {
   };
 
   const deleteComment = async (id: string) => {
-    // ON DELETE CASCADE handles replies
     if (!window.confirm("Delete this comment and all its replies?")) return;
-    const { error } = await supabase.from("blog_post_comments").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    // Remove the comment and any replies from state
-    setComments(prev => prev.filter(c => c.id !== id && c.parent_id !== id));
-    toast.success("Comment deleted");
+    await csrfGuard(async () => {
+      const { error } = await supabase.from("blog_post_comments").delete().eq("id", id);
+      if (error) { toast.error(error.message); return; }
+      setComments(prev => prev.filter(c => c.id !== id && c.parent_id !== id));
+      toast.success("Comment deleted");
+    });
   };
 
   const deleteReply = async (id: string) => {
     if (!window.confirm("Delete this reply?")) return;
-    const { error } = await supabase.from("blog_post_comments").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    setComments(prev => prev.filter(c => c.id !== id));
-    toast.success("Reply deleted");
+    await csrfGuard(async () => {
+      const { error } = await supabase.from("blog_post_comments").delete().eq("id", id);
+      if (error) { toast.error(error.message); return; }
+      setComments(prev => prev.filter(c => c.id !== id));
+      toast.success("Reply deleted");
+    });
   };
 
   const filtered = filterPost === "__all__" ? comments : comments.filter(c => c.post_id === filterPost);

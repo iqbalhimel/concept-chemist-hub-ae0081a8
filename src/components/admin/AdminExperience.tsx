@@ -111,6 +111,7 @@ const AdminExperience = () => {
             <div className="md:col-span-2"><Label>Description (BN)</Label><Textarea value={form.description_bn} onChange={e => setForm({ ...form, description_bn: e.target.value })} className="mt-1" /></div>
           </div>
           <div className="flex items-center gap-2"><Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} /><Label>Active</Label></div>
+          <input type="hidden" name="_csrf" value={csrfToken || ""} />
           <Button onClick={handleSave}><Save size={14} className="mr-1" />Save</Button>
         </div>
       )}

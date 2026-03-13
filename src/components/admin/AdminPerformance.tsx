@@ -49,35 +49,36 @@ const AdminPerformance = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    try {
-      const value = {
-        img_compress: String(imgCompress),
-        img_webp: String(imgWebp),
-        img_max_width: imgMaxWidth,
-        img_max_height: imgMaxHeight,
-        img_quality: imgQuality,
-        lazy_loading: String(lazyLoading),
-        font_preload: String(fontPreload),
-        reduce_animations: String(reduceAnimations),
-      };
-      const { data: existing } = await supabase
-        .from("site_settings")
-        .select("id")
-        .eq("key", "performance")
-        .maybeSingle();
+    await csrfGuard(async () => {
+      try {
+        const value = {
+          img_compress: String(imgCompress),
+          img_webp: String(imgWebp),
+          img_max_width: imgMaxWidth,
+          img_max_height: imgMaxHeight,
+          img_quality: imgQuality,
+          lazy_loading: String(lazyLoading),
+          font_preload: String(fontPreload),
+          reduce_animations: String(reduceAnimations),
+        };
+        const { data: existing } = await supabase
+          .from("site_settings")
+          .select("id")
+          .eq("key", "performance")
+          .maybeSingle();
 
-      if (existing) {
-        await supabase.from("site_settings").update({ value }).eq("key", "performance");
-      } else {
-        await supabase.from("site_settings").insert({ key: "performance", value });
+        if (existing) {
+          await supabase.from("site_settings").update({ value }).eq("key", "performance");
+        } else {
+          await supabase.from("site_settings").insert({ key: "performance", value });
+        }
+        invalidateSiteSettings();
+        toast.success("Performance settings saved");
+      } catch {
+        toast.error("Failed to save performance settings");
       }
-      invalidateSiteSettings();
-      toast.success("Performance settings saved");
-    } catch {
-      toast.error("Failed to save performance settings");
-    } finally {
-      setSaving(false);
-    }
+    });
+    setSaving(false);
   };
 
   const handleClearCache = async () => {

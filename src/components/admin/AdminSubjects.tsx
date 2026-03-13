@@ -99,6 +99,7 @@ const AdminSubjects = () => {
             <div><Label>Subject Name (BN)</Label><Input value={form.subject_name_bn} onChange={e => setForm({ ...form, subject_name_bn: e.target.value })} className="mt-1" /></div>
           </div>
           <div className="flex items-center gap-2"><Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} /><Label>Active</Label></div>
+          <input type="hidden" name="_csrf" value={csrfToken || ""} />
           <Button onClick={handleSave}><Save size={14} className="mr-1" />Save</Button>
         </div>
       )}

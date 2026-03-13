@@ -50,35 +50,38 @@ const AdminAtmosphere = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    const { error } = await supabase
-      .from("site_settings")
-      .upsert({ key: "atmosphere", value: settings as any }, { onConflict: "key" });
+    await csrfGuard(async () => {
+      const { error } = await supabase
+        .from("site_settings")
+        .upsert({ key: "atmosphere", value: settings as any }, { onConflict: "key" });
+      setSaving(false);
+
+      if (error) {
+        toast.error("Failed to save: " + error.message);
+        setVerified(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "atmosphere")
+        .maybeSingle();
+
+      const saved = data?.value as Record<string, string> | null;
+      const ok =
+        saved?.enabled === settings.enabled &&
+        saved?.time_override === settings.time_override;
+
+      setVerified(ok);
+      if (ok) {
+        invalidateSiteSettings();
+        toast.success("Atmosphere settings saved and verified!");
+      } else {
+        toast.error("Settings saved but verification failed. Please retry.");
+      }
+    });
     setSaving(false);
-
-    if (error) {
-      toast.error("Failed to save: " + error.message);
-      setVerified(false);
-      return;
-    }
-
-    const { data } = await supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", "atmosphere")
-      .maybeSingle();
-
-    const saved = data?.value as Record<string, string> | null;
-    const ok =
-      saved?.enabled === settings.enabled &&
-      saved?.time_override === settings.time_override;
-
-    setVerified(ok);
-    if (ok) {
-      invalidateSiteSettings();
-      toast.success("Atmosphere settings saved and verified!");
-    } else {
-      toast.error("Settings saved but verification failed. Please retry.");
-    }
   };
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
