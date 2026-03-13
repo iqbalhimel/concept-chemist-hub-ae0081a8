@@ -81,7 +81,7 @@ const AdminFAQ = () => {
       if (error) { toast.error(error.message); return; }
       toast.success("Updated");
       setExpandedEditId(null);
-    });
+    }, "content_update", `Updated FAQ item`);
   };
 
   const toggleActive = async (item: FAQItem) => {
