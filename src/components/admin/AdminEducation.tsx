@@ -48,6 +48,8 @@ const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }
 };
 
 const AdminEducation = () => {
+  const csrfGuard = useCsrfGuard();
+  const csrfToken = useCsrfToken();
   const [items, setItems] = useState<Education[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<string | null>(null);
