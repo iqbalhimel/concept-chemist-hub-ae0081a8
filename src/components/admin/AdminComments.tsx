@@ -23,6 +23,7 @@ const formatDate = (d: string) =>
   new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
 const AdminComments = () => {
+  const csrfGuard = useCsrfGuard();
   const [comments, setComments] = useState<Comment[]>([]);
   const [posts, setPosts] = useState<PostInfo[]>([]);
   const [loading, setLoading] = useState(true);
