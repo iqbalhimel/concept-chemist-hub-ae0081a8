@@ -90,7 +90,7 @@ const AdminEducation = () => {
       const { error } = await supabase.from("education").delete().eq("id", id);
       if (error) { toast.error(error.message); return; }
       toast.success("Deleted!"); fetchAll();
-    });
+    }, "content_delete", "Deleted education item");
   };
 
   const toggleActive = async (id: string, val: boolean) => {
