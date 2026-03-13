@@ -72,7 +72,7 @@ const AdminFAQ = () => {
       newIdRef.current = data.id;
       setExpandedEditId(data.id);
       setItems(prev => [data as FAQItem, ...prev]);
-    });
+    }, "content_create", "Created new FAQ item");
   };
 
   const update = async (id: string, updates: Partial<FAQItem>) => {
