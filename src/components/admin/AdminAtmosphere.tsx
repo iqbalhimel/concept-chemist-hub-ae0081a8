@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Save, CloudSun, CheckCircle2, XCircle } from "lucide-react";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import { invalidateSiteSettings } from "@/hooks/useSiteSettings";
 
 type AtmosphereSettings = {
