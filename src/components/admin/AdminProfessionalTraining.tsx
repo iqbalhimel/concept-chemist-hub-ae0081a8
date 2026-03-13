@@ -38,6 +38,7 @@ function SortableRow({ id, children }: { id: string; children: React.ReactNode }
 }
 
 const AdminProfessionalTraining = () => {
+  const csrfGuard = useCsrfGuard();
   const [items, setItems] = useState<Training[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<string | null>(null);
