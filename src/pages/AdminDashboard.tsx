@@ -91,6 +91,7 @@ const AdminDashboard = () => {
       case "media": return <AdminMediaLibrary />;
       case "themes": return <AdminThemes />;
       case "atmosphere": return <AdminAtmosphere />;
+      case "security-logs": return <AdminSecurityLogs />;
       default: return <AdminDashboardOverview onNavigate={(tab) => setActiveTab(tab as Tab)} />;
     }
   };
