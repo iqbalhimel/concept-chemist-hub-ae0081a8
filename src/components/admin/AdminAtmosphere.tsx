@@ -20,6 +20,7 @@ const defaults: AtmosphereSettings = {
 };
 
 const AdminAtmosphere = () => {
+  const csrfGuard = useCsrfGuard();
   const [settings, setSettings] = useState<AtmosphereSettings>(defaults);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
