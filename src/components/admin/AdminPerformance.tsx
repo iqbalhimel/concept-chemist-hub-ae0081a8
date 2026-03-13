@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import {
   Zap, Image, Eye, Type, Trash2, Gauge, Save, Loader2,
 } from "lucide-react";
+import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 const AdminPerformance = () => {
   const { get, loaded } = useSiteSettings();
