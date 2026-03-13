@@ -7,6 +7,7 @@ import { Plus, Trash2, Save, Upload, GripVertical, Pencil, Search, X } from "luc
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import type { Tables } from "@/integrations/supabase/types";
 import { compressImage } from "@/lib/imageCompression";
+import { secureUpload } from "@/lib/secureUpload";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent,
 } from "@dnd-kit/core";

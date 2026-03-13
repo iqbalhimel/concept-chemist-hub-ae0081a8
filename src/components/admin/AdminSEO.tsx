@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Save, Upload, Search, Globe, FileText, Code } from "lucide-react";
 import { compressImage } from "@/lib/imageCompression";
+import { secureUpload } from "@/lib/secureUpload";
 import { invalidateSiteSettings } from "@/hooks/useSiteSettings";
 
 const SECTION_KEY = "seo";
