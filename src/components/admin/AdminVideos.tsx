@@ -324,6 +324,19 @@ const AdminVideos = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">{processedVideos.length} video(s){search || filterSubject !== "all" || filterClass !== "all" ? ` (filtered from ${videos.length})` : ""}</p>
         <div className="flex items-center gap-2 flex-wrap">
+          {orderChanged && (
+            <Button size="sm" variant="default" onClick={saveOrder}><Save size={14} className="mr-1" /> Save Order</Button>
+          )}
+          {!isReorderMode && (
+            <Button size="sm" variant="outline" onClick={() => { setSortKey("sort_order"); setSortDir("asc"); }}>
+              <GripVertical size={14} className="mr-1" /> Reorder
+            </Button>
+          )}
+          {isReorderMode && !orderChanged && (
+            <Button size="sm" variant="outline" onClick={() => { setSortKey("created_at"); setSortDir("desc"); }}>
+              Exit Reorder
+            </Button>
+          )}
           {selected.size > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
