@@ -60,7 +60,7 @@ const VideosPage = () => {
 
   return (
     <>
-      <SeoHead title="Educational Videos" description="Browse all educational video lessons" />
+      {/* SEO handled globally by SeoHead */}
       <main className="min-h-screen section-padding">
         <div className="container mx-auto">
           <div className="text-center mb-10">
