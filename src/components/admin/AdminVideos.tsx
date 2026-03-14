@@ -52,6 +52,17 @@ const AdminVideos = () => {
   const [form, setForm] = useState(emptyVideo);
   const [isAdding, setIsAdding] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const { syncFromUrl } = useVideoMetadataSync(setForm);
+
+  const handleVideoUrlChange = async (url: string) => {
+    setForm(p => ({ ...p, video_url: url }));
+    if (url.trim() && form.video_source !== "upload") {
+      setSyncing(true);
+      await syncFromUrl(url, form.video_source);
+      setSyncing(false);
+    }
+  };
 
   const fetchVideos = async () => {
     const { data } = await supabase
