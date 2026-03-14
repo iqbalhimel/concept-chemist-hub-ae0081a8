@@ -458,7 +458,7 @@ const AdminVideos = () => {
             ))}
           </div>
 
-          <AdminPagination totalItems={processedVideos.length} currentPage={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
+          <AdminPagination total={processedVideos.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
         </>
       ) : (
         <p className="text-center text-muted-foreground py-10">
