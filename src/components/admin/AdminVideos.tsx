@@ -269,11 +269,11 @@ const AdminVideos = () => {
   if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-0">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">{processedVideos.length} video(s){search || filterSubject !== "all" || filterClass !== "all" ? ` (filtered from ${videos.length})` : ""}</p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {selected.size > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -293,25 +293,45 @@ const AdminVideos = () => {
       </div>
 
       {/* Search & Filters */}
-      <div className="flex flex-col sm:flex-row gap-2">
-        <div className="relative flex-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[1fr_auto_auto] gap-2">
+        <div className="relative sm:col-span-2 md:col-span-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search title, subject, class…" value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
         <Select value={filterSubject} onValueChange={setFilterSubject}>
-          <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Subject" /></SelectTrigger>
+          <SelectTrigger className="w-full md:w-[150px]"><SelectValue placeholder="Subject" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Subjects</SelectItem>
             {subjects.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={filterClass} onValueChange={setFilterClass}>
-          <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Class Level" /></SelectTrigger>
+          <SelectTrigger className="w-full md:w-[150px]"><SelectValue placeholder="Class Level" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Levels</SelectItem>
             {classLevels.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
           </SelectContent>
         </Select>
+      </div>
+
+      {/* Mobile sort control */}
+      <div className="md:hidden flex items-center gap-2">
+        <Checkbox checked={allOnPageSelected} onCheckedChange={toggleSelectAll} />
+        <span className="text-xs text-muted-foreground">Select all</span>
+        <div className="ml-auto">
+          <Select value={`${sortKey}:${sortDir}`} onValueChange={v => { const [k, d] = v.split(":"); setSortKey(k as SortKey); setSortDir(d as SortDir); }}>
+            <SelectTrigger className="h-8 text-xs w-[150px]"><ArrowUpDown size={12} className="mr-1 shrink-0" /><SelectValue placeholder="Sort by" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="created_at:desc">Newest first</SelectItem>
+              <SelectItem value="created_at:asc">Oldest first</SelectItem>
+              <SelectItem value="title:asc">Title A–Z</SelectItem>
+              <SelectItem value="title:desc">Title Z–A</SelectItem>
+              <SelectItem value="subject:asc">Subject A–Z</SelectItem>
+              <SelectItem value="is_published:desc">Published first</SelectItem>
+              <SelectItem value="is_published:asc">Drafts first</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Add/Edit Form */}
@@ -330,7 +350,7 @@ const AdminVideos = () => {
               <Label>Thumbnail {form.video_source === "upload" ? "*" : "(auto-synced)"}</Label>
               <div className="flex items-center gap-3 mt-1">
                 {form.thumbnail_url && <img src={form.thumbnail_url} alt="" className="w-24 h-14 object-cover rounded border border-border" />}
-                <Input type="file" accept="image/*" onChange={handleThumbnailUpload} disabled={uploading} />
+                <Input type="file" accept="image/*" onChange={handleThumbnailUpload} disabled={uploading} className="min-w-0" />
               </div>
               {form.video_source !== "upload" && !form.thumbnail_url && <p className="text-xs text-muted-foreground mt-1">Paste a video URL below to auto-fetch thumbnail</p>}
             </div>
@@ -348,7 +368,7 @@ const AdminVideos = () => {
               </div>
               <div>
                 {form.video_source === "upload" ? (
-                  <><Label>Upload Video</Label><Input type="file" accept="video/mp4,video/webm" onChange={handleVideoUpload} disabled={uploading} /></>
+                  <><Label>Upload Video</Label><Input type="file" accept="video/mp4,video/webm" onChange={handleVideoUpload} disabled={uploading} className="min-w-0" /></>
                 ) : (
                   <><Label>Video URL</Label><Input value={form.video_url || ""} onChange={e => handleVideoUrlChange(e.target.value)} placeholder={form.video_source === "youtube" ? "YouTube URL" : "Google Drive share link"} />
                   {syncing && <p className="text-xs text-primary mt-1 animate-pulse">Syncing metadata…</p>}</>
@@ -367,11 +387,11 @@ const AdminVideos = () => {
         </Card>
       )}
 
-      {/* Videos Table */}
+      {/* Videos List */}
       {processedVideos.length > 0 ? (
         <>
-          {/* Desktop table */}
-          <div className="hidden sm:block rounded-md border border-border">
+          {/* Desktop table — only on md+ */}
+          <div className="hidden md:block rounded-md border border-border overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -431,26 +451,33 @@ const AdminVideos = () => {
             </Table>
           </div>
 
-          {/* Mobile cards */}
-          <div className="sm:hidden space-y-3">
+          {/* Mobile & Tablet cards — below md */}
+          <div className="md:hidden space-y-2">
             {paginatedVideos.map(video => (
-              <Card key={video.id} className="overflow-hidden">
-                <div className="flex gap-3 p-3">
+              <Card key={video.id} className="overflow-hidden" data-state={selected.has(video.id) ? "selected" : undefined}>
+                <div className="flex gap-3 p-3 min-w-0">
                   <Checkbox checked={selected.has(video.id)} onCheckedChange={() => toggleSelect(video.id)} className="mt-1 shrink-0" />
-                  <div className="w-20 h-14 rounded overflow-hidden bg-muted shrink-0">
-                    {video.thumbnail_url ? <img src={video.thumbnail_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Video size={18} className="text-muted-foreground/40" /></div>}
+                  <div className="w-16 h-11 sm:w-20 sm:h-14 rounded overflow-hidden bg-muted shrink-0">
+                    {video.thumbnail_url ? <img src={video.thumbnail_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Video size={16} className="text-muted-foreground/40" /></div>}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-sm text-foreground truncate">{video.title}</h3>
-                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                       <Badge variant={video.is_published ? "default" : "secondary"} className="text-[10px] cursor-pointer" onClick={() => togglePublish(video)}>
                         {video.is_published ? "Published" : "Draft"}
                       </Badge>
                       {video.subject && <span className="text-[10px] text-muted-foreground">{video.subject}</span>}
+                      {video.class_level && <span className="text-[10px] text-muted-foreground">• {video.class_level}</span>}
                     </div>
-                    <div className="flex items-center gap-1 mt-1.5">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => startEdit(video)}><Edit2 size={12} /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(video.id)}><Trash2 size={12} className="text-destructive" /></Button>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-[10px] text-muted-foreground">
+                        {sourceLabel(video.video_source)} • {new Date(video.created_at).toLocaleDateString()}
+                        {video.duration && ` • ${video.duration}`}
+                      </span>
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => startEdit(video)}><Edit2 size={12} /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(video.id)}><Trash2 size={12} className="text-destructive" /></Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -468,7 +495,7 @@ const AdminVideos = () => {
 
       {/* Bulk Action Confirmation */}
       <AlertDialog open={!!bulkDialog} onOpenChange={open => !open && setBulkDialog(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[calc(100vw-2rem)]">
           <AlertDialogHeader>
             <AlertDialogTitle>
               {bulkDialog?.action === "delete" ? "Delete Selected Videos?" : bulkDialog?.action === "publish" ? "Publish Selected Videos?" : "Unpublish Selected Videos?"}
