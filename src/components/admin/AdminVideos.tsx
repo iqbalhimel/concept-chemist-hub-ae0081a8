@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit2, Video, Save, X, Search, ArrowUpDown, ArrowUp, ArrowDown, ListFilter } from "lucide-react";
+import { Plus, Trash2, Edit2, Video, Save, X, Search, ArrowUpDown, ArrowUp, ArrowDown, ListFilter, GripVertical } from "lucide-react";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import { Badge } from "@/components/ui/badge";
 import { secureUpload } from "@/lib/secureUpload";
@@ -19,6 +19,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 
 type VideoItem = {
   id: string;
