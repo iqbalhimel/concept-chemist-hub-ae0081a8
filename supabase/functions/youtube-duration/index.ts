@@ -6,14 +6,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const INVIDIOUS_INSTANCES = [
-  "https://inv.nadeko.net",
-  "https://invidious.nerdvpn.de",
-  "https://inv.tux.pizza",
-  "https://yewtu.be",
-  "https://invidious.privacyredirect.com",
-];
-
 function formatDuration(totalSeconds: number): string {
   if (totalSeconds <= 0) return "";
   const h = Math.floor(totalSeconds / 3600);
@@ -24,70 +16,18 @@ function formatDuration(totalSeconds: number): string {
     : `${m}:${String(s).padStart(2, "0")}`;
 }
 
-async function tryYouTubePlayer(videoId: string): Promise<string> {
-  // Try multiple client types
-  const clients = [
-    { clientName: "ANDROID", clientVersion: "19.09.37", androidSdkVersion: 30 },
-    { clientName: "IOS", clientVersion: "19.09.3" },
-    { clientName: "WEB", clientVersion: "2.20240101.00.00" },
-  ];
+const PIPED_INSTANCES = [
+  "https://pipedapi.kavin.rocks",
+  "https://pipedapi.r4fo.com",
+  "https://api.piped.privacydev.net",
+];
 
-  for (const client of clients) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
-      const res = await fetch(
-        "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "User-Agent": "com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip",
-          },
-          body: JSON.stringify({
-            videoId,
-            context: { client: { hl: "en", gl: "US", ...client } },
-          }),
-          signal: controller.signal,
-        }
-      );
-      clearTimeout(timeout);
-      if (res.ok) {
-        const data = await res.json();
-        const secs = parseInt(data?.videoDetails?.lengthSeconds || "0");
-        if (secs > 0) {
-          return formatDuration(secs);
-        }
-      }
-    } catch {
-      // try next client
-    }
-  }
-  return "";
-}
-
-async function tryInvidious(videoId: string): Promise<string> {
-  for (const instance of INVIDIOUS_INSTANCES) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 6000);
-      const res = await fetch(
-        `${instance}/api/v1/videos/${encodeURIComponent(videoId)}?fields=lengthSeconds`,
-        { signal: controller.signal }
-      );
-      clearTimeout(timeout);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.lengthSeconds && data.lengthSeconds > 0) {
-          return formatDuration(data.lengthSeconds);
-        }
-      }
-    } catch {
-      // try next instance
-    }
-  }
-  return "";
-}
+const INVIDIOUS_INSTANCES = [
+  "https://inv.nadeko.net",
+  "https://invidious.nerdvpn.de",
+  "https://inv.tux.pizza",
+  "https://yewtu.be",
+];
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -103,16 +43,79 @@ serve(async (req) => {
       });
     }
 
-    // Race both approaches for speed
-    const [ytDuration, invDuration] = await Promise.allSettled([
-      tryYouTubePlayer(videoId),
-      tryInvidious(videoId),
-    ]);
+    let duration = "";
 
-    const duration =
-      (ytDuration.status === "fulfilled" && ytDuration.value) ||
-      (invDuration.status === "fulfilled" && invDuration.value) ||
-      "";
+    // 1. Try Piped API instances
+    for (const instance of PIPED_INSTANCES) {
+      if (duration) break;
+      try {
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch(`${instance}/streams/${encodeURIComponent(videoId)}`, {
+          signal: controller.signal,
+          headers: { Accept: "application/json" },
+        });
+        clearTimeout(tid);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.duration && data.duration > 0) {
+            duration = formatDuration(data.duration);
+          }
+        }
+      } catch (_) { /* next */ }
+    }
+
+    // 2. Try Invidious API instances
+    if (!duration) {
+      for (const instance of INVIDIOUS_INSTANCES) {
+        if (duration) break;
+        try {
+          const controller = new AbortController();
+          const tid = setTimeout(() => controller.abort(), 8000);
+          const res = await fetch(
+            `${instance}/api/v1/videos/${encodeURIComponent(videoId)}?fields=lengthSeconds`,
+            { signal: controller.signal }
+          );
+          clearTimeout(tid);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.lengthSeconds && data.lengthSeconds > 0) {
+              duration = formatDuration(data.lengthSeconds);
+            }
+          }
+        } catch (_) { /* next */ }
+      }
+    }
+
+    // 3. Try YouTube internal player API
+    if (!duration) {
+      try {
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch("https://www.youtube.com/youtubei/v1/player?prettyPrint=false", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": "com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip",
+          },
+          body: JSON.stringify({
+            videoId,
+            context: {
+              client: { clientName: "ANDROID", clientVersion: "19.09.37", androidSdkVersion: 30, hl: "en", gl: "US" },
+            },
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(tid);
+        if (res.ok) {
+          const data = await res.json();
+          const secs = parseInt(data?.videoDetails?.lengthSeconds || "0");
+          if (secs > 0) {
+            duration = formatDuration(secs);
+          }
+        }
+      } catch (_) { /* skip */ }
+    }
 
     return new Response(JSON.stringify({ duration }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
