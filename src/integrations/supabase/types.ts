@@ -268,6 +268,54 @@ export type Database = {
         }
         Relationships: []
       }
+      educational_videos: {
+        Row: {
+          class_level: string
+          created_at: string
+          description: string | null
+          duration: string | null
+          id: string
+          is_published: boolean
+          sort_order: number
+          subject: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_source: string
+          video_url: string | null
+        }
+        Insert: {
+          class_level?: string
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_published?: boolean
+          sort_order?: number
+          subject?: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_source?: string
+          video_url?: string | null
+        }
+        Update: {
+          class_level?: string
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_published?: boolean
+          sort_order?: number
+          subject?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_source?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       experience: {
         Row: {
           created_at: string

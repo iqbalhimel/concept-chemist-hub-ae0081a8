@@ -15,6 +15,7 @@ import StatsSection from "@/components/StatsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import ContactSection from "@/components/ContactSection";
 import GallerySection from "@/components/GallerySection";
+import VideoSection from "@/components/VideoSection";
 import FAQSection from "@/components/FAQSection";
 
 type Visibility = Record<string, string>;
@@ -48,6 +49,7 @@ const Index = () => {
         {show("show_training") && <ProfessionalTrainingSection />}
         {show("show_education") && <EducationSection />}
         {show("show_gallery") && <GallerySection />}
+        {show("show_videos") && <VideoSection />}
         {show("show_testimonials") && <TestimonialsSection />}
         {show("show_notices") && <NoticesSection />}
         {show("show_resources") && <ResourcesSection />}

@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, BookOpen, Bell, Download,
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
-  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp, Shield
+  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp, Shield, Video
 } from "lucide-react";
 import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminNotices from "@/components/admin/AdminNotices";
@@ -30,12 +30,13 @@ import AdminSEO from "@/components/admin/AdminSEO";
 import AdminPerformance from "@/components/admin/AdminPerformance";
 import AdminSeoMonitor from "@/components/admin/AdminSeoMonitor";
 import AdminSecurityLogs from "@/components/admin/AdminSecurityLogs";
+import AdminVideos from "@/components/admin/AdminVideos";
 
 type Tab =
   | "dashboard" | "analytics" | "site-settings" | "seo" | "seo-monitor" | "performance" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
   | "media" | "themes" | "atmosphere" | "education" | "experience"
-  | "achievements" | "approach" | "subjects" | "training" | "security-logs";
+  | "achievements" | "approach" | "subjects" | "training" | "security-logs" | "videos";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -61,6 +62,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "themes", label: "Themes", icon: Palette },
   { id: "atmosphere", label: "Atmosphere", icon: CloudSun },
   { id: "security-logs", label: "Security Logs", icon: Shield },
+  { id: "videos", label: "Educational Videos", icon: Video },
 ];
 
 const AdminDashboard = () => {
@@ -92,6 +94,7 @@ const AdminDashboard = () => {
       case "themes": return <AdminThemes />;
       case "atmosphere": return <AdminAtmosphere />;
       case "security-logs": return <AdminSecurityLogs />;
+      case "videos": return <AdminVideos />;
       default: return <AdminDashboardOverview onNavigate={(tab) => setActiveTab(tab as Tab)} />;
     }
   };

@@ -29,6 +29,7 @@ const BlogListing = lazy(() => import("./pages/BlogListing"));
 const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage"));
 const NoticesPage = lazy(() => import("./pages/NoticesPage"));
 const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
+const VideosPage = lazy(() => import("./pages/VideosPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,6 +63,7 @@ const AppRoutes = () => (
           <Route path="/:lang/testimonials" element={<TestimonialsPage />} />
           <Route path="/:lang/notices" element={<NoticesPage />} />
           <Route path="/:lang/resources" element={<ResourcesPage />} />
+          <Route path="/:lang/videos" element={<VideosPage />} />
 
           {/* Legacy routes (redirect handled via LanguageRedirect) */}
           <Route path="/" element={<Index />} />
@@ -70,6 +72,7 @@ const AppRoutes = () => (
           <Route path="/testimonials" element={<TestimonialsPage />} />
           <Route path="/notices" element={<NoticesPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/videos" element={<VideosPage />} />
         </Route>
 
         {/* Admin routes (no lang prefix) */}
