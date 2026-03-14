@@ -13,6 +13,7 @@ import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import { Badge } from "@/components/ui/badge";
 import { secureUpload } from "@/lib/secureUpload";
 import { compressImage } from "@/lib/imageCompression";
+import { useVideoMetadataSync } from "@/hooks/useVideoMetadataSync";
 
 type VideoItem = {
   id: string;
