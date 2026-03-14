@@ -29,6 +29,7 @@ const BlogListing = lazy(() => import("./pages/BlogListing"));
 const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage"));
 const NoticesPage = lazy(() => import("./pages/NoticesPage"));
 const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
+const VideosPage = lazy(() => import("./pages/VideosPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
