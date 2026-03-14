@@ -50,10 +50,10 @@ type SortKey = "title" | "subject" | "class_level" | "video_source" | "created_a
 type SortDir = "asc" | "desc";
 
 // Sortable wrapper for table rows
-const SortableTableRow = ({ id, children }: { id: string; children: React.ReactNode }) => {
+const SortableTableRow = ({ id, children }: { id: string; children: (listeners: Record<string, any>) => React.ReactNode }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
-  return <TableRow ref={setNodeRef} style={style} {...attributes}>{children instanceof Function ? children({ listeners }) : children}</TableRow>;
+  return <TableRow ref={setNodeRef} style={style} {...attributes}>{children(listeners ?? {})}</TableRow>;
 };
 
 // Sortable wrapper for mobile cards
