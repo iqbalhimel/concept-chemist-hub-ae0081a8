@@ -72,6 +72,7 @@ const AppRoutes = () => (
           <Route path="/testimonials" element={<TestimonialsPage />} />
           <Route path="/notices" element={<NoticesPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/videos" element={<VideosPage />} />
         </Route>
 
         {/* Admin routes (no lang prefix) */}
