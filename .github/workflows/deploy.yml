@@ -1,4 +1,4 @@
-name: Deploy to Hostinger
+name: Deploy to Hostinger (Bulletproof)
 
 on:
   workflow_dispatch:
@@ -34,18 +34,17 @@ jobs:
       - name: Verify build output
         run: |
           if [ ! -d "dist" ]; then
-            echo "❌ dist folder not found. Build failed."
+            echo "❌ dist folder not found"
             exit 1
           fi
           echo "✅ dist folder exists"
 
-      # ==============================
-      # BUILD BACKUP (GitHub Artifact)
-      # ==============================
+      # -----------------------------
+      # BACKUP BUILD
+      # -----------------------------
 
       - name: Archive build
-        run: |
-          tar -czf build.tar.gz dist
+        run: tar -czf build.tar.gz dist
 
       - name: Upload build backup
         uses: actions/upload-artifact@v4
@@ -54,11 +53,13 @@ jobs:
           path: build.tar.gz
           retention-days: 7
 
-      # ==============================
-      # DEPLOY TO HOSTINGER
-      # ==============================
+      # -----------------------------
+      # FTP DEPLOY WITH RETRY
+      # -----------------------------
 
-      - name: Deploy to Hostinger via FTP
+      - name: Deploy attempt 1
+        id: deploy1
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -69,11 +70,38 @@ jobs:
           local-dir: dist/
           server-dir: ./
           dangerous-clean-slate: false
-          log-level: standard
 
-      # ==============================
+      - name: Deploy attempt 2
+        if: steps.deploy1.outcome == 'failure'
+        id: deploy2
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: dist/
+          server-dir: ./
+          dangerous-clean-slate: false
+
+      - name: Deploy attempt 3
+        if: steps.deploy2.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: dist/
+          server-dir: ./
+          dangerous-clean-slate: false
+
+      # -----------------------------
       # PURGE CLOUDFLARE CACHE
-      # ==============================
+      # -----------------------------
 
       - name: Purge Cloudflare Cache
         run: |
@@ -82,38 +110,35 @@ jobs:
           -H "Content-Type: application/json" \
           --data '{"purge_everything":true}'
 
-      # ==============================
-      # DEPLOY HEALTH CHECK
-      # ==============================
+      # -----------------------------
+      # HEALTH CHECK
+      # -----------------------------
 
       - name: Check site health
         run: |
           STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://iqbalsir.bd)
           if [ "$STATUS" -ne 200 ]; then
-            echo "❌ Site health check failed"
+            echo "❌ Health check failed"
             exit 1
           fi
-          echo "✅ Site is live (HTTP $STATUS)"
+          echo "✅ Site is live"
 
-      # ==============================
-      # DEPLOY COMPLETE
-      # ==============================
+      # -----------------------------
+      # TELEGRAM SUCCESS
+      # -----------------------------
 
-      - name: Deploy complete
-        run: echo "🚀 Deployment finished successfully"
-
-      # ==============================
-      # TELEGRAM ALERTS
-      # ==============================
-
-      - name: Telegram notify success
+      - name: Telegram success
         if: success()
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
           -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
           -d text="✅ Deploy success: iqbalsir.bd"
 
-      - name: Telegram notify failure
+      # -----------------------------
+      # TELEGRAM FAILURE
+      # -----------------------------
+
+      - name: Telegram failure
         if: failure()
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
