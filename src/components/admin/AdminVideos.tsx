@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit2, Video, Save, X, Search, ArrowUpDown, ArrowUp, ArrowDown, ListFilter } from "lucide-react";
+import { Plus, Trash2, Edit2, Video, Save, X, Search, ArrowUpDown, ArrowUp, ArrowDown, ListFilter, GripVertical } from "lucide-react";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import { Badge } from "@/components/ui/badge";
 import { secureUpload } from "@/lib/secureUpload";
@@ -19,6 +19,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 
 type VideoItem = {
   id: string;
@@ -42,8 +46,22 @@ const emptyVideo: Omit<VideoItem, "id" | "created_at" | "updated_at"> = {
   duration: "", is_published: false, sort_order: 0,
 };
 
-type SortKey = "title" | "subject" | "class_level" | "video_source" | "created_at" | "is_published";
+type SortKey = "title" | "subject" | "class_level" | "video_source" | "created_at" | "is_published" | "sort_order";
 type SortDir = "asc" | "desc";
+
+// Sortable wrapper for table rows
+const SortableTableRow = ({ id, children }: { id: string; children: (listeners: Record<string, any>) => React.ReactNode }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  return <TableRow ref={setNodeRef} style={style} {...attributes}>{children(listeners ?? {})}</TableRow>;
+};
+
+// Sortable wrapper for mobile cards
+const SortableCard = ({ id, children }: { id: string; children: (listeners: any) => React.ReactNode }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  return <div ref={setNodeRef} style={style} {...attributes}>{children(listeners)}</div>;
+};
 
 const AdminVideos = () => {
   const csrfGuard = useCsrfGuard();
@@ -62,6 +80,7 @@ const AdminVideos = () => {
   const [filterClass, setFilterClass] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [orderChanged, setOrderChanged] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "all">(10);
 
@@ -79,7 +98,7 @@ const AdminVideos = () => {
   };
 
   const fetchVideos = async () => {
-    const { data } = await supabase.from("educational_videos").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase.from("educational_videos").select("*").order("sort_order", { ascending: true });
     if (data) setVideos(data as VideoItem[]);
     setLoading(false);
   };
@@ -159,6 +178,37 @@ const AdminVideos = () => {
         return s;
       });
     }
+  };
+
+  // Drag-and-drop reorder
+  const isReorderMode = useMemo(() => !search.trim() && filterSubject === "all" && filterClass === "all" && sortKey === "sort_order", [search, filterSubject, filterClass, sortKey]);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setVideos(prev => {
+      const oldIndex = prev.findIndex(v => v.id === active.id);
+      const newIndex = prev.findIndex(v => v.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return prev;
+      const reordered = arrayMove(prev, oldIndex, newIndex);
+      return reordered.map((v, i) => ({ ...v, sort_order: i }));
+    });
+    setOrderChanged(true);
+  };
+
+  const saveOrder = async () => {
+    await csrfGuard(async () => {
+      const updates = videos.map((v, i) =>
+        supabase.from("educational_videos").update({ sort_order: i, updated_at: new Date().toISOString() }).eq("id", v.id)
+      );
+      await Promise.all(updates);
+      setOrderChanged(false);
+      toast.success("Order saved");
+    }, "content_update", "Reordered educational videos");
   };
 
   // CRUD
@@ -274,6 +324,19 @@ const AdminVideos = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">{processedVideos.length} video(s){search || filterSubject !== "all" || filterClass !== "all" ? ` (filtered from ${videos.length})` : ""}</p>
         <div className="flex items-center gap-2 flex-wrap">
+          {orderChanged && (
+            <Button size="sm" variant="default" onClick={saveOrder}><Save size={14} className="mr-1" /> Save Order</Button>
+          )}
+          {!isReorderMode && (
+            <Button size="sm" variant="outline" onClick={() => { setSortKey("sort_order"); setSortDir("asc"); }}>
+              <GripVertical size={14} className="mr-1" /> Reorder
+            </Button>
+          )}
+          {isReorderMode && !orderChanged && (
+            <Button size="sm" variant="outline" onClick={() => { setSortKey("created_at"); setSortDir("desc"); }}>
+              Exit Reorder
+            </Button>
+          )}
           {selected.size > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -322,6 +385,7 @@ const AdminVideos = () => {
           <Select value={`${sortKey}:${sortDir}`} onValueChange={v => { const [k, d] = v.split(":"); setSortKey(k as SortKey); setSortDir(d as SortDir); }}>
             <SelectTrigger className="h-8 text-xs w-[150px]"><ArrowUpDown size={12} className="mr-1 shrink-0" /><SelectValue placeholder="Sort by" /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="sort_order:asc">Custom order</SelectItem>
               <SelectItem value="created_at:desc">Newest first</SelectItem>
               <SelectItem value="created_at:asc">Oldest first</SelectItem>
               <SelectItem value="title:asc">Title A–Z</SelectItem>
@@ -389,104 +453,154 @@ const AdminVideos = () => {
 
       {/* Videos List */}
       {processedVideos.length > 0 ? (
-        <>
-          {/* Desktop table — only on md+ */}
-          <div className="hidden md:block rounded-md border border-border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-10"><Checkbox checked={allOnPageSelected} onCheckedChange={toggleSelectAll} /></TableHead>
-                  <TableHead className="w-16">Thumb</TableHead>
-                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("title")}>
-                    <span className="inline-flex items-center">Title<SortIcon col="title" /></span>
-                  </TableHead>
-                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("subject")}>
-                    <span className="inline-flex items-center">Subject<SortIcon col="subject" /></span>
-                  </TableHead>
-                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("class_level")}>
-                    <span className="inline-flex items-center">Class<SortIcon col="class_level" /></span>
-                  </TableHead>
-                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("video_source")}>
-                    <span className="inline-flex items-center">Source<SortIcon col="video_source" /></span>
-                  </TableHead>
-                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("created_at")}>
-                    <span className="inline-flex items-center">Date<SortIcon col="created_at" /></span>
-                  </TableHead>
-                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("is_published")}>
-                    <span className="inline-flex items-center">Status<SortIcon col="is_published" /></span>
-                  </TableHead>
-                  <TableHead className="w-24 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedVideos.map(video => (
-                  <TableRow key={video.id} data-state={selected.has(video.id) ? "selected" : undefined}>
-                    <TableCell><Checkbox checked={selected.has(video.id)} onCheckedChange={() => toggleSelect(video.id)} /></TableCell>
-                    <TableCell>
-                      {video.thumbnail_url ? (
-                        <img src={video.thumbnail_url} alt="" className="w-14 h-9 object-cover rounded" />
-                      ) : (
-                        <div className="w-14 h-9 rounded bg-muted flex items-center justify-center"><Video size={14} className="text-muted-foreground/40" /></div>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium max-w-[200px] truncate">{video.title}</TableCell>
-                    <TableCell className="text-muted-foreground text-xs">{video.subject || "—"}</TableCell>
-                    <TableCell className="text-muted-foreground text-xs">{video.class_level || "—"}</TableCell>
-                    <TableCell className="text-xs">{sourceLabel(video.video_source)}</TableCell>
-                    <TableCell className="text-muted-foreground text-xs">{new Date(video.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <Badge variant={video.is_published ? "default" : "secondary"} className="cursor-pointer" onClick={() => togglePublish(video)}>
-                        {video.is_published ? "Published" : "Draft"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => startEdit(video)}><Edit2 size={14} /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(video.id)}><Trash2 size={14} className="text-destructive" /></Button>
-                      </div>
-                    </TableCell>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} modifiers={[restrictToVerticalAxis]}>
+          <SortableContext items={paginatedVideos.map(v => v.id)} strategy={verticalListSortingStrategy}>
+            {/* Desktop table — only on md+ */}
+            <div className="hidden md:block rounded-md border border-border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {isReorderMode && <TableHead className="w-10" />}
+                    <TableHead className="w-10"><Checkbox checked={allOnPageSelected} onCheckedChange={toggleSelectAll} /></TableHead>
+                    <TableHead className="w-16">Thumb</TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("title")}>
+                      <span className="inline-flex items-center">Title<SortIcon col="title" /></span>
+                    </TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("subject")}>
+                      <span className="inline-flex items-center">Subject<SortIcon col="subject" /></span>
+                    </TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("class_level")}>
+                      <span className="inline-flex items-center">Class<SortIcon col="class_level" /></span>
+                    </TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("video_source")}>
+                      <span className="inline-flex items-center">Source<SortIcon col="video_source" /></span>
+                    </TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("created_at")}>
+                      <span className="inline-flex items-center">Date<SortIcon col="created_at" /></span>
+                    </TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("is_published")}>
+                      <span className="inline-flex items-center">Status<SortIcon col="is_published" /></span>
+                    </TableHead>
+                    <TableHead className="w-24 text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {paginatedVideos.map(video => isReorderMode ? (
+                    <SortableTableRow key={video.id} id={video.id}>
+                      {(listeners: Record<string, any>) => (
+                        <>
+                          <TableCell className="w-10 cursor-grab" {...listeners}><GripVertical size={16} className="text-muted-foreground" /></TableCell>
+                          <TableCell><Checkbox checked={selected.has(video.id)} onCheckedChange={() => toggleSelect(video.id)} /></TableCell>
+                          <TableCell>
+                            {video.thumbnail_url ? <img src={video.thumbnail_url} alt="" className="w-14 h-9 object-cover rounded" /> : <div className="w-14 h-9 rounded bg-muted flex items-center justify-center"><Video size={14} className="text-muted-foreground/40" /></div>}
+                          </TableCell>
+                          <TableCell className="font-medium max-w-[200px] truncate">{video.title}</TableCell>
+                          <TableCell className="text-muted-foreground text-xs">{video.subject || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground text-xs">{video.class_level || "—"}</TableCell>
+                          <TableCell className="text-xs">{sourceLabel(video.video_source)}</TableCell>
+                          <TableCell className="text-muted-foreground text-xs">{new Date(video.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <Badge variant={video.is_published ? "default" : "secondary"} className="cursor-pointer" onClick={() => togglePublish(video)}>
+                              {video.is_published ? "Published" : "Draft"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button variant="ghost" size="icon" onClick={() => startEdit(video)}><Edit2 size={14} /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleDelete(video.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                            </div>
+                          </TableCell>
+                        </>
+                      )}
+                    </SortableTableRow>
+                  ) : (
+                    <TableRow key={video.id} data-state={selected.has(video.id) ? "selected" : undefined}>
+                      <TableCell><Checkbox checked={selected.has(video.id)} onCheckedChange={() => toggleSelect(video.id)} /></TableCell>
+                      <TableCell>
+                        {video.thumbnail_url ? <img src={video.thumbnail_url} alt="" className="w-14 h-9 object-cover rounded" /> : <div className="w-14 h-9 rounded bg-muted flex items-center justify-center"><Video size={14} className="text-muted-foreground/40" /></div>}
+                      </TableCell>
+                      <TableCell className="font-medium max-w-[200px] truncate">{video.title}</TableCell>
+                      <TableCell className="text-muted-foreground text-xs">{video.subject || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground text-xs">{video.class_level || "—"}</TableCell>
+                      <TableCell className="text-xs">{sourceLabel(video.video_source)}</TableCell>
+                      <TableCell className="text-muted-foreground text-xs">{new Date(video.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <Badge variant={video.is_published ? "default" : "secondary"} className="cursor-pointer" onClick={() => togglePublish(video)}>
+                          {video.is_published ? "Published" : "Draft"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => startEdit(video)}><Edit2 size={14} /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(video.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
-          {/* Mobile & Tablet cards — below md */}
-          <div className="md:hidden space-y-2">
-            {paginatedVideos.map(video => (
-              <Card key={video.id} className="overflow-hidden" data-state={selected.has(video.id) ? "selected" : undefined}>
-                <div className="flex gap-3 p-3 min-w-0">
-                  <Checkbox checked={selected.has(video.id)} onCheckedChange={() => toggleSelect(video.id)} className="mt-1 shrink-0" />
-                  <div className="w-16 h-11 sm:w-20 sm:h-14 rounded overflow-hidden bg-muted shrink-0">
-                    {video.thumbnail_url ? <img src={video.thumbnail_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Video size={16} className="text-muted-foreground/40" /></div>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm text-foreground truncate">{video.title}</h3>
-                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                      <Badge variant={video.is_published ? "default" : "secondary"} className="text-[10px] cursor-pointer" onClick={() => togglePublish(video)}>
-                        {video.is_published ? "Published" : "Draft"}
-                      </Badge>
-                      {video.subject && <span className="text-[10px] text-muted-foreground">{video.subject}</span>}
-                      {video.class_level && <span className="text-[10px] text-muted-foreground">• {video.class_level}</span>}
+            {/* Mobile & Tablet cards — below md */}
+            <div className="md:hidden space-y-2">
+              {paginatedVideos.map(video => isReorderMode ? (
+                <SortableCard key={video.id} id={video.id}>
+                  {(listeners: any) => (
+                    <Card className="overflow-hidden">
+                      <div className="flex gap-2 p-3 min-w-0">
+                        <div className="cursor-grab shrink-0 flex items-center" {...listeners}><GripVertical size={16} className="text-muted-foreground" /></div>
+                        <Checkbox checked={selected.has(video.id)} onCheckedChange={() => toggleSelect(video.id)} className="mt-1 shrink-0" />
+                        <div className="w-16 h-11 rounded overflow-hidden bg-muted shrink-0">
+                          {video.thumbnail_url ? <img src={video.thumbnail_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Video size={16} className="text-muted-foreground/40" /></div>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-sm text-foreground truncate">{video.title}</h3>
+                          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                            <Badge variant={video.is_published ? "default" : "secondary"} className="text-[10px] cursor-pointer" onClick={() => togglePublish(video)}>
+                              {video.is_published ? "Published" : "Draft"}
+                            </Badge>
+                            {video.subject && <span className="text-[10px] text-muted-foreground">{video.subject}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  )}
+                </SortableCard>
+              ) : (
+                <Card key={video.id} className="overflow-hidden" data-state={selected.has(video.id) ? "selected" : undefined}>
+                  <div className="flex gap-3 p-3 min-w-0">
+                    <Checkbox checked={selected.has(video.id)} onCheckedChange={() => toggleSelect(video.id)} className="mt-1 shrink-0" />
+                    <div className="w-16 h-11 sm:w-20 sm:h-14 rounded overflow-hidden bg-muted shrink-0">
+                      {video.thumbnail_url ? <img src={video.thumbnail_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Video size={16} className="text-muted-foreground/40" /></div>}
                     </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-[10px] text-muted-foreground">
-                        {sourceLabel(video.video_source)} • {new Date(video.created_at).toLocaleDateString()}
-                        {video.duration && ` • ${video.duration}`}
-                      </span>
-                      <div className="flex items-center gap-0.5 shrink-0">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => startEdit(video)}><Edit2 size={12} /></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(video.id)}><Trash2 size={12} className="text-destructive" /></Button>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-sm text-foreground truncate">{video.title}</h3>
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        <Badge variant={video.is_published ? "default" : "secondary"} className="text-[10px] cursor-pointer" onClick={() => togglePublish(video)}>
+                          {video.is_published ? "Published" : "Draft"}
+                        </Badge>
+                        {video.subject && <span className="text-[10px] text-muted-foreground">{video.subject}</span>}
+                        {video.class_level && <span className="text-[10px] text-muted-foreground">• {video.class_level}</span>}
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-[10px] text-muted-foreground">
+                          {sourceLabel(video.video_source)} • {new Date(video.created_at).toLocaleDateString()}
+                          {video.duration && ` • ${video.duration}`}
+                        </span>
+                        <div className="flex items-center gap-0.5 shrink-0">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => startEdit(video)}><Edit2 size={12} /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(video.id)}><Trash2 size={12} className="text-destructive" /></Button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          </SortableContext>
 
           <AdminPagination total={processedVideos.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
-        </>
+        </DndContext>
       ) : (
         <p className="text-center text-muted-foreground py-10">
           {videos.length === 0 ? 'No videos yet. Click "Add Video" to get started.' : "No videos match your search/filters."}
