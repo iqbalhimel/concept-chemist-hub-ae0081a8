@@ -80,6 +80,7 @@ const AdminVideos = () => {
   const [filterClass, setFilterClass] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [orderChanged, setOrderChanged] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "all">(10);
 
