@@ -62,6 +62,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "themes", label: "Themes", icon: Palette },
   { id: "atmosphere", label: "Atmosphere", icon: CloudSun },
   { id: "security-logs", label: "Security Logs", icon: Shield },
+  { id: "videos", label: "Educational Videos", icon: Video },
 ];
 
 const AdminDashboard = () => {
