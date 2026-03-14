@@ -66,7 +66,7 @@ jobs:
           protocol: ftp
           port: 21
           local-dir: dist/
-          server-dir: domains/iqbalsir.bd/public_html_new/
+          server-dir: public_html_new/
           dangerous-clean-slate: true
           log-level: standard
 
@@ -76,16 +76,15 @@ jobs:
 
       - name: Swap folders
         run: |
-          # rename current live → backup (overwrite old backup by moving it aside)
-          curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
-            --quote "RNFR domains/iqbalsir.bd/public_html" \
-            --quote "RNTO domains/iqbalsir.bd/public_html_backup"
-      
-          # promote new build → live
-          curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
-            --quote "RNFR domains/iqbalsir.bd/public_html_new" \
-            --quote "RNTO domains/iqbalsir.bd/public_html"
+          echo "Switching folders..."
 
+          curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
+          --quote "RNFR public_html" \
+          --quote "RNTO public_html_backup"
+
+          curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
+          --quote "RNFR public_html_new" \
+          --quote "RNTO public_html"
 
       # ---------------------------
       # CLOUDFLARE CACHE PURGE
