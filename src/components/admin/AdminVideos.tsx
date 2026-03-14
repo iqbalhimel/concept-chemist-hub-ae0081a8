@@ -13,6 +13,7 @@ import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import { Badge } from "@/components/ui/badge";
 import { secureUpload } from "@/lib/secureUpload";
 import { compressImage } from "@/lib/imageCompression";
+import { useVideoMetadataSync } from "@/hooks/useVideoMetadataSync";
 
 type VideoItem = {
   id: string;
@@ -51,6 +52,17 @@ const AdminVideos = () => {
   const [form, setForm] = useState(emptyVideo);
   const [isAdding, setIsAdding] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const { syncFromUrl } = useVideoMetadataSync(setForm);
+
+  const handleVideoUrlChange = async (url: string) => {
+    setForm(p => ({ ...p, video_url: url }));
+    if (url.trim() && form.video_source !== "upload") {
+      setSyncing(true);
+      await syncFromUrl(url, form.video_source);
+      setSyncing(false);
+    }
+  };
 
   const fetchVideos = async () => {
     const { data } = await supabase
@@ -206,11 +218,14 @@ const AdminVideos = () => {
             </div>
 
             <div>
-              <Label>Thumbnail</Label>
+              <Label>Thumbnail {form.video_source === "upload" ? "*" : "(auto-synced)"}</Label>
               <div className="flex items-center gap-3 mt-1">
-                {form.thumbnail_url && <img src={form.thumbnail_url} alt="" className="w-24 h-14 object-cover rounded" />}
+                {form.thumbnail_url && <img src={form.thumbnail_url} alt="" className="w-24 h-14 object-cover rounded border border-border" />}
                 <Input type="file" accept="image/*" onChange={handleThumbnailUpload} disabled={uploading} />
               </div>
+              {form.video_source !== "upload" && !form.thumbnail_url && (
+                <p className="text-xs text-muted-foreground mt-1">Paste a video URL below to auto-fetch thumbnail</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -234,7 +249,8 @@ const AdminVideos = () => {
                 ) : (
                   <>
                     <Label>Video URL</Label>
-                    <Input value={form.video_url || ""} onChange={e => setForm(p => ({ ...p, video_url: e.target.value }))} placeholder={form.video_source === "youtube" ? "YouTube URL" : "Google Drive share link"} />
+                    <Input value={form.video_url || ""} onChange={e => handleVideoUrlChange(e.target.value)} placeholder={form.video_source === "youtube" ? "YouTube URL" : "Google Drive share link"} />
+                    {syncing && <p className="text-xs text-primary mt-1 animate-pulse">Syncing metadata…</p>}
                   </>
                 )}
               </div>
