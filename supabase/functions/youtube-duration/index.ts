@@ -6,6 +6,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function formatDuration(totalSeconds: number): string {
+  if (totalSeconds <= 0) return "";
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  return h > 0
+    ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+    : `${m}:${String(s).padStart(2, "0")}`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -13,69 +23,110 @@ serve(async (req) => {
 
   try {
     const { videoId } = await req.json();
-    const debug: string[] = [];
-
-    // Test 1: Piped API
-    try {
-      const res = await fetch(`https://pipedapi.kavin.rocks/streams/${videoId}`);
-      debug.push(`piped: status=${res.status}`);
-      if (res.ok) {
-        const text = await res.text();
-        debug.push(`piped body length: ${text.length}`);
-        try {
-          const data = JSON.parse(text);
-          debug.push(`piped duration: ${data.duration}`);
-          if (data.duration > 0) {
-            const h = Math.floor(data.duration / 3600);
-            const m = Math.floor((data.duration % 3600) / 60);
-            const s = data.duration % 60;
-            const dur = h > 0
-              ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
-              : `${m}:${String(s).padStart(2, "0")}`;
-            return new Response(JSON.stringify({ duration: dur, debug }), {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
-          }
-        } catch (e) {
-          debug.push(`piped parse error: ${e.message}`);
-        }
-      }
-    } catch (e) {
-      debug.push(`piped error: ${e.message}`);
-    }
-
-    // Test 2: Invidious
-    try {
-      const res = await fetch(`https://inv.nadeko.net/api/v1/videos/${videoId}?fields=lengthSeconds`);
-      debug.push(`inv: status=${res.status}`);
-      if (res.ok) {
-        const data = await res.json();
-        debug.push(`inv lengthSeconds: ${data.lengthSeconds}`);
-      }
-    } catch (e) {
-      debug.push(`inv error: ${e.message}`);
-    }
-
-    // Test 3: YouTube internal API
-    try {
-      const res = await fetch("https://www.youtube.com/youtubei/v1/player?prettyPrint=false", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          videoId,
-          context: { client: { clientName: "ANDROID", clientVersion: "19.09.37", androidSdkVersion: 30, hl: "en" } },
-        }),
+    if (!videoId || typeof videoId !== "string") {
+      return new Response(JSON.stringify({ error: "Missing videoId" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-      debug.push(`ytapi: status=${res.status}`);
-      if (res.ok) {
-        const data = await res.json();
-        debug.push(`ytapi lengthSeconds: ${data?.videoDetails?.lengthSeconds}`);
-      }
-    } catch (e) {
-      debug.push(`ytapi error: ${e.message}`);
     }
 
-    return new Response(JSON.stringify({ duration: "", debug }), {
+    let duration = "";
+
+    // Approach 1: Scrape the YouTube watch page for lengthSeconds
+    if (!duration) {
+      try {
+        const res = await fetch(
+          `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`,
+          {
+            headers: {
+              "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+              "Accept-Language": "en-US,en;q=0.9",
+              Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              Cookie: "CONSENT=PENDING+987; SOCS=CAESEwgDEgk2ODE4MTYwODgaAmVuIAEaBgiA_LyuBg",
+            },
+          }
+        );
+        if (res.ok) {
+          const html = await res.text();
+          // Try multiple patterns
+          const patterns = [
+            /"lengthSeconds"\s*:\s*"(\d+)"/,
+            /lengthSeconds\\?":\s*\\?"(\d+)/,
+            /"approxDurationMs"\s*:\s*"(\d+)"/,
+          ];
+          for (const pattern of patterns) {
+            const match = html.match(pattern);
+            if (match) {
+              let secs: number;
+              if (pattern === patterns[2]) {
+                // approxDurationMs
+                secs = Math.floor(parseInt(match[1]) / 1000);
+              } else {
+                secs = parseInt(match[1]);
+              }
+              if (secs > 0) {
+                duration = formatDuration(secs);
+                break;
+              }
+            }
+          }
+        }
+      } catch (_) { /* skip */ }
+    }
+
+    // Approach 2: YouTube embed page (lighter, may have duration)
+    if (!duration) {
+      try {
+        const res = await fetch(
+          `https://www.youtube.com/embed/${encodeURIComponent(videoId)}`,
+          {
+            headers: {
+              "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            },
+          }
+        );
+        if (res.ok) {
+          const html = await res.text();
+          const match = html.match(/"lengthSeconds"\s*:\s*"(\d+)"/);
+          if (match) {
+            const secs = parseInt(match[1]);
+            if (secs > 0) {
+              duration = formatDuration(secs);
+            }
+          }
+        }
+      } catch (_) { /* skip */ }
+    }
+
+    // Approach 3: Try multiple Piped instances
+    if (!duration) {
+      const pipedInstances = [
+        "https://pipedapi.r4fo.com",
+        "https://pipedapi.adminforge.de",
+        "https://api.piped.privacydev.net",
+      ];
+      for (const instance of pipedInstances) {
+        if (duration) break;
+        try {
+          const controller = new AbortController();
+          const tid = setTimeout(() => controller.abort(), 5000);
+          const res = await fetch(`${instance}/streams/${encodeURIComponent(videoId)}`, {
+            signal: controller.signal,
+          });
+          clearTimeout(tid);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.duration && data.duration > 0) {
+              duration = formatDuration(data.duration);
+            }
+          }
+        } catch (_) { /* next */ }
+      }
+    }
+
+    return new Response(JSON.stringify({ duration }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
