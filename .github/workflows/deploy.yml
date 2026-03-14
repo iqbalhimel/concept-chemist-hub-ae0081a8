@@ -39,6 +39,25 @@ jobs:
           fi
           echo "✅ dist folder exists"
 
+      # ==============================
+      # BUILD BACKUP (GitHub Artifact)
+      # ==============================
+
+      - name: Archive build
+        run: |
+          tar -czf build.tar.gz dist
+
+      - name: Upload build backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-build-backup
+          path: build.tar.gz
+          retention-days: 7
+
+      # ==============================
+      # DEPLOY TO HOSTINGER
+      # ==============================
+
       - name: Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -52,6 +71,10 @@ jobs:
           dangerous-clean-slate: false
           log-level: standard
 
+      # ==============================
+      # PURGE CLOUDFLARE CACHE
+      # ==============================
+
       - name: Purge Cloudflare Cache
         run: |
           curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
@@ -59,9 +82,29 @@ jobs:
           -H "Content-Type: application/json" \
           --data '{"purge_everything":true}'
 
+      # ==============================
+      # DEPLOY HEALTH CHECK
+      # ==============================
+
+      - name: Check site health
+        run: |
+          STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://iqbalsir.bd)
+          if [ "$STATUS" -ne 200 ]; then
+            echo "❌ Site health check failed"
+            exit 1
+          fi
+          echo "✅ Site is live (HTTP $STATUS)"
+
+      # ==============================
+      # DEPLOY COMPLETE
+      # ==============================
 
       - name: Deploy complete
         run: echo "🚀 Deployment finished successfully"
+
+      # ==============================
+      # TELEGRAM ALERTS
+      # ==============================
 
       - name: Telegram notify success
         if: success()
@@ -76,6 +119,3 @@ jobs:
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
           -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
           -d text="🚨 Deploy FAILED: iqbalsir.bd"
-
-
-
