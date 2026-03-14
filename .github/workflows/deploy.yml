@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - backup-production-*
 
 concurrency:
   group: hostinger-deploy
@@ -17,13 +16,14 @@ jobs:
     timeout-minutes: 20
 
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
@@ -35,9 +35,10 @@ jobs:
       - name: Verify build output
         run: |
           if [ ! -d "dist" ]; then
-            echo "dist folder missing"
+            echo "❌ dist folder not found. Build failed."
             exit 1
           fi
+          echo "✅ dist folder exists"
 
       - name: Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -50,7 +51,6 @@ jobs:
           local-dir: dist/
           server-dir: public_html/
           dangerous-clean-slate: false
-          log-level: verbose
 
       - name: Purge Cloudflare Cache
         run: |
@@ -59,5 +59,5 @@ jobs:
           -H "Content-Type: application/json" \
           --data '{"purge_everything":true}'
 
-      - name: Deployment complete
-        run: echo "Site deployed successfully"
+      - name: Deploy complete
+        run: echo "🚀 Site deployed successfully"
