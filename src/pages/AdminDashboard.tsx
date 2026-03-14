@@ -36,7 +36,7 @@ type Tab =
   | "dashboard" | "analytics" | "site-settings" | "seo" | "seo-monitor" | "performance" | "notices" | "study-materials"
   | "blog" | "comments" | "testimonials" | "gallery" | "faq"
   | "media" | "themes" | "atmosphere" | "education" | "experience"
-  | "achievements" | "approach" | "subjects" | "training" | "security-logs";
+  | "achievements" | "approach" | "subjects" | "training" | "security-logs" | "videos";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
