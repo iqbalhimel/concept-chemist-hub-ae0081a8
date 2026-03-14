@@ -75,7 +75,7 @@ const AdminVideos = () => {
     setUploading(true);
     try {
       const compressed = await compressImage(file);
-      const result = await secureUpload(compressed, compressed.type, file.name, { subDir: "video-thumbnails" });
+      const result = await secureUpload(compressed.blob, compressed.contentType, file.name, { subDir: "video-thumbnails" });
       setForm(prev => ({ ...prev, thumbnail_url: result.publicUrl }));
       toast.success("Thumbnail uploaded");
     } catch (err: any) {
