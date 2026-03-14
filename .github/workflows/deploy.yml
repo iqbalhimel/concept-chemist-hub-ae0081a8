@@ -73,18 +73,21 @@ jobs:
       # ---------------------------
       # ATOMIC SWAP
       # ---------------------------
-
       - name: Swap folders
         run: |
-          curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-          ftp://${{ secrets.FTP_SERVER }} \
-          --quote "RNFR domains/iqbalsir.bd/public_html" \
-          --quote "RNTO domains/iqbalsir.bd/public_html_backup"
-
-          curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-          ftp://${{ secrets.FTP_SERVER }} \
-          --quote "RNFR domains/iqbalsir.bd/public_html_new" \
-          --quote "RNTO domains/iqbalsir.bd/public_html"
+          # remove old backup if exists
+          curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
+            --quote "RMD domains/iqbalsir.bd/public_html_backup" || true
+      
+          # rename current live → backup
+          curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
+            --quote "RNFR domains/iqbalsir.bd/public_html" \
+            --quote "RNTO domains/iqbalsir.bd/public_html_backup"
+      
+          # promote new build → live
+          curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
+            --quote "RNFR domains/iqbalsir.bd/public_html_new" \
+            --quote "RNTO domains/iqbalsir.bd/public_html"
 
       # ---------------------------
       # CLOUDFLARE CACHE PURGE
