@@ -218,11 +218,14 @@ const AdminVideos = () => {
             </div>
 
             <div>
-              <Label>Thumbnail</Label>
+              <Label>Thumbnail {form.video_source === "upload" ? "*" : "(auto-synced)"}</Label>
               <div className="flex items-center gap-3 mt-1">
-                {form.thumbnail_url && <img src={form.thumbnail_url} alt="" className="w-24 h-14 object-cover rounded" />}
+                {form.thumbnail_url && <img src={form.thumbnail_url} alt="" className="w-24 h-14 object-cover rounded border border-border" />}
                 <Input type="file" accept="image/*" onChange={handleThumbnailUpload} disabled={uploading} />
               </div>
+              {form.video_source !== "upload" && !form.thumbnail_url && (
+                <p className="text-xs text-muted-foreground mt-1">Paste a video URL below to auto-fetch thumbnail</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
