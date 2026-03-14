@@ -9,8 +9,9 @@ const corsHeaders = {
 const INVIDIOUS_INSTANCES = [
   "https://inv.nadeko.net",
   "https://invidious.nerdvpn.de",
+  "https://inv.tux.pizza",
+  "https://yewtu.be",
   "https://invidious.privacyredirect.com",
-  "https://vid.puffyan.us",
 ];
 
 function formatDuration(totalSeconds: number): string {
@@ -21,6 +22,71 @@ function formatDuration(totalSeconds: number): string {
   return h > 0
     ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
     : `${m}:${String(s).padStart(2, "0")}`;
+}
+
+async function tryYouTubePlayer(videoId: string): Promise<string> {
+  // Try multiple client types
+  const clients = [
+    { clientName: "ANDROID", clientVersion: "19.09.37", androidSdkVersion: 30 },
+    { clientName: "IOS", clientVersion: "19.09.3" },
+    { clientName: "WEB", clientVersion: "2.20240101.00.00" },
+  ];
+
+  for (const client of clients) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(
+        "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": "com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip",
+          },
+          body: JSON.stringify({
+            videoId,
+            context: { client: { hl: "en", gl: "US", ...client } },
+          }),
+          signal: controller.signal,
+        }
+      );
+      clearTimeout(timeout);
+      if (res.ok) {
+        const data = await res.json();
+        const secs = parseInt(data?.videoDetails?.lengthSeconds || "0");
+        if (secs > 0) {
+          return formatDuration(secs);
+        }
+      }
+    } catch {
+      // try next client
+    }
+  }
+  return "";
+}
+
+async function tryInvidious(videoId: string): Promise<string> {
+  for (const instance of INVIDIOUS_INSTANCES) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 6000);
+      const res = await fetch(
+        `${instance}/api/v1/videos/${encodeURIComponent(videoId)}?fields=lengthSeconds`,
+        { signal: controller.signal }
+      );
+      clearTimeout(timeout);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.lengthSeconds && data.lengthSeconds > 0) {
+          return formatDuration(data.lengthSeconds);
+        }
+      }
+    } catch {
+      // try next instance
+    }
+  }
+  return "";
 }
 
 serve(async (req) => {
@@ -37,66 +103,16 @@ serve(async (req) => {
       });
     }
 
-    let duration = "";
+    // Race both approaches for speed
+    const [ytDuration, invDuration] = await Promise.allSettled([
+      tryYouTubePlayer(videoId),
+      tryInvidious(videoId),
+    ]);
 
-    // Try Invidious instances for reliable metadata
-    for (const instance of INVIDIOUS_INSTANCES) {
-      if (duration) break;
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
-        const res = await fetch(
-          `${instance}/api/v1/videos/${encodeURIComponent(videoId)}?fields=lengthSeconds`,
-          { signal: controller.signal }
-        );
-        clearTimeout(timeout);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.lengthSeconds && data.lengthSeconds > 0) {
-            duration = formatDuration(data.lengthSeconds);
-            console.log(`Got duration from ${instance}: ${duration}`);
-          }
-        }
-      } catch (e) {
-        console.log(`${instance} failed: ${e.message}`);
-      }
-    }
-
-    // Fallback: YouTube internal player API
-    if (!duration) {
-      try {
-        const res = await fetch(
-          "https://www.youtube.com/youtubei/v1/player",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              videoId,
-              context: {
-                client: {
-                  clientName: "ANDROID",
-                  clientVersion: "19.09.37",
-                  androidSdkVersion: 30,
-                  hl: "en",
-                },
-              },
-            }),
-          }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          const secs = parseInt(data?.videoDetails?.lengthSeconds || "0");
-          if (secs > 0) {
-            duration = formatDuration(secs);
-            console.log(`Got duration from youtubei: ${duration}`);
-          }
-        }
-      } catch (e) {
-        console.log(`youtubei failed: ${e.message}`);
-      }
-    }
-
-    console.log(`Video ${videoId}: final duration="${duration}"`);
+    const duration =
+      (ytDuration.status === "fulfilled" && ytDuration.value) ||
+      (invDuration.status === "fulfilled" && invDuration.value) ||
+      "";
 
     return new Response(JSON.stringify({ duration }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
