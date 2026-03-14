@@ -249,7 +249,8 @@ const AdminVideos = () => {
                 ) : (
                   <>
                     <Label>Video URL</Label>
-                    <Input value={form.video_url || ""} onChange={e => setForm(p => ({ ...p, video_url: e.target.value }))} placeholder={form.video_source === "youtube" ? "YouTube URL" : "Google Drive share link"} />
+                    <Input value={form.video_url || ""} onChange={e => handleVideoUrlChange(e.target.value)} placeholder={form.video_source === "youtube" ? "YouTube URL" : "Google Drive share link"} />
+                    {syncing && <p className="text-xs text-primary mt-1 animate-pulse">Syncing metadata…</p>}
                   </>
                 )}
               </div>
