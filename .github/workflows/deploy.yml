@@ -20,17 +20,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: 20
-          cache: npm
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install
 
       - name: Build project
-        run: npm run build
+        run: bun run build
 
       - name: Verify build output
         run: |
@@ -60,4 +59,4 @@ jobs:
           --data '{"purge_everything":true}'
 
       - name: Deploy complete
-        run: echo "🚀 Site deployed successfully"
+        run: echo "🚀 Deployment finished successfully"
