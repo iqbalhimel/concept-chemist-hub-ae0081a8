@@ -98,7 +98,7 @@ const AdminVideos = () => {
   };
 
   const fetchVideos = async () => {
-    const { data } = await supabase.from("educational_videos").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase.from("educational_videos").select("*").order("sort_order", { ascending: true });
     if (data) setVideos(data as VideoItem[]);
     setLoading(false);
   };
