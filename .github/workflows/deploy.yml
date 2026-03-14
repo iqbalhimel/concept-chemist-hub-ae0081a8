@@ -74,14 +74,9 @@ jobs:
       # ATOMIC SWAP
       # ---------------------------
 
-      
       - name: Swap folders
         run: |
-          # remove old backup if exists (recursive)
-          curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
-            --quote "RMD domains/iqbalsir.bd/public_html_backup" || true
-      
-          # rename current live → backup
+          # rename current live → backup (overwrite old backup by moving it aside)
           curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
             --quote "RNFR domains/iqbalsir.bd/public_html" \
             --quote "RNTO domains/iqbalsir.bd/public_html_backup"
