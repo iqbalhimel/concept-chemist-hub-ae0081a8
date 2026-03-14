@@ -46,8 +46,22 @@ const emptyVideo: Omit<VideoItem, "id" | "created_at" | "updated_at"> = {
   duration: "", is_published: false, sort_order: 0,
 };
 
-type SortKey = "title" | "subject" | "class_level" | "video_source" | "created_at" | "is_published";
+type SortKey = "title" | "subject" | "class_level" | "video_source" | "created_at" | "is_published" | "sort_order";
 type SortDir = "asc" | "desc";
+
+// Sortable wrapper for table rows
+const SortableTableRow = ({ id, children }: { id: string; children: React.ReactNode }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  return <TableRow ref={setNodeRef} style={style} {...attributes}>{children instanceof Function ? children({ listeners }) : children}</TableRow>;
+};
+
+// Sortable wrapper for mobile cards
+const SortableCard = ({ id, children }: { id: string; children: (listeners: any) => React.ReactNode }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  return <div ref={setNodeRef} style={style} {...attributes}>{children(listeners)}</div>;
+};
 
 const AdminVideos = () => {
   const csrfGuard = useCsrfGuard();
