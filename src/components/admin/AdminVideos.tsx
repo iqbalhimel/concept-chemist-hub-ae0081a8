@@ -16,7 +16,7 @@ import { compressImage } from "@/lib/imageCompression";
 import { useVideoMetadataSync } from "@/hooks/useVideoMetadataSync";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AdminPagination, paginateItems } from "@/components/admin/AdminPagination";
+import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
