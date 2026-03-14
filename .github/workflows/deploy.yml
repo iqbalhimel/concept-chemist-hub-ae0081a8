@@ -77,14 +77,21 @@ jobs:
       - name: Swap folders
         run: |
           echo "Switching folders..."
-
+      
+          # delete old backup if exists
+          curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
+          --quote "RMD public_html_backup" || true
+      
+          # rename live -> backup
           curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
           --quote "RNFR public_html" \
           --quote "RNTO public_html_backup"
-
+      
+          # rename new -> live
           curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }} \
           --quote "RNFR public_html_new" \
           --quote "RNTO public_html"
+
 
       # ---------------------------
       # CLOUDFLARE CACHE PURGE
