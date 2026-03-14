@@ -180,6 +180,37 @@ const AdminVideos = () => {
     }
   };
 
+  // Drag-and-drop reorder
+  const isReorderMode = useMemo(() => !search.trim() && filterSubject === "all" && filterClass === "all" && sortKey === "sort_order", [search, filterSubject, filterClass, sortKey]);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setVideos(prev => {
+      const oldIndex = prev.findIndex(v => v.id === active.id);
+      const newIndex = prev.findIndex(v => v.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return prev;
+      const reordered = arrayMove(prev, oldIndex, newIndex);
+      return reordered.map((v, i) => ({ ...v, sort_order: i }));
+    });
+    setOrderChanged(true);
+  };
+
+  const saveOrder = async () => {
+    await csrfGuard(async () => {
+      const updates = videos.map((v, i) =>
+        supabase.from("educational_videos").update({ sort_order: i, updated_at: new Date().toISOString() }).eq("id", v.id)
+      );
+      await Promise.all(updates);
+      setOrderChanged(false);
+      toast.success("Order saved");
+    }, "content_update", "Reordered educational videos");
+  };
+
   // CRUD
   const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
