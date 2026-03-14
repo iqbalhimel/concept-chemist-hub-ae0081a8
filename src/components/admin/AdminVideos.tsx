@@ -385,6 +385,7 @@ const AdminVideos = () => {
           <Select value={`${sortKey}:${sortDir}`} onValueChange={v => { const [k, d] = v.split(":"); setSortKey(k as SortKey); setSortDir(d as SortDir); }}>
             <SelectTrigger className="h-8 text-xs w-[150px]"><ArrowUpDown size={12} className="mr-1 shrink-0" /><SelectValue placeholder="Sort by" /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="sort_order:asc">Custom order</SelectItem>
               <SelectItem value="created_at:desc">Newest first</SelectItem>
               <SelectItem value="created_at:asc">Oldest first</SelectItem>
               <SelectItem value="title:asc">Title A–Z</SelectItem>
