@@ -63,6 +63,7 @@ const AppRoutes = () => (
           <Route path="/:lang/testimonials" element={<TestimonialsPage />} />
           <Route path="/:lang/notices" element={<NoticesPage />} />
           <Route path="/:lang/resources" element={<ResourcesPage />} />
+          <Route path="/:lang/videos" element={<VideosPage />} />
 
           {/* Legacy routes (redirect handled via LanguageRedirect) */}
           <Route path="/" element={<Index />} />
