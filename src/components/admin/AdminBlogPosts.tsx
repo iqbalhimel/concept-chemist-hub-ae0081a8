@@ -102,7 +102,8 @@ const SortableRow = ({
   const style = { transform: CSS.Transform.toString(transform), transition };
 
   return (
-    <div ref={setNodeRef} style={style} className="flex flex-wrap md:flex-nowrap items-start md:items-center gap-2 md:gap-3 px-3 py-3 md:px-4 border border-border rounded-lg bg-card hover:bg-muted/40 transition-colors">
+    <div ref={setNodeRef} style={style} className={`flex flex-wrap md:flex-nowrap items-start md:items-center gap-2 md:gap-3 px-3 py-3 md:px-4 border border-border rounded-lg transition-colors ${selected ? "bg-primary/5 border-primary/30" : "bg-card hover:bg-muted/40"}`}>
+      <Checkbox checked={selected} onCheckedChange={() => onToggleSelect(post.id)} className="shrink-0 mt-1 md:mt-0" />
       <button {...attributes} {...listeners} className="cursor-grab text-muted-foreground hover:text-foreground touch-none shrink-0 mt-1 md:mt-0">
         <GripVertical size={16} />
       </button>
