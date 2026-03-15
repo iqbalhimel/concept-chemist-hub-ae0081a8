@@ -9,6 +9,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { compressImage } from "@/lib/imageCompression";
 import { secureUpload } from "@/lib/secureUpload";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
+import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent,
 } from "@dnd-kit/core";
