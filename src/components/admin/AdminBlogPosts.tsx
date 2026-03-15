@@ -270,7 +270,8 @@ const EditPanel = ({
       </Button>
     </div>
   </div>
-);
+  );
+};
 
 /* ── Main Component ──────────────────────────────── */
 
