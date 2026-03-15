@@ -6,7 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, GripVertical, Pencil, Star, X, MessageSquareQuote } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pencil, Star, X, MessageSquareQuote, CheckSquare, Square } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
