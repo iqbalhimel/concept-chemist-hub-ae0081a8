@@ -267,6 +267,19 @@ const AdminGallery = () => {
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
+  if (showTrash) {
+    return (
+      <AdminTrashView
+        tableName="gallery"
+        moduleName="gallery"
+        labelSingular="image"
+        labelPlural="Images"
+        getTitle={(item: any) => item.label || item.alt || "Untitled image"}
+        onBack={() => { setShowTrash(false); fetchAll(); }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div ref={topRef} className="flex items-center justify-between flex-wrap gap-2 sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2 -mt-2">
