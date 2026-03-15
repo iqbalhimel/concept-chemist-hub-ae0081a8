@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Bell, Download, Image, MessageSquare, User, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AdminInsightsWidgets from "@/components/admin/AdminInsightsWidgets";
+import OrphanContentWidget from "@/components/admin/OrphanContentWidget";
 
 interface RecentComment {
   id: string;
@@ -152,6 +153,14 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
       <div>
         <h3 className="font-display text-lg font-bold text-foreground mb-3">Content Insights</h3>
         <AdminInsightsWidgets />
+      </div>
+
+      {/* SEO: Orphan Content */}
+      <div>
+        <h3 className="font-display text-lg font-bold text-foreground mb-3">SEO Health</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <OrphanContentWidget />
+        </div>
       </div>
     </div>
   );

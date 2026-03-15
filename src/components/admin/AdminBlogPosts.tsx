@@ -31,6 +31,7 @@ import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
 import AdminTrashView from "@/components/admin/AdminTrashView";
 import { useBlogCategories } from "@/hooks/useBlogCategories";
 import PostTagsPicker from "@/components/admin/PostTagsPicker";
+import InternalLinkSuggestions from "@/components/admin/InternalLinkSuggestions";
 
 type Post = Tables<"blog_posts">;
 
@@ -248,6 +249,18 @@ const EditPanel = ({
 
     {/* Tags */}
     <PostTagsPicker postId={post.id} />
+
+    {/* Internal Link Suggestions */}
+    <InternalLinkSuggestions
+      postId={post.id}
+      postCategory={post.category}
+      postTitle={post.title}
+      postContent={post.content || ""}
+      onInsertLink={(html) => {
+        navigator.clipboard.writeText(html);
+        toast.success("Link HTML copied to clipboard — paste into your content");
+      }}
+    />
 
     {/* Scheduling */}
     <ContentSchedulingFields
