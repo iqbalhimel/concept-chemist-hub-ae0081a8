@@ -26,6 +26,7 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Tables } from "@/integrations/supabase/types";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
+import { useBlogCategories } from "@/hooks/useBlogCategories";
 
 type Post = Tables<"blog_posts">;
 
