@@ -433,8 +433,10 @@ export type Database = {
           file_size: number | null
           file_type: string
           file_url: string
+          folder: string
           id: string
           name: string
+          tags: string[]
           uploaded_by: string | null
         }
         Insert: {
@@ -442,8 +444,10 @@ export type Database = {
           file_size?: number | null
           file_type: string
           file_url: string
+          folder?: string
           id?: string
           name: string
+          tags?: string[]
           uploaded_by?: string | null
         }
         Update: {
@@ -451,8 +455,10 @@ export type Database = {
           file_size?: number | null
           file_type?: string
           file_url?: string
+          folder?: string
           id?: string
           name?: string
+          tags?: string[]
           uploaded_by?: string | null
         }
         Relationships: []
