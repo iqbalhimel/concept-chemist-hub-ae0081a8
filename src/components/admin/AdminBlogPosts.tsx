@@ -339,6 +339,7 @@ const AdminBlogPosts = () => {
         seo_twitter_title: (post as any).seo_twitter_title || null,
         seo_twitter_description: (post as any).seo_twitter_description || null,
         seo_twitter_image: (post as any).seo_twitter_image || null,
+        expire_at: (post as any).expire_at || null,
       } as any).eq("id", post.id);
       if (error) {
         if (error.message.includes("blog_posts_slug_unique")) {
