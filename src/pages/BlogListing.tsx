@@ -97,7 +97,9 @@ const BlogListing = () => {
       const { data } = await supabase
         .from("blog_posts")
         .select("category")
-        .eq("is_published", true);
+        .eq("is_published", true)
+        .or(`scheduled_at.is.null,scheduled_at.lte.${new Date().toISOString()}`)
+        .or(`expire_at.is.null,expire_at.gte.${new Date().toISOString()}`);
       if (data) {
         const cats = [...new Set(data.map((d) => d.category))].sort();
         setCategories(cats);
