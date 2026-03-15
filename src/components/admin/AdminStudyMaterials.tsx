@@ -637,8 +637,8 @@ const AdminStudyMaterials = () => {
                             <span className="text-sm font-medium text-foreground truncate">{item.title}</span>
                             <span className="w-32 text-xs text-muted-foreground truncate">{item.category}</span>
                             <span className="w-20 text-xs text-muted-foreground text-right">{item.file_size || "—"}</span>
-                            <span className={`w-16 text-center text-xs font-medium ${item.is_active ? "text-emerald-600" : "text-muted-foreground"}`}>
-                              {item.is_active ? "Active" : "Inactive"}
+                            <span className="w-16 text-center">
+                              <ContentStatusBadge status={getContentStatus({ isActive: item.is_active, publishAt: (item as any).publish_at, expireAt: (item as any).expire_at })} />
                             </span>
                             <div className="w-24 flex items-center justify-end gap-1">
                               <Button
