@@ -198,7 +198,10 @@ const AdminFAQ = () => {
                 </div>
                 {/* Mobile */}
                 <div className="md:hidden space-y-2">
-                  <p className="font-medium text-foreground text-sm truncate">{item.question}</p>
+                  <div className="flex items-center gap-2">
+                    <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
+                    <p className="font-medium text-foreground text-sm truncate">{item.question}</p>
+                  </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1 text-xs">
                       <Switch checked={item.is_active} onCheckedChange={() => toggleActive(item)} />
