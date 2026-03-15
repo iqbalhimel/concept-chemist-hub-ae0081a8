@@ -90,6 +90,7 @@ const navigation: NavEntry[] = [
       { id: "videos", label: "Educational Videos", icon: Video },
       { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
       { id: "faq", label: "FAQ", icon: HelpCircle },
+      { id: "media", label: "Media Library", icon: Image },
     ],
   },
   {
