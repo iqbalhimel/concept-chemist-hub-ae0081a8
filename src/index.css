@@ -332,7 +332,7 @@
 
   /* Mobile touch target minimums */
   @media (max-width: 768px) {
-    a, button {
+    a, button:not([role="checkbox"]) {
       min-height: 44px;
     }
 
