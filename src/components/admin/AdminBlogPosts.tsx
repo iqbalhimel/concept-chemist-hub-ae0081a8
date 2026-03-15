@@ -288,6 +288,7 @@ const AdminBlogPosts = () => {
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
