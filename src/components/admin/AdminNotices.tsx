@@ -332,7 +332,7 @@ const AdminNotices = () => {
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <span>{formatDate(n.date)}</span>
                               <span>•</span>
-                              <span className={n.is_active ? "text-emerald-600 font-medium" : ""}>{n.is_active ? "Active" : "Inactive"}</span>
+                              <ContentStatusBadge status={contentStatus} />
                             </div>
                           </div>
                           <div className="flex gap-2 pl-6">
