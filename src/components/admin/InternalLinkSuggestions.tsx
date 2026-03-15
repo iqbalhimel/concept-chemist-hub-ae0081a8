@@ -32,50 +32,40 @@ const InternalLinkSuggestions = ({ postId, postCategory, postTitle, postContent,
     const load = async () => {
       setLoading(true);
 
-      // Get this post's tags
-      const { data: postTagRows } = await supabase
-        .from("post_tags")
-        .select("tag_id")
-        .eq("post_id", postId);
+      // Fetch this post's tags and candidate posts in parallel
+      const [postTagRes, allPostsRes] = await Promise.all([
+        supabase.from("post_tags").select("tag_id").eq("post_id", postId),
+        supabase.from("blog_posts")
+          .select("id, title, slug, category")
+          .neq("id", postId)
+          .is("trashed_at", null)
+          .limit(200),
+      ]);
 
-      const tagIds = postTagRows?.map(r => r.tag_id) || [];
+      const tagIds = postTagRes.data?.map(r => r.tag_id) || [];
 
+      // Resolve tag names and shared tags in parallel
       let tagNameMap: Record<string, string> = {};
+      let otherPostTags: Record<string, string[]> = {};
+
       if (tagIds.length > 0) {
-        const { data: tags } = await supabase
-          .from("tags")
-          .select("id, name")
-          .in("id", tagIds);
-        tags?.forEach(t => { tagNameMap[t.id] = t.name; });
+        const [tagsRes, otherPTsRes] = await Promise.all([
+          supabase.from("tags").select("id, name").in("id", tagIds),
+          supabase.from("post_tags").select("post_id, tag_id").in("tag_id", tagIds).neq("post_id", postId),
+        ]);
+        tagsRes.data?.forEach(t => { tagNameMap[t.id] = t.name; });
         setPostTagNames(Object.values(tagNameMap));
+        otherPTsRes.data?.forEach(pt => {
+          if (!otherPostTags[pt.post_id]) otherPostTags[pt.post_id] = [];
+          otherPostTags[pt.post_id].push(tagNameMap[pt.tag_id] || pt.tag_id);
+        });
       }
 
-      // Get all other published posts
-      const { data: allPosts } = await supabase
-        .from("blog_posts")
-        .select("id, title, slug, category, is_published")
-        .neq("id", postId)
-        .is("trashed_at", null);
-
+      const allPosts = allPostsRes.data;
       if (!allPosts || allPosts.length === 0) {
         setSuggestions([]);
         setLoading(false);
         return;
-      }
-
-      // Get tags for all other posts
-      let otherPostTags: Record<string, string[]> = {};
-      if (tagIds.length > 0) {
-        const { data: otherPTs } = await supabase
-          .from("post_tags")
-          .select("post_id, tag_id")
-          .in("tag_id", tagIds)
-          .neq("post_id", postId);
-
-        otherPTs?.forEach(pt => {
-          if (!otherPostTags[pt.post_id]) otherPostTags[pt.post_id] = [];
-          otherPostTags[pt.post_id].push(tagNameMap[pt.tag_id] || pt.tag_id);
-        });
       }
 
       // Score each post
