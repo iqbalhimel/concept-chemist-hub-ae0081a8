@@ -83,7 +83,7 @@ const AdminInsightsWidgets = () => {
       const resolveNames = async (items: any[], table: string): Promise<ViewItem[]> => {
         if (items.length === 0) return [];
         const ids = items.map(i => i.content_id);
-        const { data } = await supabase.from(table).select("id, title").in("id", ids);
+        const { data } = await (supabase as any).from(table).select("id, title").in("id", ids);
         const titleMap: Record<string, string> = {};
         data?.forEach((d: any) => { titleMap[d.id] = d.title; });
         return items.map(i => ({ content_id: i.content_id, view_count: i.view_count, title: titleMap[i.content_id] || "Unknown" }));
