@@ -138,7 +138,10 @@ const AdminNotices = () => {
         seo_og_image: a.seo_og_image || null, seo_twitter_title: a.seo_twitter_title || null,
         seo_twitter_description: a.seo_twitter_description || null, seo_twitter_image: a.seo_twitter_image || null,
       } as any).eq("id", n.id);
-      if (error) toast.error(error.message); else toast.success("Updated");
+      if (error) toast.error(error.message); else {
+        toast.success("Updated");
+        logAdminActivity({ action: "edit", module: "notices", itemId: n.id, itemTitle: n.title });
+      }
     });
   };
 
