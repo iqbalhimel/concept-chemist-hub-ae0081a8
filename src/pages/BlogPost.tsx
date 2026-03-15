@@ -142,6 +142,15 @@ const BlogPost = () => {
           relatedPosts = catRelated || [];
         }
         setRelated(relatedPosts as (BlogPostType & { slug?: string | null })[]);
+
+        // Fetch tag names for cross-content matching
+        if (postTags && postTags.length > 0) {
+          const tagIdList = postTags.map((pt: any) => pt.tag_id);
+          const { data: tagRows } = await supabase.from("tags").select("name").in("id", tagIdList);
+          setPostTagNames((tagRows || []).map((t: any) => t.name));
+        } else {
+          setPostTagNames([]);
+        }
       }
     };
     fetchPost();
