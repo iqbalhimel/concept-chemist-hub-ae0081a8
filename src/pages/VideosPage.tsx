@@ -4,6 +4,7 @@ import { Play, X, Clock, Tag, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import OptimizedImage from "@/components/OptimizedImage";
 import { setSeo } from "@/lib/seo";
+import RelatedBlogPosts from "@/components/RelatedBlogPosts";
 
 type Video = {
   id: string;
