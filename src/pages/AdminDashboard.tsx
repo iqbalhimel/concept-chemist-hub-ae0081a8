@@ -152,6 +152,7 @@ const navigation: NavEntry[] = [
     icon: Lock,
     items: [
       { id: "security-logs", label: "Security Logs", icon: Shield },
+      { id: "activity-timeline", label: "Activity Timeline", icon: Activity },
     ],
   },
 ];
