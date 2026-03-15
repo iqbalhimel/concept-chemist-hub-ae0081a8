@@ -474,6 +474,9 @@ const AdminGallery = () => {
           </DndContext>
         );
       })()}
+
+      {/* Pagination */}
+      <AdminPagination total={filteredItems.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1); }} />
       <MediaPickerDialog
         open={!!mediaPickerTarget}
         onOpenChange={(open) => { if (!open) setMediaPickerTarget(null); }}
