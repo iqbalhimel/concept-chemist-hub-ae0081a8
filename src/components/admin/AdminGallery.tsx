@@ -273,6 +273,11 @@ const AdminGallery = () => {
           Gallery <span className="text-base font-normal text-muted-foreground">({items.length})</span>
         </h2>
         <div className="flex gap-2">
+          {selectedIds.size > 0 && (
+            <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting} className="animate-in fade-in">
+              <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+            </Button>
+          )}
           <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleUpload} />
           <Button onClick={() => fileRef.current?.click()} size="sm" disabled={uploading}>
             <Upload size={14} className="mr-1" /> {uploading ? "Uploading..." : "Upload Images"}
