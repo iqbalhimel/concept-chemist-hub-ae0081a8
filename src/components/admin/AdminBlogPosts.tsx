@@ -94,9 +94,9 @@ const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string;
 /* ── Sortable List Row ───────────────────────────── */
 
 const SortableRow = ({
-  post, onEdit, onDelete,
+  post, onEdit, onDelete, selected, onToggleSelect,
 }: {
-  post: Post; onEdit: (id: string) => void; onDelete: (id: string) => void;
+  post: Post; onEdit: (id: string) => void; onDelete: (id: string) => void; selected: boolean; onToggleSelect: (id: string) => void;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: post.id });
   const style = { transform: CSS.Transform.toString(transform), transition };
