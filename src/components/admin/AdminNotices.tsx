@@ -417,6 +417,9 @@ const AdminNotices = () => {
           </DndContext>
         );
       })()}
+
+      {/* Pagination */}
+      <AdminPagination total={filteredNotices.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1); }} />
     </div>
   );
 };

@@ -273,9 +273,9 @@ const AdminGallery = () => {
           Gallery <span className="text-base font-normal text-muted-foreground">({items.length})</span>
         </h2>
         <div className="flex gap-2">
-          {selectedIds.size > 0 && (
-            <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting} className="animate-in fade-in">
-              <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+          {orderDirty && (
+            <Button size="sm" variant="outline" onClick={saveOrder} disabled={savingOrder}>
+              <Save size={14} className="mr-1" /> Save Order
             </Button>
           )}
           <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleUpload} />
