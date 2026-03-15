@@ -124,6 +124,7 @@ export type Database = {
           content: string | null
           created_at: string
           excerpt: string | null
+          expire_at: string | null
           featured_image: string | null
           id: string
           is_published: boolean
@@ -149,6 +150,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           excerpt?: string | null
+          expire_at?: string | null
           featured_image?: string | null
           id?: string
           is_published?: boolean
@@ -174,6 +176,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           excerpt?: string | null
+          expire_at?: string | null
           featured_image?: string | null
           id?: string
           is_published?: boolean
@@ -274,8 +277,10 @@ export type Database = {
           created_at: string
           description: string | null
           duration: string | null
+          expire_at: string | null
           id: string
           is_published: boolean
+          publish_at: string | null
           sort_order: number
           subject: string
           thumbnail_url: string | null
@@ -289,8 +294,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration?: string | null
+          expire_at?: string | null
           id?: string
           is_published?: boolean
+          publish_at?: string | null
           sort_order?: number
           subject?: string
           thumbnail_url?: string | null
@@ -304,8 +311,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration?: string | null
+          expire_at?: string | null
           id?: string
           is_published?: boolean
+          publish_at?: string | null
           sort_order?: number
           subject?: string
           thumbnail_url?: string | null
@@ -472,6 +481,7 @@ export type Database = {
           id: string
           is_active: boolean
           is_pinned: boolean
+          publish_at: string | null
           seo_canonical_url: string | null
           seo_description: string | null
           seo_keywords: string | null
@@ -494,6 +504,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_pinned?: boolean
+          publish_at?: string | null
           seo_canonical_url?: string | null
           seo_description?: string | null
           seo_keywords?: string | null
@@ -516,6 +527,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_pinned?: boolean
+          publish_at?: string | null
           seo_canonical_url?: string | null
           seo_description?: string | null
           seo_keywords?: string | null
@@ -668,11 +680,13 @@ export type Database = {
         Row: {
           category: string
           created_at: string
+          expire_at: string | null
           file_size: string | null
           file_url: string | null
           id: string
           is_active: boolean
           pages: number | null
+          publish_at: string | null
           seo_canonical_url: string | null
           seo_description: string | null
           seo_keywords: string | null
@@ -690,11 +704,13 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
+          expire_at?: string | null
           file_size?: string | null
           file_url?: string | null
           id?: string
           is_active?: boolean
           pages?: number | null
+          publish_at?: string | null
           seo_canonical_url?: string | null
           seo_description?: string | null
           seo_keywords?: string | null
@@ -712,11 +728,13 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
+          expire_at?: string | null
           file_size?: string | null
           file_url?: string | null
           id?: string
           is_active?: boolean
           pages?: number | null
+          publish_at?: string | null
           seo_canonical_url?: string | null
           seo_description?: string | null
           seo_keywords?: string | null
