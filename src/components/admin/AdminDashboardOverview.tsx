@@ -147,6 +147,12 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
           )}
         </CardContent>
       </Card>
+
+      {/* Insights Widgets */}
+      <div>
+        <h3 className="font-display text-lg font-bold text-foreground mb-3">Content Insights</h3>
+        <AdminInsightsWidgets />
+      </div>
     </div>
   );
 };
