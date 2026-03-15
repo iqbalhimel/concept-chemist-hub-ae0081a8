@@ -164,13 +164,13 @@ const AdminTestimonials = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this testimonial?")) return;
+    if (!confirm("Move this testimonial to trash?")) return;
     await csrfGuard(async () => {
       const item = items.find(i => i.id === id);
-      const { error } = await supabase.from("testimonials").delete().eq("id", id);
-      if (error) toast.error("Delete failed");
+      const { error } = await (supabase as any).from("testimonials").update({ trashed_at: new Date().toISOString() }).eq("id", id);
+      if (error) toast.error("Failed");
       else {
-        toast.success("Deleted");
+        toast.success("Moved to trash");
         logAdminActivity({ action: "delete", module: "testimonials", itemId: id, itemTitle: item?.student_name });
         if (editId === id) resetForm(); fetchItems();
       }
