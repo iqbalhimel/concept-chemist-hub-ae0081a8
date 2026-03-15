@@ -247,6 +247,7 @@ const AdminNotices = () => {
               </Button>
             </>
           )}
+          <Button onClick={() => setShowTrash(true)} size="sm" variant="outline"><Trash2 size={14} className="mr-1" /> Trash</Button>
           <Button onClick={addNotice} size="sm"><Plus size={14} className="mr-1" /> Add Notice</Button>
         </div>
       </div>
