@@ -167,6 +167,27 @@ const AdminTestimonials = () => {
     });
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  };
+  const toggleSelectAll = () => {
+    const allIds = items.map(i => i.id);
+    setSelectedIds(allIds.every(id => selectedIds.has(id)) ? new Set() : new Set(allIds));
+  };
+  const bulkDeleteItems = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected testimonial(s)?`)) return;
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      await Promise.all([...selectedIds].map(id => supabase.from("testimonials").delete().eq("id", id)));
+      setItems(prev => prev.filter(i => !selectedIds.has(i.id)));
+      if (editId && selectedIds.has(editId)) resetForm();
+      toast.success(`${selectedIds.size} testimonial(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    });
+  };
+
   const paginated = paginateItems(items, page, pageSize);
 
   return (
