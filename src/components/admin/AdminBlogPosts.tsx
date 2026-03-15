@@ -524,6 +524,7 @@ const AdminBlogPosts = () => {
           onUpdateLocal={updateLocal}
           onSave={savePost}
           onClose={() => setEditingId(null)}
+          categoryOptions={categories}
         />
       )}
 
