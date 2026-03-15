@@ -594,13 +594,15 @@ const AdminStudyMaterials = () => {
         </div>
       )}
 
-      <AdminPagination
-        total={filteredItems.length}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
-      />
+      {selectedIds.size > 0 && (
+        <div className="admin-bulk-bar">
+          <span className="text-xs text-muted-foreground">{selectedIds.size} selected</span>
+          <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting} className="animate-in fade-in">
+            <Trash2 size={14} className="mr-1" />
+            {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+          </Button>
+        </div>
+      )}
 
       {/* Compact list view with expandable edit/delete */}
       {(() => {
