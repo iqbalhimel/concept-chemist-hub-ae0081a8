@@ -288,6 +288,7 @@ const AdminGallery = () => {
         </h2>
         <div className="flex gap-2">
           <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleUpload} />
+          <Button onClick={() => setShowTrash(true)} size="sm" variant="outline"><Trash2 size={14} className="mr-1" /> Trash</Button>
           <Button onClick={() => fileRef.current?.click()} size="sm" disabled={uploading}>
             <Upload size={14} className="mr-1" /> {uploading ? "Uploading..." : "Upload Images"}
           </Button>
