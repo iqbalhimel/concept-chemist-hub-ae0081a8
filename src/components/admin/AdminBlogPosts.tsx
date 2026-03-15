@@ -133,7 +133,7 @@ const SortableRow = ({
             <span className="text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded shrink-0">Scheduled</span>
           )}
         </div>
-        <CategoryBadge name={post.category} />
+        <CategoryBadge name={post.category} colorMap={colorMap} />
       </div>
 
       <div className="flex items-center gap-1 w-full md:w-auto mt-1 md:mt-0">
