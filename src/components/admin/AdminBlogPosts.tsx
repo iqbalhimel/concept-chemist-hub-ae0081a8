@@ -406,16 +406,17 @@ const AdminBlogPosts = () => {
   };
   const bulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`Delete ${selectedIds.size} selected post(s)?`)) return;
+    if (!window.confirm(`Move ${selectedIds.size} selected post(s) to trash?`)) return;
     await csrfGuard(async () => {
       setBulkDeleting(true);
-      await Promise.all([...selectedIds].map(id => supabase.from("blog_posts").delete().eq("id", id)));
+      const now = new Date().toISOString();
+      await Promise.all([...selectedIds].map(id => (supabase as any).from("blog_posts").update({ trashed_at: now }).eq("id", id)));
       setPosts(prev => prev.filter(p => !selectedIds.has(p.id)));
       if (editingId && selectedIds.has(editingId)) setEditingId(null);
-      toast.success(`${selectedIds.size} post(s) deleted`);
+      toast.success(`${selectedIds.size} post(s) moved to trash`);
       setSelectedIds(new Set());
       setBulkDeleting(false);
-    }, "content_delete", `Bulk deleted ${selectedIds.size} blog posts`);
+    }, "content_delete", `Bulk trashed ${selectedIds.size} blog posts`);
   };
   const bulkPublish = async (publish: boolean) => {
     if (selectedIds.size === 0) return;
