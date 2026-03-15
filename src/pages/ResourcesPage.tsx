@@ -7,7 +7,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import PdfViewer from "@/components/PdfViewer";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { setSeo } from "@/lib/seo";
+import { setSeo, generateBreadcrumbSchema } from "@/lib/seo";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import RelatedBlogPosts from "@/components/RelatedBlogPosts";
 import { trackContentView } from "@/lib/trackContentView";

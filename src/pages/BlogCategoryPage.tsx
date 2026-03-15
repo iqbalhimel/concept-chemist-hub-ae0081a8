@@ -52,6 +52,7 @@ const BlogCategoryPage = () => {
     return cleanup;
   }, [categoryName, slug]);
 
+  useEffect(() => { setPage(1); }, [slug]);
   useEffect(() => { window.scrollTo(0, 0); }, [page]);
 
   useEffect(() => {
