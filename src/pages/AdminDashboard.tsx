@@ -6,7 +6,7 @@ import {
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
   Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp, Shield, Video, Tag,
-  ChevronDown, ChevronRight, Home, PenTool, User, Phone, Wrench, Eye, Lock, Activity
+  ChevronDown, ChevronRight, Home, PenTool, User, Phone, Wrench, Eye, Lock, Activity, Trash2
 } from "lucide-react";
 import AdminNotices from "@/components/admin/AdminNotices";
 import AdminStudyMaterials from "@/components/admin/AdminStudyMaterials";
