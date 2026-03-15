@@ -420,13 +420,20 @@ const AdminBlogPosts = () => {
     }, "content_update", `Bulk ${publish ? "published" : "unpublished"} ${selectedIds.size} blog posts`);
   };
 
-  // Merge managed categories with any post-only categories for filter dropdown
+  // Build color lookup from category metadata
+  const colorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    categoryMeta.forEach(c => { if (c.color) map[c.name] = c.color; });
+    return map;
+  }, [categoryMeta]);
+
+  // Merge managed categories with any post-only categories for filter dropdown (ordered by metadata order)
   const categories = useMemo(() => {
     const postCats = [...new Set(posts.map(p => p.category))];
-    const merged = [...managedCategories];
-    const mergedSet = new Set(merged);
-    postCats.forEach(c => { if (!mergedSet.has(c)) merged.push(c); });
-    return merged.sort();
+    const ordered = [...managedCategories];
+    const mergedSet = new Set(ordered);
+    postCats.forEach(c => { if (!mergedSet.has(c)) ordered.push(c); });
+    return ordered;
   }, [posts, managedCategories]);
 
   const filteredPosts = useMemo(() => {
