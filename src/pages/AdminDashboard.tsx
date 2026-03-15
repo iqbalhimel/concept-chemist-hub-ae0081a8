@@ -6,7 +6,7 @@ import {
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
   Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp, Shield, Video, Tag,
-  ChevronDown, ChevronRight, Home, PenTool, User, Phone, Wrench, Eye, Lock, Activity
+  ChevronDown, ChevronRight, Home, PenTool, User, Phone, Wrench, Eye, Lock, Activity, Trash2
 } from "lucide-react";
 import AdminNotices from "@/components/admin/AdminNotices";
 import AdminStudyMaterials from "@/components/admin/AdminStudyMaterials";
@@ -35,6 +35,7 @@ import AdminBlogCategories from "@/components/admin/AdminBlogCategories";
 import AdminSettingsSection from "@/components/admin/AdminSettingsSection";
 import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 import AdminActivityTimeline from "@/components/admin/AdminActivityTimeline";
+import AdminGlobalTrash from "@/components/admin/AdminGlobalTrash";
 import {
   heroSectionConfig, aboutSectionConfig, homepageSectionsConfig,
   announcementBarConfig, coachingInfoConfig, contactDetailsConfig,
@@ -47,7 +48,7 @@ type Tab =
   | "notices" | "study-materials" | "blog" | "blog-categories" | "comments" | "testimonials"
   | "gallery" | "faq" | "media" | "themes" | "atmosphere"
   | "education" | "experience" | "achievements" | "approach" | "subjects"
-  | "training" | "security-logs" | "videos"
+  | "training" | "security-logs" | "videos" | "global-trash"
   // Settings-based tabs
   | "hero-section" | "about-section" | "homepage-sections" | "announcement-bar"
   | "coaching-info" | "contact-details" | "social-links" | "whatsapp-chat"
@@ -72,6 +73,7 @@ const isGroup = (entry: NavEntry): entry is NavGroup => "items" in entry;
 
 const navigation: NavEntry[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "global-trash", label: "Trash", icon: Trash2 },
   {
     label: "Homepage",
     icon: Home,
@@ -220,6 +222,7 @@ const AdminDashboard = () => {
       case "security-logs": return <AdminSecurityLogs />;
       case "videos": return <AdminVideos />;
       case "activity-timeline": return <AdminActivityTimeline />;
+      case "global-trash": return <AdminGlobalTrash />;
       // Settings-based tabs
       case "hero-section": return <AdminSettingsSection section={heroSectionConfig} />;
       case "about-section": return <AdminSettingsSection section={aboutSectionConfig} />;
