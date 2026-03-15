@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit2, Video, Save, X, Search, ArrowUpDown, ArrowUp, ArrowDown, ListFilter, GripVertical } from "lucide-react";
+import { Plus, Trash2, Edit2, Video, Save, X, Search, ArrowUpDown, ArrowUp, ArrowDown, ListFilter, GripVertical, FolderOpen } from "lucide-react";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import { Badge } from "@/components/ui/badge";
 import { secureUpload } from "@/lib/secureUpload";
@@ -17,6 +17,7 @@ import { useVideoMetadataSync } from "@/hooks/useVideoMetadataSync";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
+import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
@@ -72,6 +73,7 @@ const AdminVideos = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [thumbPickerOpen, setThumbPickerOpen] = useState(false);
   const { syncFromUrl } = useVideoMetadataSync(setForm);
 
   // Search, filter, sort, pagination
@@ -414,9 +416,13 @@ const AdminVideos = () => {
               <Label>Thumbnail {form.video_source === "upload" ? "*" : "(auto-synced)"}</Label>
               <div className="flex items-center gap-3 mt-1">
                 {form.thumbnail_url && <img src={form.thumbnail_url} alt="" className="w-24 h-14 object-cover rounded border border-border" />}
-                <Input type="file" accept="image/*" onChange={handleThumbnailUpload} disabled={uploading} className="min-w-0" />
+                <Input type="file" accept="image/*" onChange={handleThumbnailUpload} disabled={uploading} className="min-w-0 flex-1" />
+                <Button size="sm" variant="outline" onClick={() => setThumbPickerOpen(true)} type="button">
+                  <FolderOpen size={14} />
+                </Button>
               </div>
               {form.video_source !== "upload" && !form.thumbnail_url && <p className="text-xs text-muted-foreground mt-1">Paste a video URL below to auto-fetch thumbnail</p>}
+              <MediaPickerDialog open={thumbPickerOpen} onOpenChange={setThumbPickerOpen} onSelect={(url) => setForm(p => ({ ...p, thumbnail_url: url }))} accept="image" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

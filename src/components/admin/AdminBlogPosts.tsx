@@ -11,7 +11,7 @@ import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
 import { toast } from "sonner";
 import {
   Plus, Trash2, Save, GripVertical, Pencil, X, Loader2, ImagePlus,
-  ExternalLink, CalendarClock, Search,
+  ExternalLink, CalendarClock, Search, FolderOpen,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
@@ -24,6 +24,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { Tables } from "@/integrations/supabase/types";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
+import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
 
 type Post = Tables<"blog_posts">;
 
@@ -39,6 +40,7 @@ const calcReadTime = (html: string): string => {
 
 const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string; onUpload: (url: string) => void; onClear: () => void }) => {
   const [uploading, setUploading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async (file: File) => {
@@ -65,16 +67,25 @@ const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string;
             <Button size="sm" variant="secondary" onClick={() => inputRef.current?.click()} disabled={uploading}>
               {uploading ? <Loader2 size={14} className="animate-spin" /> : "Replace"}
             </Button>
+            <Button size="sm" variant="secondary" onClick={() => setPickerOpen(true)}>
+              <FolderOpen size={14} />
+            </Button>
             <Button size="sm" variant="destructive" onClick={onClear}>Remove</Button>
           </div>
         </div>
       ) : (
-        <button onClick={() => inputRef.current?.click()} disabled={uploading}
-          className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 rounded-lg text-sm text-muted-foreground transition-colors">
-          {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
-          {uploading ? "Uploading..." : "Add featured image"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => inputRef.current?.click()} disabled={uploading}
+            className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 rounded-lg text-sm text-muted-foreground transition-colors">
+            {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+            {uploading ? "Uploading..." : "Upload image"}
+          </button>
+          <Button size="sm" variant="outline" onClick={() => setPickerOpen(true)}>
+            <FolderOpen size={14} className="mr-1" /> Media Library
+          </Button>
+        </div>
       )}
+      <MediaPickerDialog open={pickerOpen} onOpenChange={setPickerOpen} onSelect={onUpload} accept="image" />
     </div>
   );
 };

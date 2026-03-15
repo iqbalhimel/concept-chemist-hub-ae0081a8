@@ -3,12 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Upload, GripVertical, Pencil, Search, X } from "lucide-react";
+import { Plus, Trash2, Save, Upload, GripVertical, Pencil, Search, X, FolderOpen } from "lucide-react";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import type { Tables } from "@/integrations/supabase/types";
 import { compressImage } from "@/lib/imageCompression";
 import { secureUpload } from "@/lib/secureUpload";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
+import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent,
 } from "@dnd-kit/core";
@@ -62,6 +63,7 @@ const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }
 
 const AdminGallery = () => {
   const csrfGuard = useCsrfGuard();
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<string | null>(null);
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -380,7 +382,12 @@ const AdminGallery = () => {
                               </div>
                               <div>
                                 <label className="text-xs text-muted-foreground mb-1 block">Image URL</label>
-                                <Input value={item.image_url} onChange={e => updateLocal(item.id, "image_url", e.target.value)} placeholder="Image URL" />
+                                <div className="flex gap-2">
+                                  <Input value={item.image_url} onChange={e => updateLocal(item.id, "image_url", e.target.value)} placeholder="Image URL" className="flex-1" />
+                                  <Button size="sm" variant="outline" onClick={() => setMediaPickerTarget(item.id)}>
+                                    <FolderOpen size={14} />
+                                  </Button>
+                                </div>
                               </div>
                               <div>
                                 <label className="text-xs text-muted-foreground mb-1 block">Type / Span</label>
@@ -416,6 +423,16 @@ const AdminGallery = () => {
           </DndContext>
         );
       })()}
+      <MediaPickerDialog
+        open={!!mediaPickerTarget}
+        onOpenChange={(open) => { if (!open) setMediaPickerTarget(null); }}
+        onSelect={(url) => {
+          if (mediaPickerTarget) {
+            updateLocal(mediaPickerTarget, "image_url", url);
+          }
+        }}
+        accept="image"
+      />
     </div>
   );
 };

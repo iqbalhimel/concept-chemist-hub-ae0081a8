@@ -8,11 +8,12 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { Save, Upload } from "lucide-react";
+import { Save, Upload, FolderOpen } from "lucide-react";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import { compressImage } from "@/lib/imageCompression";
 import { secureUpload } from "@/lib/secureUpload";
 import { invalidateSiteSettings } from "@/hooks/useSiteSettings";
+import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
 
 export type FieldDef = {
   name: string;
@@ -43,6 +44,7 @@ const AdminSettingsSection = ({ section }: Props) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [pickerField, setPickerField] = useState<string | null>(null);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
@@ -131,8 +133,17 @@ const AdminSettingsSection = ({ section }: Props) => {
                 <Upload size={14} className="mr-1" />
                 {uploading === field.name ? "Uploading..." : "Upload"}
               </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => setPickerField(field.name)}>
+                <FolderOpen size={14} />
+              </Button>
             </div>
             {value && <img src={value} alt="Preview" className="mt-2 h-16 rounded-md border border-border object-contain" />}
+            <MediaPickerDialog
+              open={pickerField === field.name}
+              onOpenChange={(open) => { if (!open) setPickerField(null); }}
+              onSelect={(url) => update(field.name, url)}
+              accept="image"
+            />
           </div>
         );
       case "range":
