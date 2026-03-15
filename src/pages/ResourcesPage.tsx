@@ -7,7 +7,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import PdfViewer from "@/components/PdfViewer";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { setSeo } from "@/lib/seo";
+import { setSeo, generateBreadcrumbSchema } from "@/lib/seo";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import RelatedBlogPosts from "@/components/RelatedBlogPosts";
 import { trackContentView } from "@/lib/trackContentView";
@@ -46,6 +46,10 @@ const ResourcesPage = () => {
       url: autoCanonical,
       canonicalUrl: autoCanonical,
       image: defaultOgImage || undefined,
+      jsonLd: generateBreadcrumbSchema([
+        { name: "Home", url: "https://iqbalsir.bd" },
+        { name: "Resources", url: autoCanonical },
+      ]),
     });
     return cleanup;
   }, []);
@@ -186,6 +190,7 @@ const ResourcesPage = () => {
                               href={item.file_url}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => trackContentView("study_material", item.id)}
                               className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all glow-primary"
                             >
                               <Download size={14} />

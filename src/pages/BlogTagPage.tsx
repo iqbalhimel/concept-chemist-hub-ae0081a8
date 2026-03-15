@@ -47,6 +47,7 @@ const BlogTagPage = () => {
     return cleanup;
   }, [tagName, slug]);
 
+  useEffect(() => { setPage(1); }, [slug]);
   useEffect(() => { window.scrollTo(0, 0); }, [page]);
 
   useEffect(() => {
