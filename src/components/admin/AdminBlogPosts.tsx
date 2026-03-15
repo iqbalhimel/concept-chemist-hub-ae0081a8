@@ -419,7 +419,14 @@ const AdminBlogPosts = () => {
     }, "content_update", `Bulk ${publish ? "published" : "unpublished"} ${selectedIds.size} blog posts`);
   };
 
-  const categories = useMemo(() => [...new Set(posts.map(p => p.category))].sort(), [posts]);
+  // Merge managed categories with any post-only categories for filter dropdown
+  const categories = useMemo(() => {
+    const postCats = [...new Set(posts.map(p => p.category))];
+    const merged = [...managedCategories];
+    const mergedSet = new Set(merged);
+    postCats.forEach(c => { if (!mergedSet.has(c)) merged.push(c); });
+    return merged.sort();
+  }, [posts, managedCategories]);
 
   const filteredPosts = useMemo(() => {
     let result = posts;
