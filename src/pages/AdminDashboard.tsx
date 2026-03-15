@@ -31,6 +31,7 @@ import AdminPerformance from "@/components/admin/AdminPerformance";
 import AdminSeoMonitor from "@/components/admin/AdminSeoMonitor";
 import AdminSecurityLogs from "@/components/admin/AdminSecurityLogs";
 import AdminVideos from "@/components/admin/AdminVideos";
+import AdminBlogCategories from "@/components/admin/AdminBlogCategories";
 import AdminSettingsSection from "@/components/admin/AdminSettingsSection";
 import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 import {
