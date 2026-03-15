@@ -17,6 +17,7 @@ import ContactSection from "@/components/ContactSection";
 import GallerySection from "@/components/GallerySection";
 import VideoSection from "@/components/VideoSection";
 import FAQSection from "@/components/FAQSection";
+import RecommendedSection from "@/components/RecommendedSection";
 
 type Visibility = Record<string, string>;
 
