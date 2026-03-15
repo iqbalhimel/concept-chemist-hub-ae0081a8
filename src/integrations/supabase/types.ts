@@ -232,6 +232,27 @@ export type Database = {
         }
         Relationships: []
       }
+      content_views: {
+        Row: {
+          content_id: string
+          content_type: string
+          id: string
+          view_count: number
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          id?: string
+          view_count?: number
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          id?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       core_web_vitals: {
         Row: {
           created_at: string
@@ -1083,6 +1104,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_view_count: {
+        Args: { p_content_id: string; p_content_type: string }
+        Returns: undefined
       }
     }
     Enums: {
