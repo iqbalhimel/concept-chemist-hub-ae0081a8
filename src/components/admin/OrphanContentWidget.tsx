@@ -46,6 +46,7 @@ const OrphanContentWidget = () => {
       }
 
       // Map slugs/ids to actual posts
+      const linkedIds = new Set<string>();
       posts.forEach(p => {
         const slug = p.slug || p.id;
         if (linkedSlugs.has(slug) || linkedSlugs.has(p.id)) {
