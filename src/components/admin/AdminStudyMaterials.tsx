@@ -203,6 +203,7 @@ const AdminStudyMaterials = () => {
       setItems([data, ...updated]);
       setNewItemId(data.id);
       toast.success("Added");
+      logAdminActivity({ action: "create", module: "study_materials", itemId: data.id, itemTitle: "New Material" });
     });
   };
 
