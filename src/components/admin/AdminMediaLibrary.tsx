@@ -60,6 +60,7 @@ const AdminMediaLibrary = () => {
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
   const [filterTag, setFilterTag] = useState<string>("__all__");
   const [filterType, setFilterType] = useState<string>("__all__");
+  const [filterUnused, setFilterUnused] = useState(false);
 
   // UI state
   const [page, setPage] = useState(1);
@@ -132,22 +133,18 @@ const AdminMediaLibrary = () => {
   const filtered = useMemo(() => {
     let result = items;
 
-    // Folder filter
     if (activeFolder !== null) {
       result = result.filter(i => i.folder === activeFolder);
     }
-
-    // Tag filter
     if (filterTag !== "__all__") {
       result = result.filter(i => i.tags.includes(filterTag));
     }
-
-    // Type filter
     if (filterType !== "__all__") {
       result = result.filter(i => getTypeLabel(i.file_type) === filterType);
     }
-
-    // Search
+    if (filterUnused) {
+      result = result.filter(i => !usageCounts[i.file_url]);
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(i =>
@@ -159,11 +156,11 @@ const AdminMediaLibrary = () => {
     }
 
     return result;
-  }, [items, activeFolder, filterTag, filterType, searchQuery]);
+  }, [items, activeFolder, filterTag, filterType, filterUnused, searchQuery, usageCounts]);
 
   const paginated = useMemo(() => paginateItems(filtered, page, pageSize), [filtered, page, pageSize]);
 
-  useEffect(() => { setPage(1); }, [searchQuery, activeFolder, filterTag, filterType, pageSize]);
+  useEffect(() => { setPage(1); }, [searchQuery, activeFolder, filterTag, filterType, filterUnused, pageSize]);
 
   // ─── Selection ───
   const toggleSelect = useCallback((id: string) => {
@@ -492,11 +489,19 @@ const AdminMediaLibrary = () => {
                   <SelectItem value="GIF">GIF</SelectItem>
                 </SelectContent>
               </Select>
+              <Button
+                size="sm"
+                variant={filterUnused ? "default" : "outline"}
+                className="h-9 text-xs"
+                onClick={() => setFilterUnused(prev => !prev)}
+              >
+                Unused
+              </Button>
             </div>
           </div>
 
           {/* Active filters display */}
-          {(activeFolder || filterTag !== "__all__" || filterType !== "__all__") && (
+          {(activeFolder || filterTag !== "__all__" || filterType !== "__all__" || filterUnused) && (
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-xs text-muted-foreground">Filters:</span>
               {activeFolder && (
@@ -512,6 +517,11 @@ const AdminMediaLibrary = () => {
               {filterType !== "__all__" && (
                 <Badge variant="secondary" className="text-[10px] gap-1 cursor-pointer" onClick={() => setFilterType("__all__")}>
                   {filterType} <X size={10} />
+                </Badge>
+              )}
+              {filterUnused && (
+                <Badge variant="secondary" className="text-[10px] gap-1 cursor-pointer" onClick={() => setFilterUnused(false)}>
+                  Unused only <X size={10} />
                 </Badge>
               )}
               <span className="text-xs text-muted-foreground ml-1">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</span>
