@@ -48,9 +48,15 @@ const NoticesPage = () => {
       setLoading(true);
       const from = (page - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
+      const now = new Date().toISOString();
       const [{ data }, { count }] = await Promise.all([
-        supabase.from("notices").select("*").eq("is_active", true).order("created_at", { ascending: false }).range(from, to),
-        supabase.from("notices").select("*", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("notices").select("*").eq("is_active", true)
+          .or(`publish_at.is.null,publish_at.lte.${now}`)
+          .or(`expires_at.is.null,expires_at.gte.${new Date().toISOString().split("T")[0]}`)
+          .order("created_at", { ascending: false }).range(from, to),
+        supabase.from("notices").select("*", { count: "exact", head: true }).eq("is_active", true)
+          .or(`publish_at.is.null,publish_at.lte.${now}`)
+          .or(`expires_at.is.null,expires_at.gte.${new Date().toISOString().split("T")[0]}`),
       ]);
       setItems((data as Notice[]) || []);
       setTotal(count || 0);

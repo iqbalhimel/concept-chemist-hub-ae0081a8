@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Plus, Trash2, Edit2, Video, Save, X, Search, ArrowUpDown, ArrowUp, ArrowDown, ListFilter, GripVertical, FolderOpen } from "lucide-react";
+import ContentSchedulingFields, { getContentStatus, ContentStatusBadge } from "@/components/admin/ContentSchedulingFields";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import { Badge } from "@/components/ui/badge";
 import { secureUpload } from "@/lib/secureUpload";
@@ -41,10 +42,11 @@ type VideoItem = {
   updated_at: string;
 };
 
-const emptyVideo: Omit<VideoItem, "id" | "created_at" | "updated_at"> = {
+const emptyVideo: Omit<VideoItem, "id" | "created_at" | "updated_at"> & { publish_at?: string | null; expire_at?: string | null } = {
   title: "", description: "", subject: "", class_level: "",
   thumbnail_url: null, video_source: "youtube", video_url: "",
   duration: "", is_published: false, sort_order: 0,
+  publish_at: null, expire_at: null,
 };
 
 type SortKey = "title" | "subject" | "class_level" | "video_source" | "created_at" | "is_published" | "sort_order";
@@ -248,7 +250,7 @@ const AdminVideos = () => {
     if (!form.title.trim()) { toast.error("Title is required"); return; }
     await csrfGuard(async () => {
       if (editingId) {
-        const { error } = await supabase.from("educational_videos").update({ ...form, updated_at: new Date().toISOString() }).eq("id", editingId);
+        const { error } = await supabase.from("educational_videos").update({ ...form, updated_at: new Date().toISOString() } as any).eq("id", editingId);
         if (error) { toast.error(error.message); return; }
         toast.success("Video updated");
       } else {
@@ -288,6 +290,7 @@ const AdminVideos = () => {
       class_level: video.class_level, thumbnail_url: video.thumbnail_url,
       video_source: video.video_source, video_url: video.video_url,
       duration: video.duration, is_published: video.is_published, sort_order: video.sort_order,
+      publish_at: (video as any).publish_at || null, expire_at: (video as any).expire_at || null,
     });
     setEditingId(video.id);
     setIsAdding(true);
@@ -449,6 +452,12 @@ const AdminVideos = () => {
               <Switch checked={form.is_published} onCheckedChange={v => setForm(p => ({ ...p, is_published: v }))} id="published" />
               <Label htmlFor="published">Published</Label>
             </div>
+            <ContentSchedulingFields
+              publishAt={(form as any).publish_at || null}
+              expireAt={(form as any).expire_at || null}
+              onPublishAtChange={val => setForm(p => ({ ...p, publish_at: val } as any))}
+              onExpireAtChange={val => setForm(p => ({ ...p, expire_at: val } as any))}
+            />
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={uploading}><Save size={14} className="mr-1" /> {editingId ? "Update" : "Save"}</Button>
               <Button variant="outline" onClick={resetForm}><X size={14} className="mr-1" /> Cancel</Button>
@@ -506,9 +515,7 @@ const AdminVideos = () => {
                           <TableCell className="text-xs">{sourceLabel(video.video_source)}</TableCell>
                           <TableCell className="text-muted-foreground text-xs">{new Date(video.created_at).toLocaleDateString()}</TableCell>
                           <TableCell>
-                            <Badge variant={video.is_published ? "default" : "secondary"} className="cursor-pointer" onClick={() => togglePublish(video)}>
-                              {video.is_published ? "Published" : "Draft"}
-                            </Badge>
+                            <ContentStatusBadge status={getContentStatus({ isPublished: video.is_published, publishAt: (video as any).publish_at, expireAt: (video as any).expire_at })} />
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-1">
@@ -531,9 +538,7 @@ const AdminVideos = () => {
                       <TableCell className="text-xs">{sourceLabel(video.video_source)}</TableCell>
                       <TableCell className="text-muted-foreground text-xs">{new Date(video.created_at).toLocaleDateString()}</TableCell>
                       <TableCell>
-                        <Badge variant={video.is_published ? "default" : "secondary"} className="cursor-pointer" onClick={() => togglePublish(video)}>
-                          {video.is_published ? "Published" : "Draft"}
-                        </Badge>
+                        <ContentStatusBadge status={getContentStatus({ isPublished: video.is_published, publishAt: (video as any).publish_at, expireAt: (video as any).expire_at })} />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -562,9 +567,7 @@ const AdminVideos = () => {
                         <div className="flex-1 min-w-0">
                           <h3 className="font-medium text-sm text-foreground truncate">{video.title}</h3>
                           <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                            <Badge variant={video.is_published ? "default" : "secondary"} className="text-[10px] cursor-pointer" onClick={() => togglePublish(video)}>
-                              {video.is_published ? "Published" : "Draft"}
-                            </Badge>
+                            <ContentStatusBadge status={getContentStatus({ isPublished: video.is_published, publishAt: (video as any).publish_at, expireAt: (video as any).expire_at })} />
                             {video.subject && <span className="text-[10px] text-muted-foreground">{video.subject}</span>}
                           </div>
                         </div>
@@ -582,9 +585,7 @@ const AdminVideos = () => {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-sm text-foreground truncate">{video.title}</h3>
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                        <Badge variant={video.is_published ? "default" : "secondary"} className="text-[10px] cursor-pointer" onClick={() => togglePublish(video)}>
-                          {video.is_published ? "Published" : "Draft"}
-                        </Badge>
+                        <ContentStatusBadge status={getContentStatus({ isPublished: video.is_published, publishAt: (video as any).publish_at, expireAt: (video as any).expire_at })} />
                         {video.subject && <span className="text-[10px] text-muted-foreground">{video.subject}</span>}
                         {video.class_level && <span className="text-[10px] text-muted-foreground">• {video.class_level}</span>}
                       </div>

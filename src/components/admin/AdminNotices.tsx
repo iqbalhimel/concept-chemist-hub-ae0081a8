@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle, Pencil, Search, X } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle, Pencil, Search, X, CalendarClock } from "lucide-react";
+import ContentSchedulingFields, { getContentStatus, ContentStatusBadge } from "@/components/admin/ContentSchedulingFields";
 import { Checkbox } from "@/components/ui/checkbox";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
@@ -128,7 +129,7 @@ const AdminNotices = () => {
         title: stripHtml(n.title).trim(),
         description: n.description,
         date: n.date,
-        is_active: n.is_active, is_pinned: a.is_pinned, expires_at: a.expires_at || null,
+        is_active: n.is_active, is_pinned: a.is_pinned, expires_at: a.expires_at || null, publish_at: a.publish_at || null,
         seo_title: a.seo_title || null, seo_description: a.seo_description || null,
         seo_keywords: a.seo_keywords || null, seo_canonical_url: a.seo_canonical_url || null,
         seo_og_title: a.seo_og_title || null, seo_og_description: a.seo_og_description || null,
@@ -289,6 +290,7 @@ const AdminNotices = () => {
                   const isEditing = expandedEditId === n.id;
                   const isDeleting = expandedDeleteId === n.id;
                   const isExpired = a.expires_at && new Date(a.expires_at) < new Date();
+                  const contentStatus = getContentStatus({ isActive: n.is_active, publishAt: a.publish_at, expireAt: a.expires_at ? new Date(a.expires_at + "T23:59:59").toISOString() : null });
 
                   return (
                     <SortableRow key={n.id} id={n.id}>
@@ -301,8 +303,8 @@ const AdminNotices = () => {
                           <span className="text-sm font-medium text-foreground truncate">{n.title}</span>
                           <span className="w-24 text-xs text-muted-foreground">{formatDate(n.date)}</span>
                           <span className="w-24 text-xs text-muted-foreground">{a.expires_at ? formatDate(a.expires_at) : "—"}</span>
-                          <span className={`w-16 text-center text-xs font-medium ${n.is_active ? "text-emerald-600" : "text-muted-foreground"}`}>
-                            {n.is_active ? "Active" : "Inactive"}
+                          <span className="w-16 text-center">
+                            <ContentStatusBadge status={contentStatus} />
                           </span>
                           <span className="w-16 text-center">
                             {a.is_pinned ? <Pin size={14} className="text-primary fill-primary mx-auto" /> : <span className="text-muted-foreground/30">—</span>}
@@ -330,7 +332,7 @@ const AdminNotices = () => {
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <span>{formatDate(n.date)}</span>
                               <span>•</span>
-                              <span className={n.is_active ? "text-emerald-600 font-medium" : ""}>{n.is_active ? "Active" : "Inactive"}</span>
+                              <ContentStatusBadge status={contentStatus} />
                             </div>
                           </div>
                           <div className="flex gap-2 pl-6">
@@ -377,6 +379,16 @@ const AdminNotices = () => {
                               <div>
                                 <label className="text-xs text-muted-foreground mb-1 block">Expiry Date</label>
                                 <Input type="date" value={a.expires_at || ""} onChange={e => updateLocal(n.id, { expires_at: e.target.value || null })} />
+                              </div>
+                              <div>
+                                <label className="text-xs text-muted-foreground mb-1 block">Publish At (schedule)</label>
+                                <Input type="datetime-local" className="h-9 text-sm"
+                                  value={a.publish_at ? new Date(new Date(a.publish_at).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ""}
+                                  onChange={e => { const val = e.target.value; updateLocal(n.id, { publish_at: val ? new Date(val).toISOString() : null }); }}
+                                />
+                                {a.publish_at && new Date(a.publish_at) > new Date() && (
+                                  <p className="text-[11px] text-blue-600 mt-1">Will become visible {new Date(a.publish_at).toLocaleString()}</p>
+                                )}
                               </div>
                               <div className="flex items-end gap-6">
                                 <label className="flex items-center gap-2 text-sm cursor-pointer h-9">

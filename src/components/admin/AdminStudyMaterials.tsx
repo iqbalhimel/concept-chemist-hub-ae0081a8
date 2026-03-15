@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags, GripVertical, Search, X, Check, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import ContentSchedulingFields, { getContentStatus, ContentStatusBadge } from "@/components/admin/ContentSchedulingFields";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
@@ -636,8 +637,8 @@ const AdminStudyMaterials = () => {
                             <span className="text-sm font-medium text-foreground truncate">{item.title}</span>
                             <span className="w-32 text-xs text-muted-foreground truncate">{item.category}</span>
                             <span className="w-20 text-xs text-muted-foreground text-right">{item.file_size || "—"}</span>
-                            <span className={`w-16 text-center text-xs font-medium ${item.is_active ? "text-emerald-600" : "text-muted-foreground"}`}>
-                              {item.is_active ? "Active" : "Inactive"}
+                            <span className="w-16 text-center">
+                              <ContentStatusBadge status={getContentStatus({ isActive: item.is_active, publishAt: (item as any).publish_at, expireAt: (item as any).expire_at })} />
                             </span>
                             <div className="w-24 flex items-center justify-end gap-1">
                               <Button
@@ -671,9 +672,7 @@ const AdminStudyMaterials = () => {
                                 <span>•</span>
                                 <span>{item.file_size || "—"}</span>
                               </div>
-                              <span className={`text-xs font-medium ${item.is_active ? "text-emerald-600" : "text-muted-foreground"}`}>
-                                {item.is_active ? "Active" : "Inactive"}
-                              </span>
+                              <ContentStatusBadge status={getContentStatus({ isActive: item.is_active, publishAt: (item as any).publish_at, expireAt: (item as any).expire_at })} />
                             </div>
                             <div className="flex gap-2 pl-6">
                               <Button
@@ -798,11 +797,20 @@ const AdminStudyMaterials = () => {
                               defaultCanonical={`https://iqbalsir.bd/resources`}
                             />
 
+                            {/* Scheduling */}
+                            <ContentSchedulingFields
+                              publishAt={(item as any).publish_at || null}
+                              expireAt={(item as any).expire_at || null}
+                              onPublishAtChange={val => updateLocal(item.id, "publish_at", val)}
+                              onExpireAtChange={val => updateLocal(item.id, "expire_at", val)}
+                            />
+
                             {/* Save / Cancel */}
                             <div className="flex justify-end gap-2">
                               <Button size="sm" variant="outline" onClick={() => setExpandedEditId(null)}>Cancel</Button>
                               <Button size="sm" onClick={() => { update(item.id, {
                                 title: item.title, category: item.category, file_url: item.file_url, file_size: item.file_size, pages: item.pages,
+                                publish_at: (item as any).publish_at || null, expire_at: (item as any).expire_at || null,
                                 seo_title: (item as any).seo_title || null, seo_description: (item as any).seo_description || null,
                                 seo_keywords: (item as any).seo_keywords || null, seo_canonical_url: (item as any).seo_canonical_url || null,
                                 seo_og_title: (item as any).seo_og_title || null, seo_og_description: (item as any).seo_og_description || null,
