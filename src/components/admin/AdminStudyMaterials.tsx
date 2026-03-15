@@ -256,14 +256,15 @@ const AdminStudyMaterials = () => {
 
   const bulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`Delete ${selectedIds.size} selected item(s)? This cannot be undone.`)) return;
+    if (!window.confirm(`Move ${selectedIds.size} selected item(s) to trash?`)) return;
     await csrfGuard(async () => {
       setBulkDeleting(true);
+      const now = new Date().toISOString();
       for (const id of selectedIds) {
-        await supabase.from("study_materials").delete().eq("id", id);
+        await (supabase as any).from("study_materials").update({ trashed_at: now }).eq("id", id);
       }
       setItems(prev => prev.filter(n => !selectedIds.has(n.id)));
-      toast.success(`${selectedIds.size} item(s) deleted`);
+      toast.success(`${selectedIds.size} item(s) moved to trash`);
       setSelectedIds(new Set());
       setBulkDeleting(false);
     });
