@@ -157,11 +157,13 @@ const AdminNotices = () => {
 
   const deleteNotice = async (id: string) => {
     await csrfGuard(async () => {
+      const notice = notices.find(n => n.id === id);
       await supabase.from("notices").delete().eq("id", id);
       setNotices(prev => prev.filter(n => n.id !== id));
       setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
       setExpandedDeleteId(null);
       toast.success("Deleted");
+      logAdminActivity({ action: "delete", module: "notices", itemId: id, itemTitle: notice?.title });
     });
   };
 

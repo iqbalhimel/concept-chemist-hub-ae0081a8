@@ -269,9 +269,11 @@ const AdminVideos = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this video?")) return;
     await csrfGuard(async () => {
+      const video = videos.find(v => v.id === id);
       const { error } = await supabase.from("educational_videos").delete().eq("id", id);
       if (error) { toast.error(error.message); return; }
       toast.success("Video deleted");
+      logAdminActivity({ action: "delete", module: "educational_videos", itemId: id, itemTitle: video?.title });
       fetchVideos();
     }, "content_delete", "Deleted educational video");
   };

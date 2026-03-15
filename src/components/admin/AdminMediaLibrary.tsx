@@ -249,6 +249,7 @@ const AdminMediaLibrary = () => {
       setItems(prev => prev.filter(i => i.id !== item.id));
       if (activeDetailId === item.id) setActiveDetailId(null);
       toast.success("Deleted");
+      logAdminActivity({ action: "delete", module: "media_library", itemId: item.id, itemTitle: item.name });
     }, "content_delete", `Deleted media: ${item.name}`);
   };
 

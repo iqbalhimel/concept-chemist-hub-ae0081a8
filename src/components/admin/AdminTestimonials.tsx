@@ -163,9 +163,14 @@ const AdminTestimonials = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this testimonial?")) return;
     await csrfGuard(async () => {
+      const item = items.find(i => i.id === id);
       const { error } = await supabase.from("testimonials").delete().eq("id", id);
       if (error) toast.error("Delete failed");
-      else { toast.success("Deleted"); if (editId === id) resetForm(); fetchItems(); }
+      else {
+        toast.success("Deleted");
+        logAdminActivity({ action: "delete", module: "testimonials", itemId: id, itemTitle: item?.student_name });
+        if (editId === id) resetForm(); fetchItems();
+      }
     });
   };
 

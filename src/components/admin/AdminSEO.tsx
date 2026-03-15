@@ -98,6 +98,7 @@ const AdminSEO = () => {
       if (error) { toast.error("Failed: " + error.message); return; }
       invalidateSiteSettings();
       toast.success("SEO settings saved!");
+      logAdminActivity({ action: "update_seo", module: "seo", itemTitle: "SEO Settings" });
     });
     setSaving(null);
   };

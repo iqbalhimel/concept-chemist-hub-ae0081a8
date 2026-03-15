@@ -68,6 +68,7 @@ const AdminSettingsSection = ({ section }: Props) => {
       } else {
         invalidateSiteSettings();
         toast.success(`${section.label} saved!`);
+        logAdminActivity({ action: "update_settings", module: "site_settings", itemTitle: section.label });
       }
     });
     setSaving(false);

@@ -362,10 +362,12 @@ const AdminBlogPosts = () => {
   const remove = async (id: string) => {
     if (!window.confirm("Delete this post? This cannot be undone.")) return;
     await csrfGuard(async () => {
+      const post = posts.find(p => p.id === id);
       await supabase.from("blog_posts").delete().eq("id", id);
       setPosts(prev => prev.filter(p => p.id !== id));
       if (editingId === id) setEditingId(null);
       toast.success("Deleted");
+      logAdminActivity({ action: "delete", module: "blog_posts", itemId: id, itemTitle: post?.title });
     }, "content_delete", "Deleted blog post");
   };
 

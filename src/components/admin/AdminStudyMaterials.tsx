@@ -220,10 +220,12 @@ const AdminStudyMaterials = () => {
 
   const remove = async (id: string) => {
     await csrfGuard(async () => {
+      const item = items.find(i => i.id === id);
       await supabase.from("study_materials").delete().eq("id", id);
       setItems(prev => prev.filter(n => n.id !== id));
       setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
       toast.success("Deleted");
+      logAdminActivity({ action: "delete", module: "study_materials", itemId: id, itemTitle: item?.title });
     });
   };
 
