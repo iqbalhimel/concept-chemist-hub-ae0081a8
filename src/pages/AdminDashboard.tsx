@@ -290,13 +290,13 @@ const AdminDashboard = () => {
             );
           })}
         </nav>
-        <div className="p-3 border-t border-border shrink-0">
-          <div className="text-xs text-muted-foreground mb-2 truncate px-3">{user?.email}</div>
+        <div className="p-3 border-t border-border shrink-0 space-y-2">
+          <div className="text-xs text-muted-foreground truncate px-3">{user?.email}</div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="flex-1" onClick={() => window.open("/", "_blank")}>
-              <Globe size={14} className="mr-1" /> View Site
+            <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={() => window.open("/", "_blank")}>
+              <Globe size={13} className="mr-1" /> View Site
             </Button>
-            <Button variant="outline" size="sm" onClick={signOut}><LogOut size={14} /></Button>
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={signOut}><LogOut size={13} /></Button>
           </div>
         </div>
       </aside>
