@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { setSeo, generatePersonSchema, generateEducationalOrgSchema } from "@/lib/seo";
+import { setSeo, generatePersonSchema, generateEducationalOrgSchema, generateWebSiteSchema } from "@/lib/seo";
 
 /**
  * Injects global SEO meta tags from site_settings on every page.
