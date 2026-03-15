@@ -172,7 +172,7 @@ const AdminTags = () => {
       toast.error("Failed to delete tags");
     } else {
       toast.success(`${ids.length} tag(s) deleted`);
-      logAdminActivity("tags", "bulk_delete", undefined, `${ids.length} tags`);
+      logAdminActivity({ module: "tags", action: "bulk_delete", itemTitle: `${ids.length} tags` });
       setSelected(new Set());
       fetchTags();
     }

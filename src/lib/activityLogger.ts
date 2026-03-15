@@ -1,13 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type ActivityAction = "create" | "edit" | "delete" | "upload" | "update_settings" | "update_seo";
+export type ActivityAction = "create" | "edit" | "delete" | "bulk_delete" | "upload" | "update_settings" | "update_seo";
 
 export type ActivityModule =
   | "blog_posts" | "notices" | "study_materials" | "educational_videos"
   | "gallery" | "testimonials" | "faq" | "media_library"
   | "subjects" | "achievements" | "experience" | "education"
   | "professional_training" | "teaching_approach" | "themes"
-  | "site_settings" | "seo" | "blog_categories";
+  | "site_settings" | "seo" | "blog_categories" | "tags";
 
 interface LogParams {
   action: ActivityAction;
