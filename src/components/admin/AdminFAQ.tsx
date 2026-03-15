@@ -45,6 +45,8 @@ const AdminFAQ = () => {
   const [expandedEditId, setExpandedEditId] = useState<string | null>(null);
   const [expandedDeleteId, setExpandedDeleteId] = useState<string | null>(null);
   const [orderChanged, setOrderChanged] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
   const newIdRef = useRef<string | null>(null);
 
