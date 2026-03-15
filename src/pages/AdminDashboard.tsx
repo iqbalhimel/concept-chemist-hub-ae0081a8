@@ -73,6 +73,7 @@ const isGroup = (entry: NavEntry): entry is NavGroup => "items" in entry;
 
 const navigation: NavEntry[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "global-trash", label: "Trash", icon: Trash2 },
   {
     label: "Homepage",
     icon: Home,
