@@ -300,9 +300,12 @@ const AdminDashboard = () => {
       <main className="flex-1 min-h-screen min-w-0 overflow-x-hidden">
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center gap-3">
           <button className="lg:hidden text-foreground" onClick={() => setSidebarOpen(true)}><Menu size={22} /></button>
-          <h2 className="font-display font-semibold text-foreground">
+          <h2 className="font-display font-semibold text-foreground shrink-0">
             {activeLabel}
           </h2>
+          <div className="ml-auto">
+            <AdminGlobalSearch onNavigate={(tab) => handleTabClick(tab as Tab)} />
+          </div>
         </header>
         <div className="p-3 sm:p-4 md:p-6 lg:p-8 max-w-6xl w-full min-w-0 overflow-x-hidden">{renderContent()}</div>
       </main>
