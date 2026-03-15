@@ -243,31 +243,14 @@ const EditPanel = ({
     />
 
     {/* Scheduling */}
-    {!post.is_published && (
-      <div className="flex items-center gap-2 flex-wrap">
-        <CalendarClock size={14} className="text-muted-foreground" />
-        <label className="text-xs text-muted-foreground">Schedule publish:</label>
-        <Input
-          type="datetime-local"
-          className="w-auto h-8 text-xs"
-          value={(post as any).scheduled_at ? new Date(new Date((post as any).scheduled_at).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ""}
-          onChange={e => {
-            const val = e.target.value;
-            onUpdateLocal(post.id, "scheduled_at", val ? new Date(val).toISOString() : "");
-          }}
-        />
-        {(post as any).scheduled_at && (
-          <>
-            <button onClick={() => onUpdateLocal(post.id, "scheduled_at", "")} className="text-xs text-muted-foreground hover:text-destructive flex items-center gap-0.5">
-              <X size={12} /> Clear
-            </button>
-            <span className="text-xs text-primary font-medium">
-              Will auto-publish {new Date((post as any).scheduled_at).toLocaleString()}
-            </span>
-          </>
-        )}
-      </div>
-    )}
+    <ContentSchedulingFields
+      publishAt={(post as any).scheduled_at || null}
+      expireAt={(post as any).expire_at || null}
+      onPublishAtChange={val => onUpdateLocal(post.id, "scheduled_at", val || "")}
+      onExpireAtChange={val => onUpdateLocal(post.id, "expire_at", val || "")}
+      publishLabel="Schedule publish"
+      expireLabel="Auto-expire"
+    />
 
     <div className="flex gap-2 items-center pt-2 border-t border-border">
       <label className="flex items-center gap-2 text-sm text-muted-foreground">
