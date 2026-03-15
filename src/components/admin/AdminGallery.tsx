@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Upload, GripVertical, Pencil, Search, X, FolderOpen, CheckSquare, Square } from "lucide-react";
+import { Plus, Trash2, Save, Upload, GripVertical, Pencil, Search, X, FolderOpen } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import type { Tables } from "@/integrations/supabase/types";
@@ -301,10 +301,11 @@ const AdminGallery = () => {
       )}
 
       {filteredItems.length > 0 && (
-        <div className="flex items-center gap-2">
-          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
-            {filteredItems.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
-          </button>
+        <div className="admin-select-all">
+          <Checkbox
+            checked={filteredItems.every(i => selectedIds.has(i.id))}
+            onCheckedChange={toggleSelectAll}
+          />
           <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
         </div>
       )}
@@ -318,7 +319,7 @@ const AdminGallery = () => {
             <SortableContext items={pagedItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
               <div className="border border-border rounded-lg divide-y divide-border overflow-hidden">
                 {/* Desktop header */}
-                <div className="hidden md:grid md:grid-cols-[auto_auto_48px_1fr_auto_auto_auto] gap-3 items-center px-4 py-2 bg-muted/40 text-xs font-medium text-muted-foreground">
+                <div className="hidden md:grid md:grid-cols-[auto_auto_48px_1fr_auto_auto_auto] gap-3 items-center px-4 py-2.5 admin-table-header">
                   <span className="w-4" />
                   <span className="w-8" />
                   <span>Thumb</span>
@@ -343,7 +344,7 @@ const AdminGallery = () => {
                     <SortableRow key={item.id} id={item.id}>
                       <div>
                         {/* Desktop row */}
-                        <div className={`hidden md:grid md:grid-cols-[auto_auto_48px_1fr_auto_auto_auto] gap-3 items-center px-3 py-2.5 ${selectedIds.has(item.id) ? "bg-primary/5" : ""}`}>
+                        <div className={`hidden md:grid md:grid-cols-[auto_auto_48px_1fr_auto_auto_auto] gap-3 items-center px-3 py-2.5 transition-colors duration-150 hover:bg-muted/40 ${selectedIds.has(item.id) ? "bg-primary/5" : ""}`}>
                           <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
                           <span className="w-8" />
                           <div className="w-10 h-10 rounded bg-muted overflow-hidden shrink-0">
@@ -369,7 +370,7 @@ const AdminGallery = () => {
                         </div>
 
                         {/* Mobile row */}
-                        <div className={`md:hidden px-3 py-3 space-y-2 ${selectedIds.has(item.id) ? "bg-primary/5" : ""}`}>
+                        <div className={`md:hidden px-3 py-3 space-y-2 transition-colors duration-150 hover:bg-muted/40 ${selectedIds.has(item.id) ? "bg-primary/5" : ""}`}>
                           <div className="flex items-center gap-3">
                             <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
                             <div className="w-10 h-10 rounded bg-muted overflow-hidden shrink-0">

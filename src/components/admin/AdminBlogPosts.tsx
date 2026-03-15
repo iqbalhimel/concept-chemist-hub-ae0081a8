@@ -11,7 +11,7 @@ import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
 import { toast } from "sonner";
 import {
   Plus, Trash2, Save, GripVertical, Pencil, X, Loader2, ImagePlus,
-  ExternalLink, CalendarClock, Search, FolderOpen, CheckSquare, Square,
+  ExternalLink, CalendarClock, Search, FolderOpen,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -102,7 +102,7 @@ const SortableRow = ({
   const style = { transform: CSS.Transform.toString(transform), transition };
 
   return (
-    <div ref={setNodeRef} style={style} className={`flex flex-wrap md:flex-nowrap items-start md:items-center gap-2 md:gap-3 px-3 py-3 md:px-4 border border-border rounded-lg transition-colors ${selected ? "bg-primary/5 border-primary/30" : "bg-card hover:bg-muted/40"}`}>
+    <div ref={setNodeRef} style={style} className={`admin-row flex flex-wrap md:flex-nowrap items-start md:items-center gap-2 md:gap-3 px-3 py-3 md:px-4 ${selected ? "selected" : ""}`}>
       <Checkbox checked={selected} onCheckedChange={() => onToggleSelect(post.id)} className="shrink-0 mt-1 md:mt-0" />
       <button {...attributes} {...listeners} className="cursor-grab text-muted-foreground hover:text-foreground touch-none shrink-0 mt-1 md:mt-0">
         <GripVertical size={16} />
@@ -449,10 +449,11 @@ const AdminBlogPosts = () => {
 
       {/* Select All */}
       {filteredPosts.length > 0 && (
-        <div className="flex items-center gap-2">
-          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
-            {filteredPosts.every(p => selectedIds.has(p.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
-          </button>
+        <div className="admin-select-all">
+          <Checkbox
+            checked={filteredPosts.every(p => selectedIds.has(p.id))}
+            onCheckedChange={toggleSelectAll}
+          />
           <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
         </div>
       )}

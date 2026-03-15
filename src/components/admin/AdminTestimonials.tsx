@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, GripVertical, Pencil, Star, X, MessageSquareQuote, CheckSquare, Square } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pencil, Star, X, MessageSquareQuote } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
@@ -276,17 +276,18 @@ const AdminTestimonials = () => {
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
               {items.length > 0 && (
-                <div className="flex items-center gap-2 mb-2">
-                  <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
-                    {items.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
-                  </button>
+                <div className="admin-select-all mb-2">
+                  <Checkbox
+                    checked={items.every(i => selectedIds.has(i.id))}
+                    onCheckedChange={toggleSelectAll}
+                  />
                   <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
                 </div>
               )}
               <div className="space-y-2">
                 {paginated.map(item => (
                   <SortableRow key={item.id} id={item.id}>
-                    <div className={`border rounded-lg p-4 transition-colors ${editId === item.id ? "border-primary bg-primary/5" : selectedIds.has(item.id) ? "border-primary/30 bg-primary/5" : "border-border bg-card"}`}>
+                    <div className={`admin-row p-4 ${editId === item.id ? "selected border-primary" : selectedIds.has(item.id) ? "selected" : ""}`}>
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />

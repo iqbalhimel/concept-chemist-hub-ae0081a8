@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
-import { Plus, Trash2, Save, GripVertical, Pencil, X, CheckSquare, Square } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pencil, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
@@ -173,16 +173,17 @@ const AdminFAQ = () => {
         <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
           {items.length === 0 && <p className="text-muted-foreground text-sm">No FAQs added yet.</p>}
           {items.length > 0 && (
-            <div className="flex items-center gap-2 mb-2">
-              <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
-                {items.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
-              </button>
+            <div className="admin-select-all">
+              <Checkbox
+                checked={items.every(i => selectedIds.has(i.id))}
+                onCheckedChange={toggleSelectAll}
+              />
               <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
             </div>
           )}
           {items.map(item => (
             <SortableRow key={item.id} id={item.id}>
-              <div className={`glass-card p-3 w-full max-w-full min-w-0 overflow-hidden ${selectedIds.has(item.id) ? "border-primary/30 bg-primary/5" : ""}`}>
+              <div className={`admin-card p-3 w-full max-w-full min-w-0 overflow-hidden ${selectedIds.has(item.id) ? "selected" : ""}`}>
                 {/* Desktop */}
                 <div className="hidden md:flex items-center gap-4">
                   <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />

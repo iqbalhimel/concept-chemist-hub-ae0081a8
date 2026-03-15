@@ -356,6 +356,54 @@
     @apply outline-2 outline-offset-2 outline-primary;
     outline-style: solid;
   }
+
+  /* ── Admin Panel Utilities ────────────────────── */
+
+  .admin-row {
+    @apply border border-border rounded-lg bg-card transition-all duration-150;
+  }
+  .admin-row:hover {
+    @apply bg-muted/40 border-border;
+    box-shadow: 0 1px 3px hsl(var(--shadow-color) / 0.1);
+  }
+  .admin-row.selected {
+    @apply bg-primary/5 border-primary/30;
+  }
+
+  .admin-card {
+    @apply border border-border rounded-lg bg-card/60 backdrop-blur-sm transition-all duration-150;
+  }
+  .admin-card:hover {
+    @apply border-border bg-card/80;
+    box-shadow: 0 2px 8px hsl(var(--shadow-color) / 0.12);
+  }
+  .admin-card.selected {
+    @apply bg-primary/5 border-primary/30;
+  }
+
+  .admin-table-header {
+    @apply bg-muted/50 text-xs font-medium text-muted-foreground uppercase tracking-wider;
+  }
+
+  .admin-section-header {
+    @apply flex items-center justify-between flex-wrap gap-3 pb-1;
+  }
+
+  .admin-bulk-bar {
+    @apply flex items-center gap-2 px-3 py-2 bg-primary/5 border border-primary/20 rounded-lg animate-in fade-in slide-in-from-top-1;
+  }
+
+  .admin-select-all {
+    @apply flex items-center gap-2 px-1 py-1.5;
+  }
+
+  [data-brightness="light"] .admin-row:hover {
+    @apply bg-muted/60;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+  [data-brightness="light"] .admin-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
 }
 
 /* Announcement slide animation — seamless right-to-left marquee */

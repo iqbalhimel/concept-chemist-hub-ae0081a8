@@ -233,16 +233,19 @@ const AdminDashboard = () => {
     <button
       key={item.id}
       onClick={() => handleTabClick(item.id)}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
         indent ? "pl-9" : ""
       } ${
         activeTab === item.id
-          ? "bg-primary/15 text-primary"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+          ? "bg-primary/15 text-primary shadow-sm shadow-primary/10"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
       }`}
     >
-      <item.icon size={16} />
+      <item.icon size={16} className={activeTab === item.id ? "text-primary" : ""} />
       <span className="truncate">{item.label}</span>
+      {activeTab === item.id && (
+        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+      )}
     </button>
   );
 
@@ -253,12 +256,12 @@ const AdminDashboard = () => {
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform lg:translate-x-0 flex flex-col h-[100dvh] lg:h-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card/95 backdrop-blur-sm border-r border-border transform transition-transform lg:translate-x-0 flex flex-col h-[100dvh] lg:h-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <h1 className="font-display text-lg font-bold gradient-text">Admin Panel</h1>
-          <button className="lg:hidden text-muted-foreground" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
+          <button className="lg:hidden text-muted-foreground hover:text-foreground transition-colors" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
         </div>
-        <nav className="p-3 space-y-0.5 flex-1 overflow-y-auto min-h-0">
+        <nav className="p-3 space-y-0.5 flex-1 overflow-y-auto min-h-0 scrollbar-thin">
           {navigation.map((entry, idx) => {
             if (!isGroup(entry)) {
               return renderNavItem(entry);
@@ -287,13 +290,13 @@ const AdminDashboard = () => {
             );
           })}
         </nav>
-        <div className="p-3 border-t border-border shrink-0">
-          <div className="text-xs text-muted-foreground mb-2 truncate px-3">{user?.email}</div>
+        <div className="p-3 border-t border-border shrink-0 space-y-2">
+          <div className="text-xs text-muted-foreground truncate px-3">{user?.email}</div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="flex-1" onClick={() => window.open("/", "_blank")}>
-              <Globe size={14} className="mr-1" /> View Site
+            <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={() => window.open("/", "_blank")}>
+              <Globe size={13} className="mr-1" /> View Site
             </Button>
-            <Button variant="outline" size="sm" onClick={signOut}><LogOut size={14} /></Button>
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={signOut}><LogOut size={13} /></Button>
           </div>
         </div>
       </aside>
