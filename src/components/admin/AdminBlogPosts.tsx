@@ -277,7 +277,7 @@ const EditPanel = ({
 
 const AdminBlogPosts = () => {
   const csrfGuard = useCsrfGuard();
-  const { categories: managedCategories } = useBlogCategories();
+  const { categories: managedCategories, categoryMeta } = useBlogCategories();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
