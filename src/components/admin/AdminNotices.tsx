@@ -118,6 +118,7 @@ const AdminNotices = () => {
       setNotices([data, ...updated]);
       setNewNoticeId(data.id);
       toast.success("Notice added");
+      logAdminActivity({ action: "create", module: "notices", itemId: data.id, itemTitle: "New Notice" });
     });
   };
 
