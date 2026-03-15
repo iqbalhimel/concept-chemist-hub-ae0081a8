@@ -21,6 +21,8 @@ import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
+import AdminTrashView from "@/components/admin/AdminTrashView";
+
 type Material = Tables<"study_materials">;
 
 type StudyCategory = {

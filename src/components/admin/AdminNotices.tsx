@@ -22,6 +22,8 @@ import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
 import { validateTextInput, stripHtml } from "@/lib/sanitize";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
+import AdminTrashView from "@/components/admin/AdminTrashView";
+
 type Notice = Tables<"notices">;
 
 const formatDate = (d: string) => {

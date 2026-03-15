@@ -20,6 +20,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+import AdminTrashView from "@/components/admin/AdminTrashView";
+
 type GalleryItem = Tables<"gallery">;
 
 const SPAN_LABELS: Record<string, string> = {
