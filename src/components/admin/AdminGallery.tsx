@@ -273,11 +273,6 @@ const AdminGallery = () => {
           Gallery <span className="text-base font-normal text-muted-foreground">({items.length})</span>
         </h2>
         <div className="flex gap-2">
-          {orderDirty && (
-            <Button size="sm" variant="outline" onClick={saveOrder} disabled={savingOrder}>
-              <Save size={14} className="mr-1" /> Save Order
-            </Button>
-          )}
           <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleUpload} />
           <Button onClick={() => fileRef.current?.click()} size="sm" disabled={uploading}>
             <Upload size={14} className="mr-1" /> {uploading ? "Uploading..." : "Upload Images"}
