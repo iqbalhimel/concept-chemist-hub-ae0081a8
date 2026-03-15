@@ -92,12 +92,26 @@ const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string;
   );
 };
 
+/* ── Category Badge ───────────────────────────────── */
+
+const CategoryBadge = ({ name, colorMap }: { name: string; colorMap: Record<string, string> }) => {
+  const color = colorMap[name];
+  if (color) {
+    return (
+      <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: color }}>
+        {name}
+      </span>
+    );
+  }
+  return <span className="text-xs text-muted-foreground">{name}</span>;
+};
+
 /* ── Sortable List Row ───────────────────────────── */
 
 const SortableRow = ({
-  post, onEdit, onDelete, selected, onToggleSelect,
+  post, onEdit, onDelete, selected, onToggleSelect, colorMap,
 }: {
-  post: Post; onEdit: (id: string) => void; onDelete: (id: string) => void; selected: boolean; onToggleSelect: (id: string) => void;
+  post: Post; onEdit: (id: string) => void; onDelete: (id: string) => void; selected: boolean; onToggleSelect: (id: string) => void; colorMap: Record<string, string>;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: post.id });
   const style = { transform: CSS.Transform.toString(transform), transition };
@@ -119,7 +133,7 @@ const SortableRow = ({
             <span className="text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded shrink-0">Scheduled</span>
           )}
         </div>
-        <span className="text-xs text-muted-foreground">{post.category}</span>
+        <CategoryBadge name={post.category} colorMap={colorMap} />
       </div>
 
       <div className="flex items-center gap-1 w-full md:w-auto mt-1 md:mt-0">
@@ -277,7 +291,7 @@ const EditPanel = ({
 
 const AdminBlogPosts = () => {
   const csrfGuard = useCsrfGuard();
-  const { categories: managedCategories } = useBlogCategories();
+  const { categories: managedCategories, categoryMeta } = useBlogCategories();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -420,13 +434,20 @@ const AdminBlogPosts = () => {
     }, "content_update", `Bulk ${publish ? "published" : "unpublished"} ${selectedIds.size} blog posts`);
   };
 
-  // Merge managed categories with any post-only categories for filter dropdown
+  // Build color lookup from category metadata
+  const colorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    categoryMeta.forEach(c => { if (c.color) map[c.name] = c.color; });
+    return map;
+  }, [categoryMeta]);
+
+  // Merge managed categories with any post-only categories for filter dropdown (ordered by metadata order)
   const categories = useMemo(() => {
     const postCats = [...new Set(posts.map(p => p.category))];
-    const merged = [...managedCategories];
-    const mergedSet = new Set(merged);
-    postCats.forEach(c => { if (!mergedSet.has(c)) merged.push(c); });
-    return merged.sort();
+    const ordered = [...managedCategories];
+    const mergedSet = new Set(ordered);
+    postCats.forEach(c => { if (!mergedSet.has(c)) ordered.push(c); });
+    return ordered;
   }, [posts, managedCategories]);
 
   const filteredPosts = useMemo(() => {
@@ -504,9 +525,17 @@ const AdminBlogPosts = () => {
           <SelectTrigger className="w-40 h-9"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="__all__">All Categories</SelectItem>
-            {categories.map(cat => (
-              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-            ))}
+            {categories.map(cat => {
+              const c = colorMap[cat];
+              return (
+                <SelectItem key={cat} value={cat}>
+                  <span className="flex items-center gap-2">
+                    {c && <span className="inline-block w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c }} />}
+                    {cat}
+                  </span>
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
@@ -553,6 +582,7 @@ const AdminBlogPosts = () => {
                     onDelete={remove}
                     selected={selectedIds.has(post.id)}
                     onToggleSelect={toggleSelect}
+                    colorMap={colorMap}
                   />
                 ))}
               </div>
