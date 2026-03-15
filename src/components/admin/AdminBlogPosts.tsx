@@ -94,10 +94,8 @@ const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string;
 
 /* ── Category Badge ───────────────────────────────── */
 
-const CategoryBadge = ({ name }: { name: string }) => {
-  const { categoryMeta } = useBlogCategories();
-  const meta = categoryMeta.find(c => c.name === name);
-  const color = meta?.color;
+const CategoryBadge = ({ name, colorMap }: { name: string; colorMap: Record<string, string> }) => {
+  const color = colorMap[name];
   if (color) {
     return (
       <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: color }}>
