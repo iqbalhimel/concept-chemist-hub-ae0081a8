@@ -72,6 +72,8 @@ const AppRoutes = () => (
           {/* Legacy routes (redirect handled via LanguageRedirect) */}
           <Route path="/" element={<Index />} />
           <Route path="/blog" element={<BlogListing />} />
+          <Route path="/blog/category/:slug" element={<BlogCategoryPage />} />
+          <Route path="/blog/tag/:slug" element={<BlogTagPage />} />
           <Route path="/blog/:id" element={<BlogPostPage />} />
           <Route path="/testimonials" element={<TestimonialsPage />} />
           <Route path="/notices" element={<NoticesPage />} />
