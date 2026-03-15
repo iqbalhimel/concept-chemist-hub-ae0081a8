@@ -369,8 +369,9 @@ const AdminGallery = () => {
                         </div>
 
                         {/* Mobile row */}
-                        <div className="md:hidden px-3 py-3 space-y-2">
+                        <div className={`md:hidden px-3 py-3 space-y-2 ${selectedIds.has(item.id) ? "bg-primary/5" : ""}`}>
                           <div className="flex items-center gap-3">
+                            <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
                             <div className="w-10 h-10 rounded bg-muted overflow-hidden shrink-0">
                               {item.image_url ? (
                                 <img src={item.image_url} alt={item.alt || ""} className="w-full h-full object-cover" />

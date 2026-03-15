@@ -274,13 +274,22 @@ const AdminTestimonials = () => {
       ) : (
         <>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
+              {items.length > 0 && (
+                <div className="flex items-center gap-2 mb-2">
+                  <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+                    {items.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+                  </button>
+                  <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
+                </div>
+              )}
               <div className="space-y-2">
                 {paginated.map(item => (
                   <SortableRow key={item.id} id={item.id}>
-                    <div className={`border rounded-lg p-4 transition-colors ${editId === item.id ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
+                    <div className={`border rounded-lg p-4 transition-colors ${editId === item.id ? "border-primary bg-primary/5" : selectedIds.has(item.id) ? "border-primary/30 bg-primary/5" : "border-border bg-card"}`}>
                       <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium text-foreground text-sm">{item.student_name}</span>
                             <span className="text-xs text-muted-foreground">{item.student_info}</span>
