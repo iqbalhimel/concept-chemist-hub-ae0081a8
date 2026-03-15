@@ -261,6 +261,12 @@ const AdminGlobalTrash = () => {
     });
   };
 
+  const emptyAllTrash = async () => {
+    if (!items.length) return;
+    if (!window.confirm(`Permanently delete ALL ${items.length} trashed item${items.length > 1 ? "s" : ""} across every module? This cannot be undone.`)) return;
+    await permanentDelete(items.map(i => i.id));
+  };
+
   /* ── Render ─────────────────────────────────────── */
 
   if (loading) {
