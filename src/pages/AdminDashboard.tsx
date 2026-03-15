@@ -233,16 +233,19 @@ const AdminDashboard = () => {
     <button
       key={item.id}
       onClick={() => handleTabClick(item.id)}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
         indent ? "pl-9" : ""
       } ${
         activeTab === item.id
-          ? "bg-primary/15 text-primary"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+          ? "bg-primary/15 text-primary shadow-sm shadow-primary/10"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
       }`}
     >
-      <item.icon size={16} />
+      <item.icon size={16} className={activeTab === item.id ? "text-primary" : ""} />
       <span className="truncate">{item.label}</span>
+      {activeTab === item.id && (
+        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+      )}
     </button>
   );
 
