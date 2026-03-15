@@ -362,15 +362,15 @@ const AdminBlogPosts = () => {
   };
 
   const remove = async (id: string) => {
-    if (!window.confirm("Delete this post? This cannot be undone.")) return;
+    if (!window.confirm("Move this post to trash?")) return;
     await csrfGuard(async () => {
       const post = posts.find(p => p.id === id);
-      await supabase.from("blog_posts").delete().eq("id", id);
+      await (supabase as any).from("blog_posts").update({ trashed_at: new Date().toISOString() }).eq("id", id);
       setPosts(prev => prev.filter(p => p.id !== id));
       if (editingId === id) setEditingId(null);
-      toast.success("Deleted");
+      toast.success("Moved to trash");
       logAdminActivity({ action: "delete", module: "blog_posts", itemId: id, itemTitle: post?.title });
-    }, "content_delete", "Deleted blog post");
+    }, "content_delete", "Trashed blog post");
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
