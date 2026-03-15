@@ -210,7 +210,11 @@ const AdminStudyMaterials = () => {
   const update = async (id: string, updates: Partial<Material>) => {
     await csrfGuard(async () => {
       const { error } = await supabase.from("study_materials").update(updates).eq("id", id);
-      if (error) toast.error(error.message); else toast.success("Updated");
+      if (error) toast.error(error.message); else {
+        toast.success("Updated");
+        const item = items.find(i => i.id === id);
+        logAdminActivity({ action: "edit", module: "study_materials", itemId: id, itemTitle: item?.title });
+      }
     });
   };
 
