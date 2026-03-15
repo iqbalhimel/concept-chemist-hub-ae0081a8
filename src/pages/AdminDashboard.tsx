@@ -219,6 +219,7 @@ const AdminDashboard = () => {
       case "atmosphere": return <AdminAtmosphere />;
       case "security-logs": return <AdminSecurityLogs />;
       case "videos": return <AdminVideos />;
+      case "activity-timeline": return <AdminActivityTimeline />;
       // Settings-based tabs
       case "hero-section": return <AdminSettingsSection section={heroSectionConfig} />;
       case "about-section": return <AdminSettingsSection section={aboutSectionConfig} />;
