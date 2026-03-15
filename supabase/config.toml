@@ -2,3 +2,6 @@ project_id = "evkbhalknerpptiofwsi"
 
 [functions.track-visit]
 verify_jwt = false
+
+[functions.auto-empty-trash]
+verify_jwt = false
