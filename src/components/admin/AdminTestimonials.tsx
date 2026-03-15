@@ -197,7 +197,12 @@ const AdminTestimonials = () => {
           <h2 className="font-display text-xl font-bold text-foreground">Testimonials</h2>
           <p className="text-sm text-muted-foreground">{items.length} total</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {selectedIds.size > 0 && (
+            <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting} className="animate-in fade-in">
+              <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+            </Button>
+          )}
           {orderDirty && (
             <Button onClick={saveOrder} variant="outline" size="sm">
               <Save size={14} className="mr-1" /> Save Order
