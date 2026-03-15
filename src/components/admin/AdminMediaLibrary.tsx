@@ -519,6 +519,11 @@ const AdminMediaLibrary = () => {
                   {filterType} <X size={10} />
                 </Badge>
               )}
+              {filterUnused && (
+                <Badge variant="secondary" className="text-[10px] gap-1 cursor-pointer" onClick={() => setFilterUnused(false)}>
+                  Unused only <X size={10} />
+                </Badge>
+              )}
               <span className="text-xs text-muted-foreground ml-1">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</span>
             </div>
           )}
