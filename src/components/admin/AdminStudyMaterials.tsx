@@ -634,9 +634,9 @@ const AdminStudyMaterials = () => {
                         <div className="px-4 py-3">
                           {/* Desktop row */}
                           <div className="hidden md:grid md:grid-cols-[auto_1fr_auto_auto_auto_auto] gap-3 items-center">
-                            <button onClick={() => toggleSelect(item.id)} className="text-muted-foreground hover:text-foreground transition-colors w-10">
-                              {selectedIds.has(item.id) ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
-                            </button>
+                            <div className="w-10">
+                              <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} />
+                            </div>
                             <span className="text-sm font-medium text-foreground truncate">{item.title}</span>
                             <span className="w-32 text-xs text-muted-foreground truncate">{item.category}</span>
                             <span className="w-20 text-xs text-muted-foreground text-right">{item.file_size || "—"}</span>
