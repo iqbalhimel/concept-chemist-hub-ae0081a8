@@ -177,7 +177,7 @@ const AdminStudyMaterials = () => {
   }, [newItemId]);
 
   const fetchItems = async () => {
-    const { data } = await supabase.from("study_materials").select("*").order("sort_order");
+    const { data } = await supabase.from("study_materials").select("*").is("trashed_at" as any, null).order("sort_order");
     setItems(data || []);
     setLoading(false);
     setOrderDirty(false);
