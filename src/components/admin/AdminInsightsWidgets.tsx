@@ -55,7 +55,7 @@ const AdminInsightsWidgets = () => {
       // Fetch all data in parallel
       const [viewsRes, postsRes, matsRes, vidsRes, scheduledPostsRes, scheduledNoticesRes, scheduledMatsRes, scheduledVidsRes, trashPostsRes, trashNoticesRes, trashMatsRes, trashTestRes, trashGalleryRes] = await Promise.all([
         // Top views
-        supabase.from("content_views").select("content_type, content_id, view_count").order("view_count", { ascending: false }).limit(30),
+        (supabase as any).from("content_views").select("content_type, content_id, view_count").order("view_count", { ascending: false }).limit(30),
         // Recent uploads
         supabase.from("blog_posts").select("id, title, created_at").is("trashed_at", null).order("created_at", { ascending: false }).limit(3),
         supabase.from("study_materials").select("id, title, created_at").is("trashed_at" as any, null).order("created_at", { ascending: false }).limit(3),
