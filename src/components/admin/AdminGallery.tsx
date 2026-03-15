@@ -300,6 +300,15 @@ const AdminGallery = () => {
         <p className="text-xs text-muted-foreground">Showing {filteredItems.length} of {items.length} items matching "{searchQuery}"</p>
       )}
 
+      {filteredItems.length > 0 && (
+        <div className="flex items-center gap-2">
+          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+            {filteredItems.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+          </button>
+          <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
+        </div>
+      )}
+
       <AdminPagination total={filteredItems.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1); }} />
 
       {(() => {
@@ -309,7 +318,8 @@ const AdminGallery = () => {
             <SortableContext items={pagedItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
               <div className="border border-border rounded-lg divide-y divide-border overflow-hidden">
                 {/* Desktop header */}
-                <div className="hidden md:grid md:grid-cols-[auto_48px_1fr_auto_auto_auto] gap-3 items-center px-4 py-2 bg-muted/40 text-xs font-medium text-muted-foreground">
+                <div className="hidden md:grid md:grid-cols-[auto_auto_48px_1fr_auto_auto_auto] gap-3 items-center px-4 py-2 bg-muted/40 text-xs font-medium text-muted-foreground">
+                  <span className="w-4" />
                   <span className="w-8" />
                   <span>Thumb</span>
                   <span>Title</span>
