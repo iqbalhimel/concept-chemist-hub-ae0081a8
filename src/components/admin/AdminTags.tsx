@@ -141,7 +141,7 @@ const AdminTags = () => {
       toast.error(error.message.includes("duplicate") ? "Tag name/slug already exists" : "Failed to update tag");
     } else {
       toast.success("Tag updated");
-      logAdminActivity("tags", "update", id, editName.trim());
+      logAdminActivity({ module: "tags", action: "edit", itemId: id, itemTitle: editName.trim() });
       setEditingId(null);
       fetchTags();
     }
