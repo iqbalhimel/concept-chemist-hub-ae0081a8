@@ -67,16 +67,25 @@ const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string;
             <Button size="sm" variant="secondary" onClick={() => inputRef.current?.click()} disabled={uploading}>
               {uploading ? <Loader2 size={14} className="animate-spin" /> : "Replace"}
             </Button>
+            <Button size="sm" variant="secondary" onClick={() => setPickerOpen(true)}>
+              <FolderOpen size={14} />
+            </Button>
             <Button size="sm" variant="destructive" onClick={onClear}>Remove</Button>
           </div>
         </div>
       ) : (
-        <button onClick={() => inputRef.current?.click()} disabled={uploading}
-          className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 rounded-lg text-sm text-muted-foreground transition-colors">
-          {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
-          {uploading ? "Uploading..." : "Add featured image"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => inputRef.current?.click()} disabled={uploading}
+            className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 rounded-lg text-sm text-muted-foreground transition-colors">
+            {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+            {uploading ? "Uploading..." : "Upload image"}
+          </button>
+          <Button size="sm" variant="outline" onClick={() => setPickerOpen(true)}>
+            <FolderOpen size={14} className="mr-1" /> Media Library
+          </Button>
+        </div>
       )}
+      <MediaPickerDialog open={pickerOpen} onOpenChange={setPickerOpen} onSelect={onUpload} accept="image" />
     </div>
   );
 };
