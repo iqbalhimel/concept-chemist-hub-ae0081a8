@@ -420,10 +420,23 @@ const AdminBlogPosts = () => {
         <h2 className="font-display text-2xl font-bold text-foreground">
           Blog Posts <span className="text-base font-normal text-muted-foreground">({posts.length})</span>
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedIds.size > 0 && (
+            <>
+              <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting} className="animate-in fade-in">
+                <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => bulkPublish(true)} className="animate-in fade-in">
+                Publish ({selectedIds.size})
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => bulkPublish(false)} className="animate-in fade-in">
+                Unpublish ({selectedIds.size})
+              </Button>
+            </>
+          )}
           {orderChanged && (
             <div className="flex items-center gap-2 animate-in fade-in">
-              <span className="text-xs text-primary font-medium">Order changed – click Save Changes</span>
+              <span className="text-xs text-primary font-medium">Order changed</span>
               <Button size="sm" onClick={saveOrder} disabled={savingOrder}>
                 <Save size={14} className="mr-1" /> {savingOrder ? "Saving…" : "Save Changes"}
               </Button>
@@ -432,6 +445,16 @@ const AdminBlogPosts = () => {
           <Button onClick={add} size="sm"><Plus size={14} className="mr-1" /> Add Post</Button>
         </div>
       </div>
+
+      {/* Select All */}
+      {filteredPosts.length > 0 && (
+        <div className="flex items-center gap-2">
+          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+            {filteredPosts.every(p => selectedIds.has(p.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+          </button>
+          <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
+        </div>
+      )}
 
       {/* Search & Filter */}
       <div className="flex gap-2 items-center">
