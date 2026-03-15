@@ -69,6 +69,8 @@ const AdminTestimonials = () => {
   const [orderDirty, setOrderDirty] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "all">(10);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
