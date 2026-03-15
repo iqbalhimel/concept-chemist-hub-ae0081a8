@@ -176,6 +176,7 @@ const AdminGallery = () => {
       setItems([...newItems, ...updated]);
       setNewItemId(newItems[0].id);
       toast.success(`${newItems.length} image(s) added`);
+      newItems.forEach(item => logAdminActivity({ action: "upload", module: "gallery", itemId: item.id, itemTitle: item.label || "Image" }));
     }
 
     setUploading(false);
