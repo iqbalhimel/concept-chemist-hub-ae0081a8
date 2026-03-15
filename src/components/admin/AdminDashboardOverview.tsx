@@ -14,7 +14,7 @@ interface RecentComment {
   post_title: string;
 }
 
-const StatCard = ({ icon: Icon, label, count, loading }: { icon: React.ElementType; label: string; count: number; loading: boolean }) => (
+const StatCard = React.memo(({ icon: Icon, label, count, loading }: { icon: React.ElementType; label: string; count: number; loading: boolean }) => (
   <Card>
     <CardContent className="flex items-center gap-4 p-5">
       <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -26,7 +26,8 @@ const StatCard = ({ icon: Icon, label, count, loading }: { icon: React.ElementTy
       </div>
     </CardContent>
   </Card>
-);
+));
+StatCard.displayName = "StatCard";
 
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
