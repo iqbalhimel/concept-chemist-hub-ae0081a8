@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { logAdminActivity } from "@/lib/activityLogger";
 import { Button } from "@/components/ui/button";
