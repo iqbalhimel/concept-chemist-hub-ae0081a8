@@ -450,6 +450,12 @@ const AdminVideos = () => {
               <Switch checked={form.is_published} onCheckedChange={v => setForm(p => ({ ...p, is_published: v }))} id="published" />
               <Label htmlFor="published">Published</Label>
             </div>
+            <ContentSchedulingFields
+              publishAt={(form as any).publish_at || null}
+              expireAt={(form as any).expire_at || null}
+              onPublishAtChange={val => setForm(p => ({ ...p, publish_at: val } as any))}
+              onExpireAtChange={val => setForm(p => ({ ...p, expire_at: val } as any))}
+            />
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={uploading}><Save size={14} className="mr-1" /> {editingId ? "Update" : "Save"}</Button>
               <Button variant="outline" onClick={resetForm}><X size={14} className="mr-1" /> Cancel</Button>

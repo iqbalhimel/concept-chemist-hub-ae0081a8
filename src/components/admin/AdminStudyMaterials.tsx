@@ -797,11 +797,20 @@ const AdminStudyMaterials = () => {
                               defaultCanonical={`https://iqbalsir.bd/resources`}
                             />
 
+                            {/* Scheduling */}
+                            <ContentSchedulingFields
+                              publishAt={(item as any).publish_at || null}
+                              expireAt={(item as any).expire_at || null}
+                              onPublishAtChange={val => updateLocal(item.id, "publish_at", val)}
+                              onExpireAtChange={val => updateLocal(item.id, "expire_at", val)}
+                            />
+
                             {/* Save / Cancel */}
                             <div className="flex justify-end gap-2">
                               <Button size="sm" variant="outline" onClick={() => setExpandedEditId(null)}>Cancel</Button>
                               <Button size="sm" onClick={() => { update(item.id, {
                                 title: item.title, category: item.category, file_url: item.file_url, file_size: item.file_size, pages: item.pages,
+                                publish_at: (item as any).publish_at || null, expire_at: (item as any).expire_at || null,
                                 seo_title: (item as any).seo_title || null, seo_description: (item as any).seo_description || null,
                                 seo_keywords: (item as any).seo_keywords || null, seo_canonical_url: (item as any).seo_canonical_url || null,
                                 seo_og_title: (item as any).seo_og_title || null, seo_og_description: (item as any).seo_og_description || null,
