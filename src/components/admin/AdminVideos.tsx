@@ -42,10 +42,11 @@ type VideoItem = {
   updated_at: string;
 };
 
-const emptyVideo: Omit<VideoItem, "id" | "created_at" | "updated_at"> = {
+const emptyVideo: Omit<VideoItem, "id" | "created_at" | "updated_at"> & { publish_at?: string | null; expire_at?: string | null } = {
   title: "", description: "", subject: "", class_level: "",
   thumbnail_url: null, video_source: "youtube", video_url: "",
   duration: "", is_published: false, sort_order: 0,
+  publish_at: null, expire_at: null,
 };
 
 type SortKey = "title" | "subject" | "class_level" | "video_source" | "created_at" | "is_published" | "sort_order";
