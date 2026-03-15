@@ -295,7 +295,7 @@ const AdminBlogPosts = () => {
   useEffect(() => { fetchAll(); }, []);
 
   const fetchAll = async () => {
-    const { data } = await supabase.from("blog_posts").select("*").order("sort_order", { ascending: true });
+    const { data } = await supabase.from("blog_posts").select("*").is("trashed_at", null).order("sort_order", { ascending: true });
     setPosts(data || []);
     setLoading(false);
   };
