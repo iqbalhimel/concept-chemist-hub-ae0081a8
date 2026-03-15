@@ -261,6 +261,12 @@ const AdminGlobalTrash = () => {
     });
   };
 
+  const emptyAllTrash = async () => {
+    if (!items.length) return;
+    if (!window.confirm(`Permanently delete ALL ${items.length} trashed item${items.length > 1 ? "s" : ""} across every module? This cannot be undone.`)) return;
+    await permanentDelete(items.map(i => i.id));
+  };
+
   /* ── Render ─────────────────────────────────────── */
 
   if (loading) {
@@ -286,6 +292,11 @@ const AdminGlobalTrash = () => {
             All deleted items across modules · Auto-deleted after 30 days
           </p>
         </div>
+        {items.length > 0 && (
+          <Button size="sm" variant="destructive" disabled={processing} onClick={emptyAllTrash}>
+            <Trash2 size={14} className="mr-1" /> Empty All Trash
+          </Button>
+        )}
       </div>
 
       {/* Search + Filter */}

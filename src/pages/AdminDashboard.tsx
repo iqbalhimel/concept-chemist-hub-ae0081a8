@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -166,14 +167,25 @@ const AdminDashboard = () => {
   const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [trashCount, setTrashCount] = useState(0);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
-    // Start with the group containing the active tab expanded
     const set = new Set<string>();
     navigation.forEach(e => {
       if (isGroup(e) && e.items.some(i => i.id === "dashboard")) set.add(e.label);
     });
     return set;
   });
+
+  useEffect(() => {
+    const fetchTrashCount = async () => {
+      const tables = ["blog_posts", "notices", "study_materials", "testimonials", "gallery"];
+      const results = await Promise.all(
+        tables.map(t => (supabase as any).from(t).select("id", { count: "exact", head: true }).not("trashed_at", "is", null))
+      );
+      setTrashCount(results.reduce((sum, r) => sum + (r.count ?? 0), 0));
+    };
+    fetchTrashCount();
+  }, [activeTab]);
 
   const toggleGroup = (label: string) => {
     setExpandedGroups(prev => {
@@ -253,7 +265,12 @@ const AdminDashboard = () => {
     >
       <item.icon size={16} className={activeTab === item.id ? "text-primary" : ""} />
       <span className="truncate">{item.label}</span>
-      {activeTab === item.id && (
+      {item.id === "global-trash" && trashCount > 0 && (
+        <span className="ml-auto text-[10px] font-bold bg-destructive text-destructive-foreground rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0">
+          {trashCount > 99 ? "99+" : trashCount}
+        </span>
+      )}
+      {item.id !== "global-trash" && activeTab === item.id && (
         <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
       )}
     </button>
