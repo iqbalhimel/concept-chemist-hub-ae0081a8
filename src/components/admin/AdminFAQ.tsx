@@ -215,13 +215,14 @@ const AdminFAQ = () => {
         </div>
       )}
 
-      <AdminPagination
-        total={filteredItems.length}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
-      />
+      {/* Bulk Actions */}
+      {selectedIds.size > 0 && (
+        <div className="admin-bulk-bar">
+          <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting}>
+            <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+          </Button>
+        </div>
+      )}
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={paginateItems(filteredItems, page, pageSize).map(i => i.id)} strategy={verticalListSortingStrategy}>
