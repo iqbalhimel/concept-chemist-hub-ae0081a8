@@ -33,6 +33,37 @@ const formatTimeAgo = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 
+const AUTO_DELETE_DAYS = 30;
+
+const getDaysRemaining = (trashedAt: string) => {
+  const trashedDate = new Date(trashedAt).getTime();
+  const deleteAt = trashedDate + AUTO_DELETE_DAYS * 24 * 60 * 60 * 1000;
+  const remaining = Math.ceil((deleteAt - Date.now()) / (24 * 60 * 60 * 1000));
+  return Math.max(0, remaining);
+};
+
+const DaysRemainingBadge = ({ trashedAt }: { trashedAt: string }) => {
+  const days = getDaysRemaining(trashedAt);
+  const urgent = days <= 3;
+  const warning = days <= 7;
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        "text-[10px] px-1.5 py-0 font-medium whitespace-nowrap",
+        urgent
+          ? "border-destructive/50 text-destructive bg-destructive/10"
+          : warning
+          ? "border-orange-500/50 text-orange-600 bg-orange-500/10 dark:text-orange-400"
+          : "border-muted-foreground/30 text-muted-foreground"
+      )}
+    >
+      <AlertTriangle size={9} className={cn("mr-0.5", urgent && "animate-pulse")} />
+      {days === 0 ? "Deleting soon" : `${days}d left`}
+    </Badge>
+  );
+};
+
 const AdminTrashView = ({
   tableName,
   moduleName,
