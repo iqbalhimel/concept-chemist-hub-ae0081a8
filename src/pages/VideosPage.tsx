@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import OptimizedImage from "@/components/OptimizedImage";
 import { setSeo } from "@/lib/seo";
 import RelatedBlogPosts from "@/components/RelatedBlogPosts";
+import { trackContentView } from "@/lib/trackContentView";
 
 type Video = {
   id: string;
