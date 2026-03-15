@@ -217,6 +217,20 @@ const AdminNotices = () => {
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
+  if (showTrash) {
+    return (
+      <AdminTrashView
+        tableName="notices"
+        moduleName="notices"
+        labelSingular="notice"
+        labelPlural="Notices"
+        getTitle={(item: any) => item.title}
+        getSubtitle={(item: any) => item.date}
+        onBack={() => { setShowTrash(false); fetchNotices(); }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4 relative">
       {/* Header */}
