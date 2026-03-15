@@ -381,14 +381,14 @@ const AdminNotices = () => {
                                 <Input type="date" value={a.expires_at || ""} onChange={e => updateLocal(n.id, { expires_at: e.target.value || null })} />
                               </div>
                               <div>
-                                <label className="text-xs text-muted-foreground mb-1 block">Publish At</label>
-                                <ContentSchedulingFields
-                                  publishAt={a.publish_at || null}
-                                  expireAt={null}
-                                  onPublishAtChange={val => updateLocal(n.id, { publish_at: val })}
-                                  onExpireAtChange={() => {}}
-                                  publishLabel="Auto-publish date/time"
+                                <label className="text-xs text-muted-foreground mb-1 block">Publish At (schedule)</label>
+                                <Input type="datetime-local" className="h-9 text-sm"
+                                  value={a.publish_at ? new Date(new Date(a.publish_at).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ""}
+                                  onChange={e => { const val = e.target.value; updateLocal(n.id, { publish_at: val ? new Date(val).toISOString() : null }); }}
                                 />
+                                {a.publish_at && new Date(a.publish_at) > new Date() && (
+                                  <p className="text-[11px] text-blue-600 mt-1">Will become visible {new Date(a.publish_at).toLocaleString()}</p>
+                                )}
                               </div>
                               <div className="flex items-end gap-6">
                                 <label className="flex items-center gap-2 text-sm cursor-pointer h-9">
