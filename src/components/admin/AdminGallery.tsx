@@ -211,14 +211,10 @@ const AdminGallery = () => {
   const remove = async (id: string, imageUrl: string) => {
     await csrfGuard(async () => {
       const item = items.find(i => i.id === id);
-      const urlParts = imageUrl.split("/media/");
-      if (urlParts[1]) {
-        await supabase.storage.from("media").remove([urlParts[1]]);
-      }
-      await supabase.from("gallery").delete().eq("id", id);
+      await (supabase as any).from("gallery").update({ trashed_at: new Date().toISOString() }).eq("id", id);
       setItems(prev => prev.filter(n => n.id !== id));
       setExpandedDeleteId(null);
-      toast.success("Deleted");
+      toast.success("Moved to trash");
       logAdminActivity({ action: "delete", module: "gallery", itemId: id, itemTitle: item?.label || "Gallery item" });
     });
   };
