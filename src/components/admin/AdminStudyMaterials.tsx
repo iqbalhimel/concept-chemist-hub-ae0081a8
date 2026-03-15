@@ -425,6 +425,20 @@ const AdminStudyMaterials = () => {
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
+  if (showTrash) {
+    return (
+      <AdminTrashView
+        tableName="study_materials"
+        moduleName="study_materials"
+        labelSingular="material"
+        labelPlural="Materials"
+        getTitle={(item: any) => item.title}
+        getSubtitle={(item: any) => item.category}
+        onBack={() => { setShowTrash(false); fetchItems(); }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
