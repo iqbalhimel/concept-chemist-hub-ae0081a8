@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_activity_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          item_id: string | null
+          item_title: string | null
+          module: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          item_title?: string | null
+          module: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          item_title?: string | null
+          module?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       blog_post_comments: {
         Row: {
           content: string
