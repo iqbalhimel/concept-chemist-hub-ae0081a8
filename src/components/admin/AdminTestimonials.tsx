@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdminActivity } from "@/lib/activityLogger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,11 +129,19 @@ const AdminTestimonials = () => {
       if (editId) {
         const { error } = await supabase.from("testimonials").update(form).eq("id", editId);
         if (error) toast.error("Update failed");
-        else { toast.success("Testimonial updated"); resetForm(); fetchItems(); }
+        else {
+          toast.success("Testimonial updated");
+          logAdminActivity({ action: "edit", module: "testimonials", itemId: editId, itemTitle: form.student_name });
+          resetForm(); fetchItems();
+        }
       } else {
-        const { error } = await supabase.from("testimonials").insert({ ...form, sort_order: items.length });
+        const { data, error } = await supabase.from("testimonials").insert({ ...form, sort_order: items.length }).select().single();
         if (error) toast.error("Insert failed");
-        else { toast.success("Testimonial added"); resetForm(); fetchItems(); }
+        else {
+          toast.success("Testimonial added");
+          logAdminActivity({ action: "create", module: "testimonials", itemId: data?.id, itemTitle: form.student_name });
+          resetForm(); fetchItems();
+        }
       }
     });
   };
@@ -154,9 +163,14 @@ const AdminTestimonials = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this testimonial?")) return;
     await csrfGuard(async () => {
+      const item = items.find(i => i.id === id);
       const { error } = await supabase.from("testimonials").delete().eq("id", id);
       if (error) toast.error("Delete failed");
-      else { toast.success("Deleted"); if (editId === id) resetForm(); fetchItems(); }
+      else {
+        toast.success("Deleted");
+        logAdminActivity({ action: "delete", module: "testimonials", itemId: id, itemTitle: item?.student_name });
+        if (editId === id) resetForm(); fetchItems();
+      }
     });
   };
 

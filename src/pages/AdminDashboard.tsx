@@ -6,7 +6,7 @@ import {
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
   Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp, Shield, Video, Tag,
-  ChevronDown, ChevronRight, Home, PenTool, User, Phone, Wrench, Eye, Lock
+  ChevronDown, ChevronRight, Home, PenTool, User, Phone, Wrench, Eye, Lock, Activity
 } from "lucide-react";
 import AdminNotices from "@/components/admin/AdminNotices";
 import AdminStudyMaterials from "@/components/admin/AdminStudyMaterials";
@@ -34,6 +34,7 @@ import AdminVideos from "@/components/admin/AdminVideos";
 import AdminBlogCategories from "@/components/admin/AdminBlogCategories";
 import AdminSettingsSection from "@/components/admin/AdminSettingsSection";
 import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
+import AdminActivityTimeline from "@/components/admin/AdminActivityTimeline";
 import {
   heroSectionConfig, aboutSectionConfig, homepageSectionsConfig,
   announcementBarConfig, coachingInfoConfig, contactDetailsConfig,
@@ -50,7 +51,8 @@ type Tab =
   // Settings-based tabs
   | "hero-section" | "about-section" | "homepage-sections" | "announcement-bar"
   | "coaching-info" | "contact-details" | "social-links" | "whatsapp-chat"
-  | "site-info" | "footer-settings" | "hero-animation";
+  | "site-info" | "footer-settings" | "hero-animation"
+  | "activity-timeline";
 
 type NavItem = {
   id: Tab;
@@ -150,6 +152,7 @@ const navigation: NavEntry[] = [
     icon: Lock,
     items: [
       { id: "security-logs", label: "Security Logs", icon: Shield },
+      { id: "activity-timeline", label: "Activity Timeline", icon: Activity },
     ],
   },
 ];
@@ -216,6 +219,7 @@ const AdminDashboard = () => {
       case "atmosphere": return <AdminAtmosphere />;
       case "security-logs": return <AdminSecurityLogs />;
       case "videos": return <AdminVideos />;
+      case "activity-timeline": return <AdminActivityTimeline />;
       // Settings-based tabs
       case "hero-section": return <AdminSettingsSection section={heroSectionConfig} />;
       case "about-section": return <AdminSettingsSection section={aboutSectionConfig} />;

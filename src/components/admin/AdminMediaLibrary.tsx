@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { compressImage } from "@/lib/imageCompression";
 import { logSecurityEvent } from "@/lib/securityLogger";
+import { logAdminActivity } from "@/lib/activityLogger";
 import { secureUpload } from "@/lib/secureUpload";
 import AdminPagination, { paginateItems } from "./AdminPagination";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
@@ -222,6 +223,9 @@ const AdminMediaLibrary = () => {
       }
     }
     logSecurityEvent({ event_type: "file_upload", description: `Uploaded ${files.length} file(s)` });
+    for (const file of Array.from(files)) {
+      logAdminActivity({ action: "upload", module: "media_library", itemTitle: file.name });
+    }
     toast.success("Upload complete");
     setUploading(false);
     setPage(1);
@@ -245,6 +249,7 @@ const AdminMediaLibrary = () => {
       setItems(prev => prev.filter(i => i.id !== item.id));
       if (activeDetailId === item.id) setActiveDetailId(null);
       toast.success("Deleted");
+      logAdminActivity({ action: "delete", module: "media_library", itemId: item.id, itemTitle: item.name });
     }, "content_delete", `Deleted media: ${item.name}`);
   };
 

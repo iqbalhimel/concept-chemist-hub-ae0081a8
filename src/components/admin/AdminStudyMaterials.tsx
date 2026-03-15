@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdminActivity } from "@/lib/activityLogger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -202,22 +203,29 @@ const AdminStudyMaterials = () => {
       setItems([data, ...updated]);
       setNewItemId(data.id);
       toast.success("Added");
+      logAdminActivity({ action: "create", module: "study_materials", itemId: data.id, itemTitle: "New Material" });
     });
   };
 
   const update = async (id: string, updates: Partial<Material>) => {
     await csrfGuard(async () => {
       const { error } = await supabase.from("study_materials").update(updates).eq("id", id);
-      if (error) toast.error(error.message); else toast.success("Updated");
+      if (error) toast.error(error.message); else {
+        toast.success("Updated");
+        const item = items.find(i => i.id === id);
+        logAdminActivity({ action: "edit", module: "study_materials", itemId: id, itemTitle: item?.title });
+      }
     });
   };
 
   const remove = async (id: string) => {
     await csrfGuard(async () => {
+      const item = items.find(i => i.id === id);
       await supabase.from("study_materials").delete().eq("id", id);
       setItems(prev => prev.filter(n => n.id !== id));
       setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
       toast.success("Deleted");
+      logAdminActivity({ action: "delete", module: "study_materials", itemId: id, itemTitle: item?.title });
     });
   };
 

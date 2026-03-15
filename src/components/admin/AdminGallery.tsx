@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdminActivity } from "@/lib/activityLogger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -175,6 +176,7 @@ const AdminGallery = () => {
       setItems([...newItems, ...updated]);
       setNewItemId(newItems[0].id);
       toast.success(`${newItems.length} image(s) added`);
+      newItems.forEach(item => logAdminActivity({ action: "upload", module: "gallery", itemId: item.id, itemTitle: item.label || "Image" }));
     }
 
     setUploading(false);
@@ -196,12 +198,16 @@ const AdminGallery = () => {
   const update = async (item: GalleryItem) => {
     await csrfGuard(async () => {
       const { error } = await supabase.from("gallery").update({ image_url: item.image_url, label: item.label, alt: item.alt, span: item.span }).eq("id", item.id);
-      if (error) toast.error(error.message); else toast.success("Updated");
+      if (error) toast.error(error.message); else {
+        toast.success("Updated");
+        logAdminActivity({ action: "edit", module: "gallery", itemId: item.id, itemTitle: item.label || "Gallery item" });
+      }
     });
   };
 
   const remove = async (id: string, imageUrl: string) => {
     await csrfGuard(async () => {
+      const item = items.find(i => i.id === id);
       const urlParts = imageUrl.split("/media/");
       if (urlParts[1]) {
         await supabase.storage.from("media").remove([urlParts[1]]);
@@ -210,6 +216,7 @@ const AdminGallery = () => {
       setItems(prev => prev.filter(n => n.id !== id));
       setExpandedDeleteId(null);
       toast.success("Deleted");
+      logAdminActivity({ action: "delete", module: "gallery", itemId: id, itemTitle: item?.label || "Gallery item" });
     });
   };
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdminActivity } from "@/lib/activityLogger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -87,6 +88,7 @@ const AdminSEO = () => {
         if (error) { toast.error("Failed: " + error.message); return; }
         invalidateSiteSettings();
         toast.success("robots.txt saved!");
+        logAdminActivity({ action: "update_seo", module: "seo", itemTitle: "robots.txt" });
         return;
       }
       const { error } = await supabase
@@ -96,6 +98,7 @@ const AdminSEO = () => {
       if (error) { toast.error("Failed: " + error.message); return; }
       invalidateSiteSettings();
       toast.success("SEO settings saved!");
+      logAdminActivity({ action: "update_seo", module: "seo", itemTitle: "SEO Settings" });
     });
     setSaving(null);
   };

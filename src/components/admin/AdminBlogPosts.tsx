@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdminActivity } from "@/lib/activityLogger";
 import { slugify } from "@/lib/slugify";
 import { compressImage } from "@/lib/imageCompression";
 import { secureUpload } from "@/lib/secureUpload";
@@ -305,7 +306,10 @@ const AdminBlogPosts = () => {
       if (error) { toast.error(error.message); return; }
       toast.success("Post created — edit it below");
       await fetchAll();
-      if (data) setEditingId(data.id);
+      if (data) {
+        setEditingId(data.id);
+        logAdminActivity({ action: "create", module: "blog_posts", itemId: data.id, itemTitle: "New Post" });
+      }
     }, "content_create", "Created new blog post");
   };
 
@@ -350,6 +354,7 @@ const AdminBlogPosts = () => {
         }
       } else {
         toast.success("Post saved");
+        logAdminActivity({ action: "edit", module: "blog_posts", itemId: post.id, itemTitle: post.title });
       }
     }, "content_update", `Updated blog post: ${post.title}`);
   };
@@ -357,10 +362,12 @@ const AdminBlogPosts = () => {
   const remove = async (id: string) => {
     if (!window.confirm("Delete this post? This cannot be undone.")) return;
     await csrfGuard(async () => {
+      const post = posts.find(p => p.id === id);
       await supabase.from("blog_posts").delete().eq("id", id);
       setPosts(prev => prev.filter(p => p.id !== id));
       if (editingId === id) setEditingId(null);
       toast.success("Deleted");
+      logAdminActivity({ action: "delete", module: "blog_posts", itemId: id, itemTitle: post?.title });
     }, "content_delete", "Deleted blog post");
   };
 

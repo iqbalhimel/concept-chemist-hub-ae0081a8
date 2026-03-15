@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdminActivity } from "@/lib/activityLogger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -67,6 +68,7 @@ const AdminSettingsSection = ({ section }: Props) => {
       } else {
         invalidateSiteSettings();
         toast.success(`${section.label} saved!`);
+        logAdminActivity({ action: "update_settings", module: "site_settings", itemTitle: section.label });
       }
     });
     setSaving(false);

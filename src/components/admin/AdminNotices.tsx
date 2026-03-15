@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdminActivity } from "@/lib/activityLogger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -117,6 +118,7 @@ const AdminNotices = () => {
       setNotices([data, ...updated]);
       setNewNoticeId(data.id);
       toast.success("Notice added");
+      logAdminActivity({ action: "create", module: "notices", itemId: data.id, itemTitle: "New Notice" });
     });
   };
 
@@ -136,7 +138,10 @@ const AdminNotices = () => {
         seo_og_image: a.seo_og_image || null, seo_twitter_title: a.seo_twitter_title || null,
         seo_twitter_description: a.seo_twitter_description || null, seo_twitter_image: a.seo_twitter_image || null,
       } as any).eq("id", n.id);
-      if (error) toast.error(error.message); else toast.success("Updated");
+      if (error) toast.error(error.message); else {
+        toast.success("Updated");
+        logAdminActivity({ action: "edit", module: "notices", itemId: n.id, itemTitle: n.title });
+      }
     });
   };
 
@@ -152,11 +157,13 @@ const AdminNotices = () => {
 
   const deleteNotice = async (id: string) => {
     await csrfGuard(async () => {
+      const notice = notices.find(n => n.id === id);
       await supabase.from("notices").delete().eq("id", id);
       setNotices(prev => prev.filter(n => n.id !== id));
       setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
       setExpandedDeleteId(null);
       toast.success("Deleted");
+      logAdminActivity({ action: "delete", module: "notices", itemId: id, itemTitle: notice?.title });
     });
   };
 

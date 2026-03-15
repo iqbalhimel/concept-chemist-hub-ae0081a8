@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdminActivity } from "@/lib/activityLogger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -253,10 +254,12 @@ const AdminVideos = () => {
         const { error } = await supabase.from("educational_videos").update({ ...form, updated_at: new Date().toISOString() } as any).eq("id", editingId);
         if (error) { toast.error(error.message); return; }
         toast.success("Video updated");
+        logAdminActivity({ action: "edit", module: "educational_videos", itemId: editingId, itemTitle: form.title });
       } else {
-        const { error } = await supabase.from("educational_videos").insert(form as any);
+        const { data, error } = await supabase.from("educational_videos").insert(form as any).select().single();
         if (error) { toast.error(error.message); return; }
         toast.success("Video added");
+        logAdminActivity({ action: "create", module: "educational_videos", itemId: data?.id, itemTitle: form.title });
       }
       resetForm();
       fetchVideos();
@@ -266,9 +269,11 @@ const AdminVideos = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this video?")) return;
     await csrfGuard(async () => {
+      const video = videos.find(v => v.id === id);
       const { error } = await supabase.from("educational_videos").delete().eq("id", id);
       if (error) { toast.error(error.message); return; }
       toast.success("Video deleted");
+      logAdminActivity({ action: "delete", module: "educational_videos", itemId: id, itemTitle: video?.title });
       fetchVideos();
     }, "content_delete", "Deleted educational video");
   };
