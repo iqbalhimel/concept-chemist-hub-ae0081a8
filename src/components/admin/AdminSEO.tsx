@@ -88,6 +88,7 @@ const AdminSEO = () => {
         if (error) { toast.error("Failed: " + error.message); return; }
         invalidateSiteSettings();
         toast.success("robots.txt saved!");
+        logAdminActivity({ action: "update_seo", module: "seo", itemTitle: "robots.txt" });
         return;
       }
       const { error } = await supabase
