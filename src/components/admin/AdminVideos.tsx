@@ -567,9 +567,7 @@ const AdminVideos = () => {
                         <div className="flex-1 min-w-0">
                           <h3 className="font-medium text-sm text-foreground truncate">{video.title}</h3>
                           <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                            <Badge variant={video.is_published ? "default" : "secondary"} className="text-[10px] cursor-pointer" onClick={() => togglePublish(video)}>
-                              {video.is_published ? "Published" : "Draft"}
-                            </Badge>
+                            <ContentStatusBadge status={getContentStatus({ isPublished: video.is_published, publishAt: (video as any).publish_at, expireAt: (video as any).expire_at })} />
                             {video.subject && <span className="text-[10px] text-muted-foreground">{video.subject}</span>}
                           </div>
                         </div>
