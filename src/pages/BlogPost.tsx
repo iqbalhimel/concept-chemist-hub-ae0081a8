@@ -354,6 +354,10 @@ const BlogPost = () => {
         </section>
       )}
 
+      {post && (
+        <RelatedCrossContent postCategory={post.category} postTags={postTagNames} />
+      )}
+
     </>
   );
 };

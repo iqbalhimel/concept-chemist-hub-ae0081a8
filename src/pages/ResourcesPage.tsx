@@ -225,6 +225,11 @@ const ResourcesPage = () => {
             </>
           )}
         </div>
+
+        {/* Related Blog Posts */}
+        {activeCategory && (
+          <RelatedBlogPosts matchCategory={activeCategory.name} title="Related Blog Posts" />
+        )}
       </main>
 
       <Dialog open={!!previewUrl} onOpenChange={open => { if (!open) setPreviewUrl(null); }}>

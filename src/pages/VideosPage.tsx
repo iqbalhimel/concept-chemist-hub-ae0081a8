@@ -150,6 +150,11 @@ const VideosPage = () => {
               ))}
             </div>
           )}
+
+          {/* Related Blog Posts */}
+          {subjectFilter && (
+            <RelatedBlogPosts matchCategory={subjectFilter} title="Related Blog Posts" />
+          )}
         </div>
       </main>
 
