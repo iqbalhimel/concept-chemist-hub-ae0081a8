@@ -306,7 +306,10 @@ const AdminBlogPosts = () => {
       if (error) { toast.error(error.message); return; }
       toast.success("Post created — edit it below");
       await fetchAll();
-      if (data) setEditingId(data.id);
+      if (data) {
+        setEditingId(data.id);
+        logAdminActivity({ action: "create", module: "blog_posts", itemId: data.id, itemTitle: "New Post" });
+      }
     }, "content_create", "Created new blog post");
   };
 
