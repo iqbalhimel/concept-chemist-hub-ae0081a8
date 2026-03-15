@@ -582,6 +582,7 @@ const AdminBlogPosts = () => {
                     onDelete={remove}
                     selected={selectedIds.has(post.id)}
                     onToggleSelect={toggleSelect}
+                    colorMap={colorMap}
                   />
                 ))}
               </div>
