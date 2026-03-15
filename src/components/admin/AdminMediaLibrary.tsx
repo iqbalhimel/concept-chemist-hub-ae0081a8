@@ -148,6 +148,12 @@ const AdminMediaLibrary = () => {
       result = result.filter(i => getTypeLabel(i.file_type) === filterType);
     }
 
+    // Unused filter
+    if (filterUnused) {
+      result = result.filter(i => !usageCounts[i.file_url]);
+    }
+    }
+
     // Search
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
