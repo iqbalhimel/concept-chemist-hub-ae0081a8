@@ -319,7 +319,7 @@ const AdminGallery = () => {
             <SortableContext items={pagedItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
               <div className="border border-border rounded-lg divide-y divide-border overflow-hidden">
                 {/* Desktop header */}
-                <div className="hidden md:grid md:grid-cols-[auto_auto_48px_1fr_auto_auto_auto] gap-3 items-center px-4 py-2 bg-muted/40 text-xs font-medium text-muted-foreground">
+                <div className="hidden md:grid md:grid-cols-[auto_auto_48px_1fr_auto_auto_auto] gap-3 items-center px-4 py-2.5 admin-table-header">
                   <span className="w-4" />
                   <span className="w-8" />
                   <span>Thumb</span>
