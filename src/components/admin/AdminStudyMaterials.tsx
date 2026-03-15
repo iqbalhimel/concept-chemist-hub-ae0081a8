@@ -103,6 +103,7 @@ const AdminStudyMaterials = () => {
   const [newItemId, setNewItemId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [expandedEditId, setExpandedEditId] = useState<string | null>(null);
