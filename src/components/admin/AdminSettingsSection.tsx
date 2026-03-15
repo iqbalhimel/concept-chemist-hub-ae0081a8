@@ -8,11 +8,12 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { Save, Upload } from "lucide-react";
+import { Save, Upload, FolderOpen } from "lucide-react";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import { compressImage } from "@/lib/imageCompression";
 import { secureUpload } from "@/lib/secureUpload";
 import { invalidateSiteSettings } from "@/hooks/useSiteSettings";
+import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
 
 export type FieldDef = {
   name: string;
