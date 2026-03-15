@@ -109,9 +109,9 @@ const CategoryBadge = ({ name, colorMap }: { name: string; colorMap: Record<stri
 /* ── Sortable List Row ───────────────────────────── */
 
 const SortableRow = ({
-  post, onEdit, onDelete, selected, onToggleSelect,
+  post, onEdit, onDelete, selected, onToggleSelect, colorMap,
 }: {
-  post: Post; onEdit: (id: string) => void; onDelete: (id: string) => void; selected: boolean; onToggleSelect: (id: string) => void;
+  post: Post; onEdit: (id: string) => void; onDelete: (id: string) => void; selected: boolean; onToggleSelect: (id: string) => void; colorMap: Record<string, string>;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: post.id });
   const style = { transform: CSS.Transform.toString(transform), transition };
