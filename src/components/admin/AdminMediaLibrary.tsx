@@ -489,6 +489,14 @@ const AdminMediaLibrary = () => {
                   <SelectItem value="GIF">GIF</SelectItem>
                 </SelectContent>
               </Select>
+              <Button
+                size="sm"
+                variant={filterUnused ? "default" : "outline"}
+                className="h-9 text-xs"
+                onClick={() => setFilterUnused(prev => !prev)}
+              >
+                Unused
+              </Button>
             </div>
           </div>
 
