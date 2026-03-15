@@ -290,6 +290,7 @@ const AdminVideos = () => {
       class_level: video.class_level, thumbnail_url: video.thumbnail_url,
       video_source: video.video_source, video_url: video.video_url,
       duration: video.duration, is_published: video.is_published, sort_order: video.sort_order,
+      publish_at: (video as any).publish_at || null, expire_at: (video as any).expire_at || null,
     });
     setEditingId(video.id);
     setIsAdding(true);
