@@ -257,7 +257,14 @@ const AdminNotices = () => {
         </div>
       )}
 
-      <AdminPagination total={filteredNotices.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1); }} />
+      {/* Bulk Actions */}
+      {selectedIds.size > 0 && (
+        <div className="admin-bulk-bar">
+          <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting}>
+            <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+          </Button>
+        </div>
+      )}
 
       {(() => {
         const pagedNotices = paginateItems(filteredNotices, page, pageSize);
