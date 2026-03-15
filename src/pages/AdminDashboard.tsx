@@ -90,6 +90,7 @@ const navigation: NavEntry[] = [
       { id: "videos", label: "Educational Videos", icon: Video },
       { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
       { id: "faq", label: "FAQ", icon: HelpCircle },
+      { id: "media", label: "Media Library", icon: Image },
     ],
   },
   {
@@ -120,7 +121,6 @@ const navigation: NavEntry[] = [
     items: [
       { id: "site-info", label: "Site Information", icon: Settings },
       { id: "footer-settings", label: "Footer Settings", icon: FileText },
-      { id: "media", label: "Media Library", icon: Image },
     ],
   },
   {
