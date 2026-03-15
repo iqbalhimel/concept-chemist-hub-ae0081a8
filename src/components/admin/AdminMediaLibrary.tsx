@@ -223,6 +223,9 @@ const AdminMediaLibrary = () => {
       }
     }
     logSecurityEvent({ event_type: "file_upload", description: `Uploaded ${files.length} file(s)` });
+    for (const file of Array.from(files)) {
+      logAdminActivity({ action: "upload", module: "media_library", itemTitle: file.name });
+    }
     toast.success("Upload complete");
     setUploading(false);
     setPage(1);
