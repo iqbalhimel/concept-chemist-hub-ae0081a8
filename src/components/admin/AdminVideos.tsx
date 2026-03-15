@@ -250,7 +250,7 @@ const AdminVideos = () => {
     if (!form.title.trim()) { toast.error("Title is required"); return; }
     await csrfGuard(async () => {
       if (editingId) {
-        const { error } = await supabase.from("educational_videos").update({ ...form, updated_at: new Date().toISOString() }).eq("id", editingId);
+        const { error } = await supabase.from("educational_videos").update({ ...form, updated_at: new Date().toISOString() } as any).eq("id", editingId);
         if (error) { toast.error(error.message); return; }
         toast.success("Video updated");
       } else {
