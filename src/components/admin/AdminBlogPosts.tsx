@@ -354,6 +354,7 @@ const AdminBlogPosts = () => {
         }
       } else {
         toast.success("Post saved");
+        logAdminActivity({ action: "edit", module: "blog_posts", itemId: post.id, itemTitle: post.title });
       }
     }, "content_update", `Updated blog post: ${post.title}`);
   };
