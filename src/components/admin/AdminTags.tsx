@@ -119,7 +119,7 @@ const AdminTags = () => {
       toast.error(error.message.includes("duplicate") ? "Tag already exists" : "Failed to create tag");
     } else {
       toast.success("Tag created");
-      logAdminActivity("tags", "create", undefined, newName.trim());
+      logAdminActivity({ module: "tags", action: "create", itemTitle: newName.trim() });
       setAdding(false);
       setNewName("");
       setNewSlug("");
