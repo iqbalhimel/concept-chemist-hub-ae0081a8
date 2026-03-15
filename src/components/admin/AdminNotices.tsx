@@ -129,7 +129,7 @@ const AdminNotices = () => {
         title: stripHtml(n.title).trim(),
         description: n.description,
         date: n.date,
-        is_active: n.is_active, is_pinned: a.is_pinned, expires_at: a.expires_at || null,
+        is_active: n.is_active, is_pinned: a.is_pinned, expires_at: a.expires_at || null, publish_at: a.publish_at || null,
         seo_title: a.seo_title || null, seo_description: a.seo_description || null,
         seo_keywords: a.seo_keywords || null, seo_canonical_url: a.seo_canonical_url || null,
         seo_og_title: a.seo_og_title || null, seo_og_description: a.seo_og_description || null,
