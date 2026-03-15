@@ -94,6 +94,7 @@ const navigation: NavEntry[] = [
       { id: "study-materials", label: "Study Materials", icon: Download },
       { id: "blog", label: "Blog Posts", icon: FileText },
       { id: "blog-categories", label: "Blog Categories", icon: Tag },
+      { id: "blog-tags", label: "Blog Tags", icon: Tag },
       { id: "comments", label: "Comments", icon: MessageSquare },
       { id: "gallery", label: "Gallery", icon: Image },
       { id: "videos", label: "Educational Videos", icon: Video },
