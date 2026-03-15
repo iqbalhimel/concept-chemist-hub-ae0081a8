@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Upload, Trash2, Copy, FileText, Search } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
@@ -43,6 +44,8 @@ const AdminMediaLibrary = () => {
   const [expandedDeleteId, setExpandedDeleteId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "all">(10);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetchAll(); }, []);
@@ -66,6 +69,59 @@ const AdminMediaLibrary = () => {
   const paginated = useMemo(() => paginateItems(filtered, page, pageSize), [filtered, page, pageSize]);
 
   useEffect(() => { setPage(1); }, [searchQuery, pageSize]);
+
+  // Selection helpers
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const allIds = paginated.map(i => i.id);
+    const allSelected = allIds.every(id => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        allIds.forEach(id => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        allIds.forEach(id => next.add(id));
+        return next;
+      });
+    }
+  };
+
+  const bulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setBulkDeleting(true);
+    await csrfGuard(async () => {
+      const toDelete = items.filter(i => selectedIds.has(i.id));
+      // Remove from storage
+      const storagePaths = toDelete
+        .map(i => { const parts = i.file_url.split("/media/"); return parts[1] || null; })
+        .filter(Boolean) as string[];
+      if (storagePaths.length > 0) {
+        await supabase.storage.from("media").remove(storagePaths);
+      }
+      // Remove from DB
+      const ids = toDelete.map(i => i.id);
+      await supabase.from("media_library").delete().in("id", ids);
+      setItems(prev => prev.filter(i => !selectedIds.has(i.id)));
+      toast.success(`Deleted ${ids.length} file(s)`);
+      logSecurityEvent({
+        event_type: "content_delete",
+        description: `Bulk deleted ${ids.length} media file(s)`,
+      });
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    }, "content_delete", `Bulk deleted ${selectedIds.size} media files`);
+  };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -130,8 +186,10 @@ const AdminMediaLibrary = () => {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="font-display text-2xl font-bold text-foreground">Media Library</h2>
+      <div className="flex items-center justify-between flex-wrap gap-2 sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2 -mt-2">
+        <h2 className="font-display text-2xl font-bold text-foreground">
+          Media Library <span className="text-base font-normal text-muted-foreground">({items.length})</span>
+        </h2>
         <div>
           <input ref={fileRef} type="file" multiple accept="image/*,.pdf" className="hidden" onChange={handleUpload} />
           <Button onClick={() => fileRef.current?.click()} size="sm" disabled={uploading}>
@@ -151,14 +209,29 @@ const AdminMediaLibrary = () => {
         />
       </div>
 
-      {/* Pagination */}
-      <AdminPagination
-        total={filtered.length}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-      />
+      {/* Select All */}
+      {paginated.length > 0 && (
+        <div className="admin-select-all">
+          <Checkbox
+            checked={paginated.every(i => selectedIds.has(i.id))}
+            onCheckedChange={toggleSelectAll}
+          />
+          <span className="text-xs text-muted-foreground">
+            {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}
+          </span>
+        </div>
+      )}
+
+      {/* Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="admin-bulk-bar">
+          <span className="text-xs text-muted-foreground">{selectedIds.size} selected</span>
+          <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting} className="animate-in fade-in">
+            <Trash2 size={14} className="mr-1" />
+            {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+          </Button>
+        </div>
+      )}
 
       {/* List */}
       {paginated.length === 0 && (
@@ -168,9 +241,14 @@ const AdminMediaLibrary = () => {
       )}
 
       {paginated.map(item => (
-        <div key={item.id} className="glass-card p-3">
+        <div key={item.id} className={`admin-row glass-card p-3 ${selectedIds.has(item.id) ? "selected" : ""}`}>
           {/* Desktop */}
           <div className="hidden md:flex items-center gap-4">
+            <Checkbox
+              checked={selectedIds.has(item.id)}
+              onCheckedChange={() => toggleSelect(item.id)}
+              className="shrink-0"
+            />
             {item.file_type.startsWith("image/") ? (
               <img src={item.file_url} alt={item.name} className="w-10 h-10 object-cover rounded bg-muted flex-shrink-0" />
             ) : (
@@ -191,6 +269,11 @@ const AdminMediaLibrary = () => {
           {/* Mobile */}
           <div className="md:hidden space-y-2">
             <div className="flex items-center gap-3">
+              <Checkbox
+                checked={selectedIds.has(item.id)}
+                onCheckedChange={() => toggleSelect(item.id)}
+                className="shrink-0"
+              />
               {item.file_type.startsWith("image/") ? (
                 <img src={item.file_url} alt={item.name} className="w-10 h-10 object-cover rounded bg-muted flex-shrink-0" />
               ) : (
@@ -203,7 +286,7 @@ const AdminMediaLibrary = () => {
                 <p className="text-xs text-muted-foreground">{formatSize(item.file_size)} · {getTypeLabel(item.file_type)}</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 pl-8">
               <Button size="sm" variant="outline" className="flex-1" onClick={() => copyUrl(item.file_url)}><Copy size={12} className="mr-1" /> Copy URL</Button>
               <Button size="sm" variant="outline" className="flex-1" onClick={() => setExpandedDeleteId(expandedDeleteId === item.id ? null : item.id)}><Trash2 size={12} className="mr-1" /> Delete</Button>
             </div>
@@ -221,6 +304,17 @@ const AdminMediaLibrary = () => {
           )}
         </div>
       ))}
+
+      {/* Pagination - always at bottom */}
+      <div className="admin-pagination-footer pt-4">
+        <AdminPagination
+          total={filtered.length}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
+      </div>
     </div>
   );
 };

@@ -829,6 +829,16 @@ const AdminStudyMaterials = () => {
           </DndContext>
         );
       })()}
+
+      <div className="admin-pagination-footer pt-4">
+        <AdminPagination
+          total={filteredItems.length}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+        />
+      </div>
     </div>
   );
 };

@@ -392,6 +392,16 @@ const AdminTestimonials = () => {
               </div>
             </SortableContext>
           </DndContext>
+
+          <div className="admin-pagination-footer pt-4">
+            <AdminPagination
+              page={page}
+              pageSize={pageSize}
+              total={filteredItems.length}
+              onPageChange={setPage}
+              onPageSizeChange={(v) => { setPageSize(v); setPage(1); }}
+            />
+          </div>
         </>
       )}
     </div>
