@@ -290,6 +290,7 @@ const AdminNotices = () => {
                   const isEditing = expandedEditId === n.id;
                   const isDeleting = expandedDeleteId === n.id;
                   const isExpired = a.expires_at && new Date(a.expires_at) < new Date();
+                  const contentStatus = getContentStatus({ isActive: n.is_active, publishAt: a.publish_at, expireAt: a.expires_at ? new Date(a.expires_at + "T23:59:59").toISOString() : null });
 
                   return (
                     <SortableRow key={n.id} id={n.id}>
