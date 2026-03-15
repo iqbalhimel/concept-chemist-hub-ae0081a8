@@ -31,6 +31,7 @@ import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
 import AdminTrashView from "@/components/admin/AdminTrashView";
 import { useBlogCategories } from "@/hooks/useBlogCategories";
 import PostTagsPicker from "@/components/admin/PostTagsPicker";
+import InternalLinkSuggestions from "@/components/admin/InternalLinkSuggestions";
 
 type Post = Tables<"blog_posts">;
 

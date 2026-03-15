@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Bell, Download, Image, MessageSquare, User, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AdminInsightsWidgets from "@/components/admin/AdminInsightsWidgets";
+import OrphanContentWidget from "@/components/admin/OrphanContentWidget";
 
 interface RecentComment {
   id: string;
