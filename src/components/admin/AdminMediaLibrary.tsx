@@ -60,6 +60,7 @@ const AdminMediaLibrary = () => {
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
   const [filterTag, setFilterTag] = useState<string>("__all__");
   const [filterType, setFilterType] = useState<string>("__all__");
+  const [filterUnused, setFilterUnused] = useState(false);
 
   // UI state
   const [page, setPage] = useState(1);
