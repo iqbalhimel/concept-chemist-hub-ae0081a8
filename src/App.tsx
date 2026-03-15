@@ -26,6 +26,8 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const BlogPostPage = lazy(() => import("./pages/BlogPost"));
 const BlogListing = lazy(() => import("./pages/BlogListing"));
+const BlogCategoryPage = lazy(() => import("./pages/BlogCategoryPage"));
+const BlogTagPage = lazy(() => import("./pages/BlogTagPage"));
 const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage"));
 const NoticesPage = lazy(() => import("./pages/NoticesPage"));
 const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
@@ -59,6 +61,8 @@ const AppRoutes = () => (
           {/* Lang-prefixed */}
           <Route path="/:lang" element={<Index />} />
           <Route path="/:lang/blog" element={<BlogListing />} />
+          <Route path="/:lang/blog/category/:slug" element={<BlogCategoryPage />} />
+          <Route path="/:lang/blog/tag/:slug" element={<BlogTagPage />} />
           <Route path="/:lang/blog/:id" element={<BlogPostPage />} />
           <Route path="/:lang/testimonials" element={<TestimonialsPage />} />
           <Route path="/:lang/notices" element={<NoticesPage />} />
@@ -68,6 +72,8 @@ const AppRoutes = () => (
           {/* Legacy routes (redirect handled via LanguageRedirect) */}
           <Route path="/" element={<Index />} />
           <Route path="/blog" element={<BlogListing />} />
+          <Route path="/blog/category/:slug" element={<BlogCategoryPage />} />
+          <Route path="/blog/tag/:slug" element={<BlogTagPage />} />
           <Route path="/blog/:id" element={<BlogPostPage />} />
           <Route path="/testimonials" element={<TestimonialsPage />} />
           <Route path="/notices" element={<NoticesPage />} />
