@@ -222,6 +222,20 @@ const AdminTestimonials = () => {
 
   const paginated = paginateItems(filteredItems, page, pageSize);
 
+  if (showTrash) {
+    return (
+      <AdminTrashView
+        tableName="testimonials"
+        moduleName="testimonials"
+        labelSingular="testimonial"
+        labelPlural="Testimonials"
+        getTitle={(item: any) => item.student_name}
+        getSubtitle={(item: any) => item.student_info}
+        onBack={() => { setShowTrash(false); fetchItems(); }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
