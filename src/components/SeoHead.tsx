@@ -52,6 +52,7 @@ const SeoHead = () => {
       jsonLd: [
         generatePersonSchema(seo, contact),
         generateEducationalOrgSchema(seo, contact),
+        generateWebSiteSchema(),
       ],
     });
 

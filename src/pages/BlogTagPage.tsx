@@ -38,6 +38,11 @@ const BlogTagPage = () => {
       url: `https://iqbalsir.bd/blog/tag/${slug}`,
       canonicalUrl: `https://iqbalsir.bd/blog/tag/${slug}`,
       type: "website",
+      jsonLd: generateBreadcrumbSchema([
+        { name: "Home", url: "https://iqbalsir.bd" },
+        { name: "Blog", url: "https://iqbalsir.bd/blog" },
+        { name: `Tag: ${tagName}`, url: `https://iqbalsir.bd/blog/tag/${slug}` },
+      ]),
     });
     return cleanup;
   }, [tagName, slug]);

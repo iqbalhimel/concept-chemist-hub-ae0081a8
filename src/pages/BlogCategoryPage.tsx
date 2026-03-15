@@ -43,6 +43,11 @@ const BlogCategoryPage = () => {
       url: `https://iqbalsir.bd/blog/category/${slug}`,
       canonicalUrl: `https://iqbalsir.bd/blog/category/${slug}`,
       type: "website",
+      jsonLd: generateBreadcrumbSchema([
+        { name: "Home", url: "https://iqbalsir.bd" },
+        { name: "Blog", url: "https://iqbalsir.bd/blog" },
+        { name: categoryName, url: `https://iqbalsir.bd/blog/category/${slug}` },
+      ]),
     });
     return cleanup;
   }, [categoryName, slug]);

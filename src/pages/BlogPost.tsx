@@ -92,7 +92,15 @@ const BlogPost = () => {
           twitterTitle: pa.seo_twitter_title || undefined,
           twitterDescription: pa.seo_twitter_description || undefined,
           twitterImage: pa.seo_twitter_image || undefined,
-          jsonLd: generateArticleSchema(p),
+          jsonLd: [
+            generateArticleSchema(p),
+            generateBreadcrumbSchema([
+              { name: "Home", url: "https://iqbalsir.bd" },
+              { name: "Blog", url: "https://iqbalsir.bd/blog" },
+              { name: p.category, url: `https://iqbalsir.bd/blog/category/${p.category.toLowerCase().replace(/\s+/g, "-")}` },
+              { name: p.title, url: autoCanonical },
+            ]),
+          ],
         });
         // Set OG overrides if present
         if (pa.seo_og_title) {
