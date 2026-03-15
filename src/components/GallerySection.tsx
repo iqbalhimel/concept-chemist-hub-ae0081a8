@@ -32,7 +32,7 @@ const GallerySection = () => {
 
   useEffect(() => {
     const fetchGallery = async () => {
-      const { data } = await supabase.from("gallery").select("*").order("sort_order", { ascending: true });
+      const { data } = await supabase.from("gallery").select("*").is("trashed_at", null).order("sort_order", { ascending: true });
       if (data && data.length > 0) setPhotos(data);
       setLoaded(true);
     };

@@ -23,8 +23,8 @@ const NoticesSection = () => {
   useEffect(() => {
     const fetchNotices = async () => {
       const [{ data }, { count }] = await Promise.all([
-        supabase.from("notices").select("*").eq("is_active", true).order("created_at", { ascending: false }).limit(HOMEPAGE_LIMIT),
-        supabase.from("notices").select("*", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("notices").select("*").eq("is_active", true).is("trashed_at", null).order("created_at", { ascending: false }).limit(HOMEPAGE_LIMIT),
+        supabase.from("notices").select("*", { count: "exact", head: true }).eq("is_active", true).is("trashed_at", null),
       ]);
       if (data && data.length > 0) setNotices(data as Notice[]);
       setTotalCount(count || 0);

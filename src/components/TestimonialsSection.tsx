@@ -30,8 +30,8 @@ const TestimonialsSection = () => {
   useEffect(() => {
     const fetchData = async () => {
       const [{ data }, { count }] = await Promise.all([
-        supabase.from("testimonials").select("*").eq("is_active", true).order("created_at", { ascending: false }).limit(HOMEPAGE_LIMIT),
-        supabase.from("testimonials").select("*", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("testimonials").select("*").eq("is_active", true).is("trashed_at" as any, null).order("created_at", { ascending: false }).limit(HOMEPAGE_LIMIT),
+        supabase.from("testimonials").select("*", { count: "exact", head: true }).eq("is_active", true).is("trashed_at" as any, null),
       ]);
       setItems((data as Testimonial[]) || []);
       setTotalCount(count || 0);
