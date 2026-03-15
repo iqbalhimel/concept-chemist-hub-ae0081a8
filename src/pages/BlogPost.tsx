@@ -10,6 +10,7 @@ import BlogComments from "@/components/BlogComments";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { sanitizeHtml } from "@/lib/sanitize";
 import RelatedCrossContent from "@/components/RelatedCrossContent";
+import { trackContentView } from "@/lib/trackContentView";
 
 interface BlogPostType {
   id: string;
