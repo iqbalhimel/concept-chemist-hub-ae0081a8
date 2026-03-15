@@ -249,6 +249,7 @@ const AdminTestimonials = () => {
               <Save size={14} className="mr-1" /> Save Order
             </Button>
           )}
+          <Button onClick={() => setShowTrash(true)} size="sm" variant="outline"><Trash2 size={14} className="mr-1" /> Trash</Button>
           <Button onClick={() => { resetForm(); setShowForm(true); setForm(f => ({ ...f, sort_order: items.length })); }} size="sm">
             <Plus size={14} className="mr-1" /> Add Testimonial
           </Button>
