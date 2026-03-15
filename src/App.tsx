@@ -26,6 +26,8 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const BlogPostPage = lazy(() => import("./pages/BlogPost"));
 const BlogListing = lazy(() => import("./pages/BlogListing"));
+const BlogCategoryPage = lazy(() => import("./pages/BlogCategoryPage"));
+const BlogTagPage = lazy(() => import("./pages/BlogTagPage"));
 const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage"));
 const NoticesPage = lazy(() => import("./pages/NoticesPage"));
 const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
