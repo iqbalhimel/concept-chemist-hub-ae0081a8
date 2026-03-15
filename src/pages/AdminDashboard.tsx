@@ -33,6 +33,7 @@ import AdminSeoMonitor from "@/components/admin/AdminSeoMonitor";
 import AdminSecurityLogs from "@/components/admin/AdminSecurityLogs";
 import AdminVideos from "@/components/admin/AdminVideos";
 import AdminBlogCategories from "@/components/admin/AdminBlogCategories";
+import AdminTags from "@/components/admin/AdminTags";
 import AdminSettingsSection from "@/components/admin/AdminSettingsSection";
 import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 import AdminActivityTimeline from "@/components/admin/AdminActivityTimeline";
@@ -46,7 +47,7 @@ import {
 
 type Tab =
   | "dashboard" | "analytics" | "seo" | "seo-monitor" | "performance"
-  | "notices" | "study-materials" | "blog" | "blog-categories" | "comments" | "testimonials"
+  | "notices" | "study-materials" | "blog" | "blog-categories" | "blog-tags" | "comments" | "testimonials"
   | "gallery" | "faq" | "media" | "themes" | "atmosphere"
   | "education" | "experience" | "achievements" | "approach" | "subjects"
   | "training" | "security-logs" | "videos" | "global-trash"
@@ -93,6 +94,7 @@ const navigation: NavEntry[] = [
       { id: "study-materials", label: "Study Materials", icon: Download },
       { id: "blog", label: "Blog Posts", icon: FileText },
       { id: "blog-categories", label: "Blog Categories", icon: Tag },
+      { id: "blog-tags", label: "Blog Tags", icon: Tag },
       { id: "comments", label: "Comments", icon: MessageSquare },
       { id: "gallery", label: "Gallery", icon: Image },
       { id: "videos", label: "Educational Videos", icon: Video },
@@ -218,6 +220,7 @@ const AdminDashboard = () => {
       case "study-materials": return <AdminStudyMaterials />;
       case "blog": return <AdminBlogPosts />;
       case "blog-categories": return <AdminBlogCategories />;
+      case "blog-tags": return <AdminTags />;
       case "comments": return <AdminComments />;
       case "testimonials": return <AdminTestimonials />;
       case "gallery": return <AdminGallery />;
