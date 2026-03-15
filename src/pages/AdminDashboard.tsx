@@ -47,7 +47,7 @@ import {
 
 type Tab =
   | "dashboard" | "analytics" | "seo" | "seo-monitor" | "performance"
-  | "notices" | "study-materials" | "blog" | "blog-categories" | "comments" | "testimonials"
+  | "notices" | "study-materials" | "blog" | "blog-categories" | "blog-tags" | "comments" | "testimonials"
   | "gallery" | "faq" | "media" | "themes" | "atmosphere"
   | "education" | "experience" | "achievements" | "approach" | "subjects"
   | "training" | "security-logs" | "videos" | "global-trash"
