@@ -125,7 +125,7 @@ const AdminGallery = () => {
   }, [items]);
 
   const fetchAll = async () => {
-    const { data } = await supabase.from("gallery").select("*").order("sort_order", { ascending: true });
+    const { data } = await supabase.from("gallery").select("*").is("trashed_at", null).order("sort_order", { ascending: true });
     setItems(data || []);
     setLoading(false);
   };
