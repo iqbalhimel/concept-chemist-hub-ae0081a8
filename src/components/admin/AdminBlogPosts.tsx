@@ -250,6 +250,18 @@ const EditPanel = ({
     {/* Tags */}
     <PostTagsPicker postId={post.id} />
 
+    {/* Internal Link Suggestions */}
+    <InternalLinkSuggestions
+      postId={post.id}
+      postCategory={post.category}
+      postTitle={post.title}
+      postContent={post.content || ""}
+      onInsertLink={(html) => {
+        navigator.clipboard.writeText(html);
+        toast.success("Link HTML copied to clipboard — paste into your content");
+      }}
+    />
+
     {/* Scheduling */}
     <ContentSchedulingFields
       publishAt={(post as any).scheduled_at || null}

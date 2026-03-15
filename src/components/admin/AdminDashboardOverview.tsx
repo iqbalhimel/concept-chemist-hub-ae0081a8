@@ -154,6 +154,14 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
         <h3 className="font-display text-lg font-bold text-foreground mb-3">Content Insights</h3>
         <AdminInsightsWidgets />
       </div>
+
+      {/* SEO: Orphan Content */}
+      <div>
+        <h3 className="font-display text-lg font-bold text-foreground mb-3">SEO Health</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <OrphanContentWidget />
+        </div>
+      </div>
     </div>
   );
 };
