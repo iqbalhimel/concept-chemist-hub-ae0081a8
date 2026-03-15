@@ -20,29 +20,30 @@ const OrphanContentWidget = () => {
 
   useEffect(() => {
     const analyze = async () => {
+      // Only fetch fields needed for analysis; skip full content for non-linking posts
       const { data: posts } = await supabase
         .from("blog_posts")
         .select("id, title, slug, content, is_published")
-        .is("trashed_at", null);
+        .is("trashed_at", null)
+        .limit(500);
 
       if (!posts || posts.length === 0) {
         setLoading(false);
         return;
       }
 
-      // Collect all internal links from all post content
+      // Collect all internal links from all post content using a single regex pass
       const linkedSlugs = new Set<string>();
-      const linkedIds = new Set<string>();
+      const linkPattern = /\/blog\/([a-z0-9-]+)/gi;
 
-      posts.forEach(p => {
-        if (!p.content) return;
-        // Match /blog/slug patterns
-        const slugMatches = p.content.match(/\/blog\/([a-z0-9-]+)/gi);
-        slugMatches?.forEach(m => {
-          const slug = m.replace(/^\/blog\//i, "");
-          linkedSlugs.add(slug);
-        });
-      });
+      for (const p of posts) {
+        if (!p.content) continue;
+        let match: RegExpExecArray | null;
+        while ((match = linkPattern.exec(p.content)) !== null) {
+          linkedSlugs.add(match[1]);
+        }
+        linkPattern.lastIndex = 0; // reset for next post
+      }
 
       // Map slugs/ids to actual posts
       posts.forEach(p => {

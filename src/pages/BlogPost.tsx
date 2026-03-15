@@ -112,16 +112,21 @@ const BlogPost = () => {
           if (el) el.content = pa.seo_og_description;
         }
 
-        // Tag-based related posts with category fallback
-        let relatedPosts: any[] = [];
+        // Fetch tags and related posts in parallel
         const { data: postTags } = await supabase
           .from("post_tags")
           .select("tag_id")
           .eq("post_id", p.id);
         const tagIds = (postTags || []).map((pt: any) => pt.tag_id);
 
+        // Start tag name resolution immediately (parallel with related posts logic)
+        const tagNamesPromise = tagIds.length > 0
+          ? supabase.from("tags").select("name").in("id", tagIds)
+          : Promise.resolve({ data: [] });
+
+        // Related posts: try tag-based first
+        let relatedPosts: any[] = [];
         if (tagIds.length > 0) {
-          // Find posts sharing any tag
           const { data: sharedPostTags } = await supabase
             .from("post_tags")
             .select("post_id")
@@ -154,16 +159,11 @@ const BlogPost = () => {
             .limit(3);
           relatedPosts = catRelated || [];
         }
-        setRelated(relatedPosts as (BlogPostType & { slug?: string | null })[]);
 
-        // Fetch tag names for cross-content matching
-        if (postTags && postTags.length > 0) {
-          const tagIdList = postTags.map((pt: any) => pt.tag_id);
-          const { data: tagRows } = await supabase.from("tags").select("name").in("id", tagIdList);
-          setPostTagNames((tagRows || []).map((t: any) => t.name));
-        } else {
-          setPostTagNames([]);
-        }
+        // Await tag names (already started above)
+        const { data: tagRows } = await tagNamesPromise;
+        setPostTagNames((tagRows || []).map((t: any) => t.name));
+        setRelated(relatedPosts as (BlogPostType & { slug?: string | null })[]);
       }
     };
     fetchPost();
