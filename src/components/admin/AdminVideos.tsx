@@ -254,10 +254,12 @@ const AdminVideos = () => {
         const { error } = await supabase.from("educational_videos").update({ ...form, updated_at: new Date().toISOString() } as any).eq("id", editingId);
         if (error) { toast.error(error.message); return; }
         toast.success("Video updated");
+        logAdminActivity({ action: "edit", module: "educational_videos", itemId: editingId, itemTitle: form.title });
       } else {
-        const { error } = await supabase.from("educational_videos").insert(form as any);
+        const { data, error } = await supabase.from("educational_videos").insert(form as any).select().single();
         if (error) { toast.error(error.message); return; }
         toast.success("Video added");
+        logAdminActivity({ action: "create", module: "educational_videos", itemId: data?.id, itemTitle: form.title });
       }
       resetForm();
       fetchVideos();
