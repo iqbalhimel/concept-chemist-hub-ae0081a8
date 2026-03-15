@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import OptimizedImage from "@/components/OptimizedImage";
 import { setSeo } from "@/lib/seo";
 import RelatedBlogPosts from "@/components/RelatedBlogPosts";
+import { trackContentView } from "@/lib/trackContentView";
 
 type Video = {
   id: string;
@@ -114,7 +115,7 @@ const VideosPage = () => {
                   viewport={{ once: true }}
                   transition={{ delay: (i % 6) * 0.05 }}
                   className="rounded-xl overflow-hidden bg-card border border-border/50 group cursor-pointer"
-                  onClick={() => setActiveVideo(video)}
+                  onClick={() => { trackContentView("video", video.id); setActiveVideo(video); }}
                 >
                   <div className="relative aspect-video bg-muted">
                     {video.thumbnail_url ? (

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Bell, Download, Image, MessageSquare, User, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AdminInsightsWidgets from "@/components/admin/AdminInsightsWidgets";
 
 interface RecentComment {
   id: string;
@@ -146,6 +147,12 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
           )}
         </CardContent>
       </Card>
+
+      {/* Insights Widgets */}
+      <div>
+        <h3 className="font-display text-lg font-bold text-foreground mb-3">Content Insights</h3>
+        <AdminInsightsWidgets />
+      </div>
     </div>
   );
 };

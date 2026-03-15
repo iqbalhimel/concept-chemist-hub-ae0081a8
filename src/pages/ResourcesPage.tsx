@@ -10,6 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { setSeo } from "@/lib/seo";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import RelatedBlogPosts from "@/components/RelatedBlogPosts";
+import { trackContentView } from "@/lib/trackContentView";
 
 type StudyMaterial = Tables<"study_materials">;
 type StudyCategory = { id: string; name: string; slug: string; sort_order: number; is_active: boolean; };
@@ -175,7 +176,7 @@ const ResourcesPage = () => {
                         {item.file_url ? (
                           <div className="flex-shrink-0 flex items-center gap-2">
                             <button
-                              onClick={() => { setPreviewUrl(item.file_url); setPreviewTitle(item.title); }}
+                              onClick={() => { trackContentView("study_material", item.id); setPreviewUrl(item.file_url); setPreviewTitle(item.title); }}
                               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-primary/30 text-primary text-sm font-medium hover:bg-primary/10 transition-all"
                             >
                               <Eye size={14} />

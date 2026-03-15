@@ -10,6 +10,7 @@ import BlogComments from "@/components/BlogComments";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { sanitizeHtml } from "@/lib/sanitize";
 import RelatedCrossContent from "@/components/RelatedCrossContent";
+import { trackContentView } from "@/lib/trackContentView";
 
 interface BlogPostType {
   id: string;
@@ -71,6 +72,10 @@ const BlogPost = () => {
       const p = data as (BlogPostType & { is_published?: boolean; slug?: string | null }) | null;
       setPost(p);
       setLoading(false);
+
+      if (p) {
+        trackContentView("blog_post", p.id);
+      }
 
       if (p) {
         const postSlug = p.slug || p.id;
