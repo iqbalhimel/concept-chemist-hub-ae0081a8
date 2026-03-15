@@ -276,10 +276,11 @@ const AdminTestimonials = () => {
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
               {items.length > 0 && (
-                <div className="flex items-center gap-2 mb-2">
-                  <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
-                    {items.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
-                  </button>
+                <div className="admin-select-all mb-2">
+                  <Checkbox
+                    checked={items.every(i => selectedIds.has(i.id))}
+                    onCheckedChange={toggleSelectAll}
+                  />
                   <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
                 </div>
               )}
