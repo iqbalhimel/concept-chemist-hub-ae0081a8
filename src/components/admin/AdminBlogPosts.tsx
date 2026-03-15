@@ -364,6 +364,37 @@ const AdminBlogPosts = () => {
     setSavingOrder(false);
   };
 
+  /* ── Bulk actions ──────────────────────────────── */
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  };
+  const toggleSelectAll = () => {
+    const allIds = filteredPosts.map(p => p.id);
+    setSelectedIds(allIds.every(id => selectedIds.has(id)) ? new Set() : new Set(allIds));
+  };
+  const bulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected post(s)?`)) return;
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      await Promise.all([...selectedIds].map(id => supabase.from("blog_posts").delete().eq("id", id)));
+      setPosts(prev => prev.filter(p => !selectedIds.has(p.id)));
+      if (editingId && selectedIds.has(editingId)) setEditingId(null);
+      toast.success(`${selectedIds.size} post(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    }, "content_delete", `Bulk deleted ${selectedIds.size} blog posts`);
+  };
+  const bulkPublish = async (publish: boolean) => {
+    if (selectedIds.size === 0) return;
+    await csrfGuard(async () => {
+      await Promise.all([...selectedIds].map(id => supabase.from("blog_posts").update({ is_published: publish } as any).eq("id", id)));
+      setPosts(prev => prev.map(p => selectedIds.has(p.id) ? { ...p, is_published: publish } : p));
+      toast.success(`${selectedIds.size} post(s) ${publish ? "published" : "unpublished"}`);
+      setSelectedIds(new Set());
+    }, "content_update", `Bulk ${publish ? "published" : "unpublished"} ${selectedIds.size} blog posts`);
+  };
+
   const categories = useMemo(() => [...new Set(posts.map(p => p.category))].sort(), [posts]);
 
   const filteredPosts = useMemo(() => {
