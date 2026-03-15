@@ -343,7 +343,8 @@ const AdminGallery = () => {
                     <SortableRow key={item.id} id={item.id}>
                       <div>
                         {/* Desktop row */}
-                        <div className="hidden md:grid md:grid-cols-[auto_48px_1fr_auto_auto_auto] gap-3 items-center px-3 py-2.5">
+                        <div className={`hidden md:grid md:grid-cols-[auto_auto_48px_1fr_auto_auto_auto] gap-3 items-center px-3 py-2.5 ${selectedIds.has(item.id) ? "bg-primary/5" : ""}`}>
+                          <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
                           <span className="w-8" />
                           <div className="w-10 h-10 rounded bg-muted overflow-hidden shrink-0">
                             {item.image_url ? (
