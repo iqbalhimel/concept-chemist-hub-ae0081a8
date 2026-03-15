@@ -61,6 +61,8 @@ const AppRoutes = () => (
           {/* Lang-prefixed */}
           <Route path="/:lang" element={<Index />} />
           <Route path="/:lang/blog" element={<BlogListing />} />
+          <Route path="/:lang/blog/category/:slug" element={<BlogCategoryPage />} />
+          <Route path="/:lang/blog/tag/:slug" element={<BlogTagPage />} />
           <Route path="/:lang/blog/:id" element={<BlogPostPage />} />
           <Route path="/:lang/testimonials" element={<TestimonialsPage />} />
           <Route path="/:lang/notices" element={<NoticesPage />} />
