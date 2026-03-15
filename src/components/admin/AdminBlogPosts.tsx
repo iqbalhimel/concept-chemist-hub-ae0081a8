@@ -518,6 +518,8 @@ const AdminBlogPosts = () => {
                     post={post}
                     onEdit={(id) => setEditingId(editingId === id ? null : id)}
                     onDelete={remove}
+                    selected={selectedIds.has(post.id)}
+                    onToggleSelect={toggleSelect}
                   />
                 ))}
               </div>
