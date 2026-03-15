@@ -156,7 +156,7 @@ const AdminTags = () => {
       toast.error("Failed to delete tag");
     } else {
       toast.success("Tag deleted");
-      logAdminActivity("tags", "delete", id, name);
+      logAdminActivity({ module: "tags", action: "delete", itemId: id, itemTitle: name });
       setSelected(prev => { const n = new Set(prev); n.delete(id); return n; });
       fetchTags();
     }
