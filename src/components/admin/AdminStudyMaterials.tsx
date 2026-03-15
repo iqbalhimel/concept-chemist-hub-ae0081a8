@@ -672,8 +672,7 @@ const AdminStudyMaterials = () => {
                                 <span>•</span>
                                 <span>{item.file_size || "—"}</span>
                               </div>
-                              <span className={`text-xs font-medium ${item.is_active ? "text-emerald-600" : "text-muted-foreground"}`}>
-                                {item.is_active ? "Active" : "Inactive"}
+                              <ContentStatusBadge status={getContentStatus({ isActive: item.is_active, publishAt: (item as any).publish_at, expireAt: (item as any).expire_at })} />
                               </span>
                             </div>
                             <div className="flex gap-2 pl-6">

@@ -380,6 +380,16 @@ const AdminNotices = () => {
                                 <label className="text-xs text-muted-foreground mb-1 block">Expiry Date</label>
                                 <Input type="date" value={a.expires_at || ""} onChange={e => updateLocal(n.id, { expires_at: e.target.value || null })} />
                               </div>
+                              <div>
+                                <label className="text-xs text-muted-foreground mb-1 block">Publish At</label>
+                                <ContentSchedulingFields
+                                  publishAt={a.publish_at || null}
+                                  expireAt={null}
+                                  onPublishAtChange={val => updateLocal(n.id, { publish_at: val })}
+                                  onExpireAtChange={() => {}}
+                                  publishLabel="Auto-publish date/time"
+                                />
+                              </div>
                               <div className="flex items-end gap-6">
                                 <label className="flex items-center gap-2 text-sm cursor-pointer h-9">
                                   <Switch checked={n.is_active} onCheckedChange={v => updateLocal(n.id, { is_active: v })} />
