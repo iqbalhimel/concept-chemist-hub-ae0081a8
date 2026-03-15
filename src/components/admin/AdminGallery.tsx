@@ -382,7 +382,12 @@ const AdminGallery = () => {
                               </div>
                               <div>
                                 <label className="text-xs text-muted-foreground mb-1 block">Image URL</label>
-                                <Input value={item.image_url} onChange={e => updateLocal(item.id, "image_url", e.target.value)} placeholder="Image URL" />
+                                <div className="flex gap-2">
+                                  <Input value={item.image_url} onChange={e => updateLocal(item.id, "image_url", e.target.value)} placeholder="Image URL" className="flex-1" />
+                                  <Button size="sm" variant="outline" onClick={() => setMediaPickerTarget(item.id)}>
+                                    <FolderOpen size={14} />
+                                  </Button>
+                                </div>
                               </div>
                               <div>
                                 <label className="text-xs text-muted-foreground mb-1 block">Type / Span</label>
