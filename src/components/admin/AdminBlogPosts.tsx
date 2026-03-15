@@ -13,6 +13,7 @@ import {
   Plus, Trash2, Save, GripVertical, Pencil, X, Loader2, ImagePlus,
   ExternalLink, CalendarClock, Search, FolderOpen,
 } from "lucide-react";
+import ContentSchedulingFields, { getContentStatus, ContentStatusBadge } from "@/components/admin/ContentSchedulingFields";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
