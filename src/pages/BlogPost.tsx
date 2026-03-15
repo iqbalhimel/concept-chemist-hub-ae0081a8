@@ -53,11 +53,11 @@ const BlogPost = () => {
       
       let data: any = null;
       if (!isUUID) {
-        const res = await supabase.from("blog_posts").select("*").eq("slug", id).single();
+        const res = await supabase.from("blog_posts").select("*").eq("slug", id).is("trashed_at", null).single();
         data = res.data;
       }
       if (!data && isUUID) {
-        const res = await supabase.from("blog_posts").select("*").eq("id", id).single();
+        const res = await supabase.from("blog_posts").select("*").eq("id", id).is("trashed_at", null).single();
         data = res.data;
         // Redirect UUID URL to slug URL
         if (data?.slug) {
