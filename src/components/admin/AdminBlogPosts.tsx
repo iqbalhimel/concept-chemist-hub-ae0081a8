@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdminActivity } from "@/lib/activityLogger";
 import { slugify } from "@/lib/slugify";
 import { compressImage } from "@/lib/imageCompression";
 import { secureUpload } from "@/lib/secureUpload";
