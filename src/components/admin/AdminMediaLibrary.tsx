@@ -501,7 +501,7 @@ const AdminMediaLibrary = () => {
           </div>
 
           {/* Active filters display */}
-          {(activeFolder || filterTag !== "__all__" || filterType !== "__all__") && (
+          {(activeFolder || filterTag !== "__all__" || filterType !== "__all__" || filterUnused) && (
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-xs text-muted-foreground">Filters:</span>
               {activeFolder && (
