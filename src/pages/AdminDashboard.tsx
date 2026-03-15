@@ -34,6 +34,7 @@ import AdminVideos from "@/components/admin/AdminVideos";
 import AdminBlogCategories from "@/components/admin/AdminBlogCategories";
 import AdminSettingsSection from "@/components/admin/AdminSettingsSection";
 import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
+import AdminActivityTimeline from "@/components/admin/AdminActivityTimeline";
 import {
   heroSectionConfig, aboutSectionConfig, homepageSectionsConfig,
   announcementBarConfig, coachingInfoConfig, contactDetailsConfig,
