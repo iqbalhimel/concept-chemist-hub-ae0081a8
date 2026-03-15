@@ -236,6 +236,34 @@ const AdminGallery = () => {
     toast.success("Order updated");
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  };
+  const toggleSelectAll = () => {
+    const allIds = filteredItems.map(i => i.id);
+    setSelectedIds(allIds.every(id => selectedIds.has(id)) ? new Set() : new Set(allIds));
+  };
+  const bulkDeleteItems = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected image(s)?`)) return;
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      // Remove storage files and DB records
+      for (const id of selectedIds) {
+        const item = items.find(i => i.id === id);
+        if (item?.image_url) {
+          const urlParts = item.image_url.split("/media/");
+          if (urlParts[1]) await supabase.storage.from("media").remove([urlParts[1]]);
+        }
+        await supabase.from("gallery").delete().eq("id", id);
+      }
+      setItems(prev => prev.filter(i => !selectedIds.has(i.id)));
+      toast.success(`${selectedIds.size} image(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    });
+  };
+
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
   return (
