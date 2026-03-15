@@ -76,6 +76,8 @@ const AdminGallery = () => {
   const [pageSize, setPageSize] = useState<number | "all">(10);
   // Store file sizes locally since the DB column doesn't exist yet
   const [fileSizes, setFileSizes] = useState<Record<string, string>>({});
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const newTitleRef = useRef<HTMLInputElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
