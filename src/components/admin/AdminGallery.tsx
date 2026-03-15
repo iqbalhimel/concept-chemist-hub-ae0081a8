@@ -198,7 +198,10 @@ const AdminGallery = () => {
   const update = async (item: GalleryItem) => {
     await csrfGuard(async () => {
       const { error } = await supabase.from("gallery").update({ image_url: item.image_url, label: item.label, alt: item.alt, span: item.span }).eq("id", item.id);
-      if (error) toast.error(error.message); else toast.success("Updated");
+      if (error) toast.error(error.message); else {
+        toast.success("Updated");
+        logAdminActivity({ action: "edit", module: "gallery", itemId: item.id, itemTitle: item.label || "Gallery item" });
+      }
     });
   };
 
