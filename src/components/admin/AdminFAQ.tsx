@@ -172,6 +172,14 @@ const AdminFAQ = () => {
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
           {items.length === 0 && <p className="text-muted-foreground text-sm">No FAQs added yet.</p>}
+          {items.length > 0 && (
+            <div className="flex items-center gap-2 mb-2">
+              <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+                {items.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+              </button>
+              <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
+            </div>
+          )}
           {items.map(item => (
             <SortableRow key={item.id} id={item.id}>
               <div className="glass-card p-3 w-full max-w-full min-w-0 overflow-hidden">
