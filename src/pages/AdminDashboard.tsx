@@ -167,14 +167,25 @@ const AdminDashboard = () => {
   const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [trashCount, setTrashCount] = useState(0);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
-    // Start with the group containing the active tab expanded
     const set = new Set<string>();
     navigation.forEach(e => {
       if (isGroup(e) && e.items.some(i => i.id === "dashboard")) set.add(e.label);
     });
     return set;
   });
+
+  useEffect(() => {
+    const fetchTrashCount = async () => {
+      const tables = ["blog_posts", "notices", "study_materials", "testimonials", "gallery"];
+      const results = await Promise.all(
+        tables.map(t => (supabase as any).from(t).select("id", { count: "exact", head: true }).not("trashed_at", "is", null))
+      );
+      setTrashCount(results.reduce((sum, r) => sum + (r.count ?? 0), 0));
+    };
+    fetchTrashCount();
+  }, [activeTab]);
 
   const toggleGroup = (label: string) => {
     setExpandedGroups(prev => {
