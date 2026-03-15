@@ -51,7 +51,8 @@ type Tab =
   // Settings-based tabs
   | "hero-section" | "about-section" | "homepage-sections" | "announcement-bar"
   | "coaching-info" | "contact-details" | "social-links" | "whatsapp-chat"
-  | "site-info" | "footer-settings" | "hero-animation";
+  | "site-info" | "footer-settings" | "hero-animation"
+  | "activity-timeline";
 
 type NavItem = {
   id: Tab;
