@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle, Pencil, Search, X } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle, Pencil, Search, X, CalendarClock } from "lucide-react";
+import ContentSchedulingFields, { getContentStatus, ContentStatusBadge } from "@/components/admin/ContentSchedulingFields";
 import { Checkbox } from "@/components/ui/checkbox";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
