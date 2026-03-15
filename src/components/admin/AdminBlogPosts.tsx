@@ -304,10 +304,11 @@ const AdminBlogPosts = () => {
     await csrfGuard(async () => {
       const maxOrder = posts.length > 0 ? Math.max(...posts.map(p => (p as any).sort_order ?? 0)) + 1 : 0;
       const newSlug = slugify("new-post") + "-" + Date.now().toString(36);
-      const { error } = await supabase.from("blog_posts").insert({ title: "New Post", category: "General", excerpt: "", content: "", sort_order: maxOrder, slug: newSlug } as any);
+      const { data, error } = await supabase.from("blog_posts").insert({ title: "New Post", category: "General", excerpt: "", content: "", sort_order: maxOrder, slug: newSlug } as any).select().single();
       if (error) { toast.error(error.message); return; }
-      toast.success("Post added");
-      fetchAll();
+      toast.success("Post created — edit it below");
+      await fetchAll();
+      if (data) setEditingId(data.id);
     }, "content_create", "Created new blog post");
   };
 
