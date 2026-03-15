@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { compressImage } from "@/lib/imageCompression";
 import { logSecurityEvent } from "@/lib/securityLogger";
+import { logAdminActivity } from "@/lib/activityLogger";
 import { secureUpload } from "@/lib/secureUpload";
 import AdminPagination, { paginateItems } from "./AdminPagination";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
