@@ -74,6 +74,7 @@ const AdminTestimonials = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showTrash, setShowTrash] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
