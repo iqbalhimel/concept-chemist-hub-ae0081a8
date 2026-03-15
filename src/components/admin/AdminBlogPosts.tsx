@@ -166,7 +166,25 @@ const EditPanel = ({
           }
         }} placeholder="Title" />
       </div>
-      <Input value={post.category} onChange={e => onUpdateLocal(post.id, "category", e.target.value)} placeholder="Category" />
+      <div>
+        <label className="text-xs font-medium text-muted-foreground mb-1 block">Category</label>
+        {customCat ? (
+          <div className="flex gap-2">
+            <Input value={post.category} onChange={e => onUpdateLocal(post.id, "category", e.target.value)} placeholder="New category name" className="flex-1" />
+            <Button size="sm" variant="outline" onClick={() => setCustomCat(false)}>Use list</Button>
+          </div>
+        ) : (
+          <Select value={post.category || "__new__"} onValueChange={v => { if (v === "__new__") { setCustomCat(true); onUpdateLocal(post.id, "category", ""); } else onUpdateLocal(post.id, "category", v); }}>
+            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {categoryOptions.map(cat => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              ))}
+              <SelectItem value="__new__">+ Add new category</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+      </div>
     </div>
 
     <div className="space-y-1">
