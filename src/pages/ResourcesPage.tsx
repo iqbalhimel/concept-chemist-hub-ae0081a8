@@ -190,6 +190,7 @@ const ResourcesPage = () => {
                               href={item.file_url}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => trackContentView("study_material", item.id)}
                               className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all glow-primary"
                             >
                               <Download size={14} />
