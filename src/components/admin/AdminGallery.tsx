@@ -317,7 +317,7 @@ const AdminGallery = () => {
             <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
           </Button>
         </div>
-      )
+      )}
 
       {(() => {
         const pagedItems = paginateItems(filteredItems, page, pageSize);
