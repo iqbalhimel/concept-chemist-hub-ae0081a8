@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, X, Clock, Tag, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import OptimizedImage from "@/components/OptimizedImage";
-import { setSeo } from "@/lib/seo";
+import { setSeo, generateVideoObjectSchema, generateBreadcrumbSchema } from "@/lib/seo";
 import RelatedBlogPosts from "@/components/RelatedBlogPosts";
 import { trackContentView } from "@/lib/trackContentView";
 
