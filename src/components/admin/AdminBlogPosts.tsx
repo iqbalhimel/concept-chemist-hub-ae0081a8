@@ -527,9 +527,17 @@ const AdminBlogPosts = () => {
           <SelectTrigger className="w-40 h-9"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="__all__">All Categories</SelectItem>
-            {categories.map(cat => (
-              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-            ))}
+            {categories.map(cat => {
+              const c = colorMap[cat];
+              return (
+                <SelectItem key={cat} value={cat}>
+                  <span className="flex items-center gap-2">
+                    {c && <span className="inline-block w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c }} />}
+                    {cat}
+                  </span>
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
