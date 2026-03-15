@@ -142,7 +142,7 @@ const EditPanel = ({
   post: Post; onUpdateLocal: (id: string, field: string, value: string | boolean) => void; onSave: (post: Post) => void; onClose: () => void; categoryOptions: string[];
 }) => {
   const [customCat, setCustomCat] = useState(false);
-  <div className="border border-primary/30 rounded-lg bg-card p-5 space-y-3 animate-in slide-in-from-top-2">
+  return (
     <div className="flex items-center justify-between">
       <h3 className="font-display text-lg font-bold text-foreground">Editing: {post.title}</h3>
       <Button size="sm" variant="ghost" onClick={onClose}><X size={16} /></Button>
