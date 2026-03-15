@@ -213,11 +213,6 @@ const AdminNotices = () => {
           Notices <span className="text-base font-normal text-muted-foreground">({notices.length})</span>
         </h2>
         <div className="flex flex-wrap items-center gap-2">
-          {selectedIds.size > 0 && (
-            <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting} className="animate-in fade-in">
-              <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
-            </Button>
-          )}
           {orderDirty && (
             <>
               <span className="text-xs text-destructive flex items-center gap-1"><AlertTriangle size={12} /> Order changed</span>
@@ -257,7 +252,14 @@ const AdminNotices = () => {
         </div>
       )}
 
-      <AdminPagination total={filteredNotices.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1); }} />
+      {/* Bulk Actions */}
+      {selectedIds.size > 0 && (
+        <div className="admin-bulk-bar">
+          <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting}>
+            <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+          </Button>
+        </div>
+      )}
 
       {(() => {
         const pagedNotices = paginateItems(filteredNotices, page, pageSize);
@@ -415,6 +417,9 @@ const AdminNotices = () => {
           </DndContext>
         );
       })()}
+
+      {/* Pagination */}
+      <AdminPagination total={filteredNotices.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1); }} />
     </div>
   );
 };

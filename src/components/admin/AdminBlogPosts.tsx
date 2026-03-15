@@ -474,19 +474,6 @@ const AdminBlogPosts = () => {
           Blog Posts <span className="text-base font-normal text-muted-foreground">({posts.length})</span>
         </h2>
         <div className="flex flex-wrap items-center gap-2">
-          {selectedIds.size > 0 && (
-            <>
-              <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting} className="animate-in fade-in">
-                <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => bulkPublish(true)} className="animate-in fade-in">
-                Publish ({selectedIds.size})
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => bulkPublish(false)} className="animate-in fade-in">
-                Unpublish ({selectedIds.size})
-              </Button>
-            </>
-          )}
           {orderChanged && (
             <div className="flex items-center gap-2 animate-in fade-in">
               <span className="text-xs text-primary font-medium">Order changed</span>
@@ -498,17 +485,6 @@ const AdminBlogPosts = () => {
           <Button onClick={add} size="sm"><Plus size={14} className="mr-1" /> Add Post</Button>
         </div>
       </div>
-
-      {/* Select All */}
-      {filteredPosts.length > 0 && (
-        <div className="admin-select-all">
-          <Checkbox
-            checked={filteredPosts.every(p => selectedIds.has(p.id))}
-            onCheckedChange={toggleSelectAll}
-          />
-          <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
-        </div>
-      )}
 
       {/* Search & Filter */}
       <div className="flex gap-2 items-center">
@@ -547,7 +523,33 @@ const AdminBlogPosts = () => {
         </p>
       )}
 
-      {/* Edit Panel (shown above list when editing) */}
+      {/* Select All */}
+      {filteredPosts.length > 0 && (
+        <div className="admin-select-all">
+          <Checkbox
+            checked={filteredPosts.every(p => selectedIds.has(p.id))}
+            onCheckedChange={toggleSelectAll}
+          />
+          <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
+        </div>
+      )}
+
+      {/* Bulk Actions */}
+      {selectedIds.size > 0 && (
+        <div className="admin-bulk-bar">
+          <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting}>
+            <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => bulkPublish(true)}>
+            Publish ({selectedIds.size})
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => bulkPublish(false)}>
+            Unpublish ({selectedIds.size})
+          </Button>
+        </div>
+      )}
+
+      {/* Edit Panel */}
       {editingPost && (
         <EditPanel
           post={editingPost}
@@ -558,16 +560,7 @@ const AdminBlogPosts = () => {
         />
       )}
 
-      {/* Page size selector */}
-      <AdminPagination
-        total={filteredPosts.length}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
-      />
-
-      {/* Sortable List */}
+      {/* Content List */}
       {(() => {
         const pagedPosts = paginateItems(filteredPosts, page, pageSize);
         return (
@@ -596,6 +589,15 @@ const AdminBlogPosts = () => {
           {isFiltering ? "No posts match your search." : "No blog posts yet. Click \"Add Post\" to create one."}
         </p>
       )}
+
+      {/* Pagination */}
+      <AdminPagination
+        total={filteredPosts.length}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+      />
     </div>
   );
 };

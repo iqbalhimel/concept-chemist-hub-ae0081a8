@@ -273,11 +273,6 @@ const AdminGallery = () => {
           Gallery <span className="text-base font-normal text-muted-foreground">({items.length})</span>
         </h2>
         <div className="flex gap-2">
-          {selectedIds.size > 0 && (
-            <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting} className="animate-in fade-in">
-              <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
-            </Button>
-          )}
           <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleUpload} />
           <Button onClick={() => fileRef.current?.click()} size="sm" disabled={uploading}>
             <Upload size={14} className="mr-1" /> {uploading ? "Uploading..." : "Upload Images"}
@@ -310,7 +305,14 @@ const AdminGallery = () => {
         </div>
       )}
 
-      <AdminPagination total={filteredItems.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1); }} />
+      {/* Bulk Actions */}
+      {selectedIds.size > 0 && (
+        <div className="admin-bulk-bar">
+          <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting}>
+            <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+          </Button>
+        </div>
+      )}
 
       {(() => {
         const pagedItems = paginateItems(filteredItems, page, pageSize);
@@ -472,6 +474,9 @@ const AdminGallery = () => {
           </DndContext>
         );
       })()}
+
+      {/* Pagination */}
+      <AdminPagination total={filteredItems.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1); }} />
       <MediaPickerDialog
         open={!!mediaPickerTarget}
         onOpenChange={(open) => { if (!open) setMediaPickerTarget(null); }}
