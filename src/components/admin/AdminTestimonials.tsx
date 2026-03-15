@@ -129,11 +129,19 @@ const AdminTestimonials = () => {
       if (editId) {
         const { error } = await supabase.from("testimonials").update(form).eq("id", editId);
         if (error) toast.error("Update failed");
-        else { toast.success("Testimonial updated"); resetForm(); fetchItems(); }
+        else {
+          toast.success("Testimonial updated");
+          logAdminActivity({ action: "edit", module: "testimonials", itemId: editId, itemTitle: form.student_name });
+          resetForm(); fetchItems();
+        }
       } else {
-        const { error } = await supabase.from("testimonials").insert({ ...form, sort_order: items.length });
+        const { data, error } = await supabase.from("testimonials").insert({ ...form, sort_order: items.length }).select().single();
         if (error) toast.error("Insert failed");
-        else { toast.success("Testimonial added"); resetForm(); fetchItems(); }
+        else {
+          toast.success("Testimonial added");
+          logAdminActivity({ action: "create", module: "testimonials", itemId: data?.id, itemTitle: form.student_name });
+          resetForm(); fetchItems();
+        }
       }
     });
   };
