@@ -212,11 +212,6 @@ const AdminTestimonials = () => {
           Testimonials <span className="text-base font-normal text-muted-foreground">({items.length})</span>
         </h2>
         <div className="flex gap-2 flex-wrap">
-          {selectedIds.size > 0 && (
-            <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting} className="animate-in fade-in">
-              <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
-            </Button>
-          )}
           {orderDirty && (
             <Button onClick={saveOrder} variant="outline" size="sm">
               <Save size={14} className="mr-1" /> Save Order
@@ -312,13 +307,14 @@ const AdminTestimonials = () => {
             <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
           </div>
 
-          <AdminPagination
-            page={page}
-            pageSize={pageSize}
-            total={filteredItems.length}
-            onPageChange={setPage}
-            onPageSizeChange={(v) => { setPageSize(v); setPage(1); }}
-          />
+          {selectedIds.size > 0 && (
+            <div className="admin-bulk-bar">
+              <span className="text-xs text-muted-foreground">{selectedIds.size} selected</span>
+              <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting} className="animate-in fade-in">
+                <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+              </Button>
+            </div>
+          )}
 
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
@@ -391,6 +387,16 @@ const AdminTestimonials = () => {
               </div>
             </SortableContext>
           </DndContext>
+
+          <div className="admin-pagination-footer pt-4">
+            <AdminPagination
+              page={page}
+              pageSize={pageSize}
+              total={filteredItems.length}
+              onPageChange={setPage}
+              onPageSizeChange={(v) => { setPageSize(v); setPage(1); }}
+            />
+          </div>
         </>
       )}
     </div>

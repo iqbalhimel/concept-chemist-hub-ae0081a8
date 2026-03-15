@@ -420,12 +420,6 @@ const AdminStudyMaterials = () => {
           Study Materials <span className="text-base font-normal text-muted-foreground">({items.length})</span>
         </h2>
         <div className="flex flex-wrap items-center gap-2">
-          {selectedIds.size > 0 && (
-            <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting} className="animate-in fade-in">
-              <Trash2 size={14} className="mr-1" />
-              {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
-            </Button>
-          )}
           {orderDirty && (
             <>
               <span className="text-xs text-destructive flex items-center gap-1">
@@ -594,13 +588,15 @@ const AdminStudyMaterials = () => {
         </div>
       )}
 
-      <AdminPagination
-        total={filteredItems.length}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
-      />
+      {selectedIds.size > 0 && (
+        <div className="admin-bulk-bar">
+          <span className="text-xs text-muted-foreground">{selectedIds.size} selected</span>
+          <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting} className="animate-in fade-in">
+            <Trash2 size={14} className="mr-1" />
+            {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+          </Button>
+        </div>
+      )}
 
       {/* Compact list view with expandable edit/delete */}
       {(() => {
@@ -827,6 +823,16 @@ const AdminStudyMaterials = () => {
           </DndContext>
         );
       })()}
+
+      <div className="admin-pagination-footer pt-4">
+        <AdminPagination
+          total={filteredItems.length}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+        />
+      </div>
     </div>
   );
 };
