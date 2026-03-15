@@ -220,6 +220,7 @@ const AdminDashboard = () => {
       case "study-materials": return <AdminStudyMaterials />;
       case "blog": return <AdminBlogPosts />;
       case "blog-categories": return <AdminBlogCategories />;
+      case "blog-tags": return <AdminTags />;
       case "comments": return <AdminComments />;
       case "testimonials": return <AdminTestimonials />;
       case "gallery": return <AdminGallery />;
