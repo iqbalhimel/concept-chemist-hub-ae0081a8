@@ -132,6 +132,26 @@ const AdminFAQ = () => {
     });
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  };
+  const toggleSelectAll = () => {
+    const allIds = items.map(i => i.id);
+    setSelectedIds(allIds.every(id => selectedIds.has(id)) ? new Set() : new Set(allIds));
+  };
+  const bulkDeleteItems = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected FAQ(s)?`)) return;
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      await Promise.all([...selectedIds].map(id => supabase.from("faq").delete().eq("id", id)));
+      setItems(prev => prev.filter(i => !selectedIds.has(i.id)));
+      toast.success(`${selectedIds.size} FAQ(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    }, "content_delete", `Bulk deleted ${selectedIds.size} FAQ items`);
+  };
+
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
   return (
