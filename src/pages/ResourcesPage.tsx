@@ -46,6 +46,10 @@ const ResourcesPage = () => {
       url: autoCanonical,
       canonicalUrl: autoCanonical,
       image: defaultOgImage || undefined,
+      jsonLd: generateBreadcrumbSchema([
+        { name: "Home", url: "https://iqbalsir.bd" },
+        { name: "Resources", url: autoCanonical },
+      ]),
     });
     return cleanup;
   }, []);
