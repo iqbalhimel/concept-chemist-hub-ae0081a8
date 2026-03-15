@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Upload, GripVertical, Pencil, Search, X, FolderOpen } from "lucide-react";
+import { Plus, Trash2, Save, Upload, GripVertical, Pencil, Search, X, FolderOpen, CheckSquare, Square } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import type { Tables } from "@/integrations/supabase/types";
 import { compressImage } from "@/lib/imageCompression";
@@ -75,6 +76,8 @@ const AdminGallery = () => {
   const [pageSize, setPageSize] = useState<number | "all">(10);
   // Store file sizes locally since the DB column doesn't exist yet
   const [fileSizes, setFileSizes] = useState<Record<string, string>>({});
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const newTitleRef = useRef<HTMLInputElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
@@ -233,6 +236,34 @@ const AdminGallery = () => {
     toast.success("Order updated");
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  };
+  const toggleSelectAll = () => {
+    const allIds = filteredItems.map(i => i.id);
+    setSelectedIds(allIds.every(id => selectedIds.has(id)) ? new Set() : new Set(allIds));
+  };
+  const bulkDeleteItems = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected image(s)?`)) return;
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      // Remove storage files and DB records
+      for (const id of selectedIds) {
+        const item = items.find(i => i.id === id);
+        if (item?.image_url) {
+          const urlParts = item.image_url.split("/media/");
+          if (urlParts[1]) await supabase.storage.from("media").remove([urlParts[1]]);
+        }
+        await supabase.from("gallery").delete().eq("id", id);
+      }
+      setItems(prev => prev.filter(i => !selectedIds.has(i.id)));
+      toast.success(`${selectedIds.size} image(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    });
+  };
+
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
   return (
@@ -242,6 +273,11 @@ const AdminGallery = () => {
           Gallery <span className="text-base font-normal text-muted-foreground">({items.length})</span>
         </h2>
         <div className="flex gap-2">
+          {selectedIds.size > 0 && (
+            <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting} className="animate-in fade-in">
+              <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+            </Button>
+          )}
           <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleUpload} />
           <Button onClick={() => fileRef.current?.click()} size="sm" disabled={uploading}>
             <Upload size={14} className="mr-1" /> {uploading ? "Uploading..." : "Upload Images"}
@@ -264,6 +300,15 @@ const AdminGallery = () => {
         <p className="text-xs text-muted-foreground">Showing {filteredItems.length} of {items.length} items matching "{searchQuery}"</p>
       )}
 
+      {filteredItems.length > 0 && (
+        <div className="flex items-center gap-2">
+          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+            {filteredItems.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+          </button>
+          <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
+        </div>
+      )}
+
       <AdminPagination total={filteredItems.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1); }} />
 
       {(() => {
@@ -273,7 +318,8 @@ const AdminGallery = () => {
             <SortableContext items={pagedItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
               <div className="border border-border rounded-lg divide-y divide-border overflow-hidden">
                 {/* Desktop header */}
-                <div className="hidden md:grid md:grid-cols-[auto_48px_1fr_auto_auto_auto] gap-3 items-center px-4 py-2 bg-muted/40 text-xs font-medium text-muted-foreground">
+                <div className="hidden md:grid md:grid-cols-[auto_auto_48px_1fr_auto_auto_auto] gap-3 items-center px-4 py-2 bg-muted/40 text-xs font-medium text-muted-foreground">
+                  <span className="w-4" />
                   <span className="w-8" />
                   <span>Thumb</span>
                   <span>Title</span>
@@ -297,7 +343,8 @@ const AdminGallery = () => {
                     <SortableRow key={item.id} id={item.id}>
                       <div>
                         {/* Desktop row */}
-                        <div className="hidden md:grid md:grid-cols-[auto_48px_1fr_auto_auto_auto] gap-3 items-center px-3 py-2.5">
+                        <div className={`hidden md:grid md:grid-cols-[auto_auto_48px_1fr_auto_auto_auto] gap-3 items-center px-3 py-2.5 ${selectedIds.has(item.id) ? "bg-primary/5" : ""}`}>
+                          <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
                           <span className="w-8" />
                           <div className="w-10 h-10 rounded bg-muted overflow-hidden shrink-0">
                             {item.image_url ? (
@@ -322,8 +369,9 @@ const AdminGallery = () => {
                         </div>
 
                         {/* Mobile row */}
-                        <div className="md:hidden px-3 py-3 space-y-2">
+                        <div className={`md:hidden px-3 py-3 space-y-2 ${selectedIds.has(item.id) ? "bg-primary/5" : ""}`}>
                           <div className="flex items-center gap-3">
+                            <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
                             <div className="w-10 h-10 rounded bg-muted overflow-hidden shrink-0">
                               {item.image_url ? (
                                 <img src={item.image_url} alt={item.alt || ""} className="w-full h-full object-cover" />

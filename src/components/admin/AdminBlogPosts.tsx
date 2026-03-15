@@ -11,8 +11,9 @@ import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
 import { toast } from "sonner";
 import {
   Plus, Trash2, Save, GripVertical, Pencil, X, Loader2, ImagePlus,
-  ExternalLink, CalendarClock, Search, FolderOpen,
+  ExternalLink, CalendarClock, Search, FolderOpen, CheckSquare, Square,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
@@ -93,15 +94,16 @@ const FeaturedImageField = ({ imageUrl, onUpload, onClear }: { imageUrl: string;
 /* ── Sortable List Row ───────────────────────────── */
 
 const SortableRow = ({
-  post, onEdit, onDelete,
+  post, onEdit, onDelete, selected, onToggleSelect,
 }: {
-  post: Post; onEdit: (id: string) => void; onDelete: (id: string) => void;
+  post: Post; onEdit: (id: string) => void; onDelete: (id: string) => void; selected: boolean; onToggleSelect: (id: string) => void;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: post.id });
   const style = { transform: CSS.Transform.toString(transform), transition };
 
   return (
-    <div ref={setNodeRef} style={style} className="flex flex-wrap md:flex-nowrap items-start md:items-center gap-2 md:gap-3 px-3 py-3 md:px-4 border border-border rounded-lg bg-card hover:bg-muted/40 transition-colors">
+    <div ref={setNodeRef} style={style} className={`flex flex-wrap md:flex-nowrap items-start md:items-center gap-2 md:gap-3 px-3 py-3 md:px-4 border border-border rounded-lg transition-colors ${selected ? "bg-primary/5 border-primary/30" : "bg-card hover:bg-muted/40"}`}>
+      <Checkbox checked={selected} onCheckedChange={() => onToggleSelect(post.id)} className="shrink-0 mt-1 md:mt-0" />
       <button {...attributes} {...listeners} className="cursor-grab text-muted-foreground hover:text-foreground touch-none shrink-0 mt-1 md:mt-0">
         <GripVertical size={16} />
       </button>
@@ -262,6 +264,8 @@ const AdminBlogPosts = () => {
   const [filterCategory, setFilterCategory] = useState("__all__");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "all">(10);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -361,6 +365,37 @@ const AdminBlogPosts = () => {
     setSavingOrder(false);
   };
 
+  /* ── Bulk actions ──────────────────────────────── */
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  };
+  const toggleSelectAll = () => {
+    const allIds = filteredPosts.map(p => p.id);
+    setSelectedIds(allIds.every(id => selectedIds.has(id)) ? new Set() : new Set(allIds));
+  };
+  const bulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected post(s)?`)) return;
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      await Promise.all([...selectedIds].map(id => supabase.from("blog_posts").delete().eq("id", id)));
+      setPosts(prev => prev.filter(p => !selectedIds.has(p.id)));
+      if (editingId && selectedIds.has(editingId)) setEditingId(null);
+      toast.success(`${selectedIds.size} post(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    }, "content_delete", `Bulk deleted ${selectedIds.size} blog posts`);
+  };
+  const bulkPublish = async (publish: boolean) => {
+    if (selectedIds.size === 0) return;
+    await csrfGuard(async () => {
+      await Promise.all([...selectedIds].map(id => supabase.from("blog_posts").update({ is_published: publish } as any).eq("id", id)));
+      setPosts(prev => prev.map(p => selectedIds.has(p.id) ? { ...p, is_published: publish } : p));
+      toast.success(`${selectedIds.size} post(s) ${publish ? "published" : "unpublished"}`);
+      setSelectedIds(new Set());
+    }, "content_update", `Bulk ${publish ? "published" : "unpublished"} ${selectedIds.size} blog posts`);
+  };
+
   const categories = useMemo(() => [...new Set(posts.map(p => p.category))].sort(), [posts]);
 
   const filteredPosts = useMemo(() => {
@@ -386,10 +421,23 @@ const AdminBlogPosts = () => {
         <h2 className="font-display text-2xl font-bold text-foreground">
           Blog Posts <span className="text-base font-normal text-muted-foreground">({posts.length})</span>
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedIds.size > 0 && (
+            <>
+              <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkDeleting} className="animate-in fade-in">
+                <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => bulkPublish(true)} className="animate-in fade-in">
+                Publish ({selectedIds.size})
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => bulkPublish(false)} className="animate-in fade-in">
+                Unpublish ({selectedIds.size})
+              </Button>
+            </>
+          )}
           {orderChanged && (
             <div className="flex items-center gap-2 animate-in fade-in">
-              <span className="text-xs text-primary font-medium">Order changed – click Save Changes</span>
+              <span className="text-xs text-primary font-medium">Order changed</span>
               <Button size="sm" onClick={saveOrder} disabled={savingOrder}>
                 <Save size={14} className="mr-1" /> {savingOrder ? "Saving…" : "Save Changes"}
               </Button>
@@ -398,6 +446,16 @@ const AdminBlogPosts = () => {
           <Button onClick={add} size="sm"><Plus size={14} className="mr-1" /> Add Post</Button>
         </div>
       </div>
+
+      {/* Select All */}
+      {filteredPosts.length > 0 && (
+        <div className="flex items-center gap-2">
+          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+            {filteredPosts.every(p => selectedIds.has(p.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+          </button>
+          <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
+        </div>
+      )}
 
       {/* Search & Filter */}
       <div className="flex gap-2 items-center">
@@ -460,6 +518,8 @@ const AdminBlogPosts = () => {
                     post={post}
                     onEdit={(id) => setEditingId(editingId === id ? null : id)}
                     onDelete={remove}
+                    selected={selectedIds.has(post.id)}
+                    onToggleSelect={toggleSelect}
                   />
                 ))}
               </div>

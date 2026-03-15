@@ -7,7 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
-import { Plus, Trash2, Save, GripVertical, Pencil, X } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pencil, X, CheckSquare, Square } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -44,6 +45,8 @@ const AdminFAQ = () => {
   const [expandedEditId, setExpandedEditId] = useState<string | null>(null);
   const [expandedDeleteId, setExpandedDeleteId] = useState<string | null>(null);
   const [orderChanged, setOrderChanged] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
   const newIdRef = useRef<string | null>(null);
 
@@ -129,13 +132,38 @@ const AdminFAQ = () => {
     });
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  };
+  const toggleSelectAll = () => {
+    const allIds = items.map(i => i.id);
+    setSelectedIds(allIds.every(id => selectedIds.has(id)) ? new Set() : new Set(allIds));
+  };
+  const bulkDeleteItems = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected FAQ(s)?`)) return;
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      await Promise.all([...selectedIds].map(id => supabase.from("faq").delete().eq("id", id)));
+      setItems(prev => prev.filter(i => !selectedIds.has(i.id)));
+      toast.success(`${selectedIds.size} FAQ(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    }, "content_delete", `Bulk deleted ${selectedIds.size} FAQ items`);
+  };
+
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
   return (
     <div className="space-y-4 w-full max-w-full min-w-0">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="font-display text-2xl font-bold text-foreground">FAQ</h2>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {selectedIds.size > 0 && (
+            <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting} className="animate-in fade-in">
+              <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+            </Button>
+          )}
           {orderChanged && <Button onClick={saveOrder} size="sm" variant="outline"><Save size={14} className="mr-1" /> Save Order</Button>}
           <Button onClick={add} size="sm"><Plus size={14} className="mr-1" /> Add FAQ</Button>
         </div>
@@ -144,11 +172,20 @@ const AdminFAQ = () => {
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
           {items.length === 0 && <p className="text-muted-foreground text-sm">No FAQs added yet.</p>}
+          {items.length > 0 && (
+            <div className="flex items-center gap-2 mb-2">
+              <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+                {items.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+              </button>
+              <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
+            </div>
+          )}
           {items.map(item => (
             <SortableRow key={item.id} id={item.id}>
-              <div className="glass-card p-3 w-full max-w-full min-w-0 overflow-hidden">
+              <div className={`glass-card p-3 w-full max-w-full min-w-0 overflow-hidden ${selectedIds.has(item.id) ? "border-primary/30 bg-primary/5" : ""}`}>
                 {/* Desktop */}
                 <div className="hidden md:flex items-center gap-4">
+                  <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
                   <span className="flex-1 font-medium text-foreground truncate">{item.question}</span>
                   <div className="flex items-center gap-1 text-xs">
                     <Switch checked={item.is_active} onCheckedChange={() => toggleActive(item)} />
@@ -161,7 +198,10 @@ const AdminFAQ = () => {
                 </div>
                 {/* Mobile */}
                 <div className="md:hidden space-y-2">
-                  <p className="font-medium text-foreground text-sm truncate">{item.question}</p>
+                  <div className="flex items-center gap-2">
+                    <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
+                    <p className="font-medium text-foreground text-sm truncate">{item.question}</p>
+                  </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1 text-xs">
                       <Switch checked={item.is_active} onCheckedChange={() => toggleActive(item)} />

@@ -6,7 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, GripVertical, Pencil, Star, X, MessageSquareQuote } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pencil, Star, X, MessageSquareQuote, CheckSquare, Square } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
@@ -68,6 +69,8 @@ const AdminTestimonials = () => {
   const [orderDirty, setOrderDirty] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "all">(10);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
@@ -164,6 +167,27 @@ const AdminTestimonials = () => {
     });
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  };
+  const toggleSelectAll = () => {
+    const allIds = items.map(i => i.id);
+    setSelectedIds(allIds.every(id => selectedIds.has(id)) ? new Set() : new Set(allIds));
+  };
+  const bulkDeleteItems = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected testimonial(s)?`)) return;
+    await csrfGuard(async () => {
+      setBulkDeleting(true);
+      await Promise.all([...selectedIds].map(id => supabase.from("testimonials").delete().eq("id", id)));
+      setItems(prev => prev.filter(i => !selectedIds.has(i.id)));
+      if (editId && selectedIds.has(editId)) resetForm();
+      toast.success(`${selectedIds.size} testimonial(s) deleted`);
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+    });
+  };
+
   const paginated = paginateItems(items, page, pageSize);
 
   return (
@@ -173,7 +197,12 @@ const AdminTestimonials = () => {
           <h2 className="font-display text-xl font-bold text-foreground">Testimonials</h2>
           <p className="text-sm text-muted-foreground">{items.length} total</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {selectedIds.size > 0 && (
+            <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting} className="animate-in fade-in">
+              <Trash2 size={14} className="mr-1" /> {bulkDeleting ? "Deleting…" : `Delete (${selectedIds.size})`}
+            </Button>
+          )}
           {orderDirty && (
             <Button onClick={saveOrder} variant="outline" size="sm">
               <Save size={14} className="mr-1" /> Save Order
@@ -245,13 +274,22 @@ const AdminTestimonials = () => {
       ) : (
         <>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
+              {items.length > 0 && (
+                <div className="flex items-center gap-2 mb-2">
+                  <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
+                    {items.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+                  </button>
+                  <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
+                </div>
+              )}
               <div className="space-y-2">
                 {paginated.map(item => (
                   <SortableRow key={item.id} id={item.id}>
-                    <div className={`border rounded-lg p-4 transition-colors ${editId === item.id ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
+                    <div className={`border rounded-lg p-4 transition-colors ${editId === item.id ? "border-primary bg-primary/5" : selectedIds.has(item.id) ? "border-primary/30 bg-primary/5" : "border-border bg-card"}`}>
                       <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium text-foreground text-sm">{item.student_name}</span>
                             <span className="text-xs text-muted-foreground">{item.student_info}</span>
