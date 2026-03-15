@@ -126,12 +126,11 @@ const SortableRow = ({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-foreground truncate">{post.title}</span>
-          {!post.is_published && (
-            <span className="text-[10px] font-semibold uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded shrink-0">Draft</span>
-          )}
-          {(post as any).scheduled_at && !post.is_published && (
-            <span className="text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded shrink-0">Scheduled</span>
-          )}
+          <ContentStatusBadge status={getContentStatus({
+            isPublished: post.is_published,
+            scheduledAt: (post as any).scheduled_at,
+            expireAt: (post as any).expire_at,
+          })} />
         </div>
         <CategoryBadge name={post.category} colorMap={colorMap} />
       </div>
