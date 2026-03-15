@@ -39,10 +39,13 @@ const VideosPage = () => {
   const [subjectFilter, setSubjectFilter] = useState("");
 
   useEffect(() => {
+    const now = new Date().toISOString();
     supabase
       .from("educational_videos")
       .select("*")
       .eq("is_published", true)
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
+      .or(`expire_at.is.null,expire_at.gte.${now}`)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         if (data) setVideos(data as Video[]);

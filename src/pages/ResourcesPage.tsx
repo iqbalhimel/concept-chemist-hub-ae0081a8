@@ -50,8 +50,12 @@ const ResourcesPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      const now = new Date().toISOString();
       const [matRes, catRes] = await Promise.all([
-        supabase.from("study_materials").select("*").eq("is_active", true).order("created_at", { ascending: false }),
+        supabase.from("study_materials").select("*").eq("is_active", true)
+          .or(`publish_at.is.null,publish_at.lte.${now}`)
+          .or(`expire_at.is.null,expire_at.gte.${now}`)
+          .order("created_at", { ascending: false }),
         supabase.from("study_categories").select("*").eq("is_active", true).order("sort_order"),
       ]);
       setMaterials(matRes.data || []);
