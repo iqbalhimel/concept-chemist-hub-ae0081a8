@@ -33,6 +33,7 @@ import AdminSeoMonitor from "@/components/admin/AdminSeoMonitor";
 import AdminSecurityLogs from "@/components/admin/AdminSecurityLogs";
 import AdminVideos from "@/components/admin/AdminVideos";
 import AdminBlogCategories from "@/components/admin/AdminBlogCategories";
+import AdminTags from "@/components/admin/AdminTags";
 import AdminSettingsSection from "@/components/admin/AdminSettingsSection";
 import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 import AdminActivityTimeline from "@/components/admin/AdminActivityTimeline";
