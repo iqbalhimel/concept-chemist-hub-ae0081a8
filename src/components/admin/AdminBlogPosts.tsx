@@ -246,6 +246,9 @@ const EditPanel = ({
       defaultCanonical={`https://iqbalsir.bd/blog/${(post as any).slug || post.id}`}
     />
 
+    {/* Tags */}
+    <PostTagsPicker postId={post.id} />
+
     {/* Scheduling */}
     <ContentSchedulingFields
       publishAt={(post as any).scheduled_at || null}

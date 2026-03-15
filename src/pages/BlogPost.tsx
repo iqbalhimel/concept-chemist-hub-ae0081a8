@@ -97,15 +97,49 @@ const BlogPost = () => {
           if (el) el.content = pa.seo_og_description;
         }
 
-        const { data: rel } = await supabase
-          .from("blog_posts")
-          .select("*")
-          .eq("is_published", true)
-          .eq("category", p.category)
-          .neq("id", p.id)
-          .order("sort_order", { ascending: true })
-          .limit(3);
-        setRelated((rel as (BlogPostType & { slug?: string | null })[]) || []);
+        // Tag-based related posts with category fallback
+        let relatedPosts: any[] = [];
+        const { data: postTags } = await supabase
+          .from("post_tags")
+          .select("tag_id")
+          .eq("post_id", p.id);
+        const tagIds = (postTags || []).map((pt: any) => pt.tag_id);
+
+        if (tagIds.length > 0) {
+          // Find posts sharing any tag
+          const { data: sharedPostTags } = await supabase
+            .from("post_tags")
+            .select("post_id")
+            .in("tag_id", tagIds)
+            .neq("post_id", p.id);
+          const relatedIds = [...new Set((sharedPostTags || []).map((pt: any) => pt.post_id))];
+          if (relatedIds.length > 0) {
+            const { data: tagRelated } = await supabase
+              .from("blog_posts")
+              .select("*")
+              .eq("is_published", true)
+              .is("trashed_at", null)
+              .in("id", relatedIds.slice(0, 6))
+              .order("sort_order", { ascending: true })
+              .limit(3);
+            relatedPosts = tagRelated || [];
+          }
+        }
+
+        // Fallback to category if no tag matches
+        if (relatedPosts.length === 0) {
+          const { data: catRelated } = await supabase
+            .from("blog_posts")
+            .select("*")
+            .eq("is_published", true)
+            .is("trashed_at", null)
+            .eq("category", p.category)
+            .neq("id", p.id)
+            .order("sort_order", { ascending: true })
+            .limit(3);
+          relatedPosts = catRelated || [];
+        }
+        setRelated(relatedPosts as (BlogPostType & { slug?: string | null })[]);
       }
     };
     fetchPost();
