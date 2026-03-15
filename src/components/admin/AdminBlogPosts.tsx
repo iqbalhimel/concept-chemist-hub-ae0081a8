@@ -30,6 +30,7 @@ import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
 import AdminTrashView from "@/components/admin/AdminTrashView";
 import { useBlogCategories } from "@/hooks/useBlogCategories";
+import PostTagsPicker from "@/components/admin/PostTagsPicker";
 
 type Post = Tables<"blog_posts">;
 
