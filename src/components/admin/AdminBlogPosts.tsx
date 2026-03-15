@@ -11,8 +11,9 @@ import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
 import { toast } from "sonner";
 import {
   Plus, Trash2, Save, GripVertical, Pencil, X, Loader2, ImagePlus,
-  ExternalLink, CalendarClock, Search, FolderOpen,
+  ExternalLink, CalendarClock, Search, FolderOpen, CheckSquare, Square,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
