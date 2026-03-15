@@ -261,6 +261,7 @@ const AdminTrashView = ({
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Clock size={10} /> Trashed {formatTimeAgo(item.trashed_at)}
                   </span>
+                  <DaysRemainingBadge trashedAt={item.trashed_at} />
                 </div>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
