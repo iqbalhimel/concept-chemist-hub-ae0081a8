@@ -666,9 +666,7 @@ const AdminStudyMaterials = () => {
                           {/* Mobile row */}
                           <div className="md:hidden space-y-1.5">
                             <div className="flex items-center gap-2">
-                              <button onClick={() => toggleSelect(item.id)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                                {selectedIds.has(item.id) ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
-                              </button>
+                              <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
                               <span className="text-sm font-medium text-foreground truncate flex-1">{item.title}</span>
                             </div>
                             <div className="flex items-center justify-between pl-6">
