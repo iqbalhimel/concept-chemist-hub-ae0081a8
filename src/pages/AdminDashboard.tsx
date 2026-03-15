@@ -32,6 +32,7 @@ import AdminSeoMonitor from "@/components/admin/AdminSeoMonitor";
 import AdminSecurityLogs from "@/components/admin/AdminSecurityLogs";
 import AdminVideos from "@/components/admin/AdminVideos";
 import AdminSettingsSection from "@/components/admin/AdminSettingsSection";
+import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 import {
   heroSectionConfig, aboutSectionConfig, homepageSectionsConfig,
   announcementBarConfig, coachingInfoConfig, contactDetailsConfig,
