@@ -73,6 +73,7 @@ const AdminVideos = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [thumbPickerOpen, setThumbPickerOpen] = useState(false);
   const { syncFromUrl } = useVideoMetadataSync(setForm);
 
   // Search, filter, sort, pagination
