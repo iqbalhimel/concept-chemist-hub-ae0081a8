@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags, GripVertical, Search, X, Check, Eye, EyeOff, AlertTriangle, CheckSquare, Square } from "lucide-react";
+import { Plus, Trash2, Save, Upload, Loader2, FileUp, Pencil, Tags, GripVertical, Search, X, Check, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import type { Tables } from "@/integrations/supabase/types";
@@ -582,10 +583,11 @@ const AdminStudyMaterials = () => {
 
       {/* Select all toggle */}
       {filteredItems.length > 0 && (
-        <div className="flex items-center gap-2">
-          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
-            {filteredItems.every(i => selectedIds.has(i.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
-          </button>
+        <div className="admin-select-all">
+          <Checkbox
+            checked={filteredItems.every(i => selectedIds.has(i.id))}
+            onCheckedChange={toggleSelectAll}
+          />
           <span className="text-xs text-muted-foreground">
             {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}
           </span>
@@ -632,9 +634,9 @@ const AdminStudyMaterials = () => {
                         <div className="px-4 py-3">
                           {/* Desktop row */}
                           <div className="hidden md:grid md:grid-cols-[auto_1fr_auto_auto_auto_auto] gap-3 items-center">
-                            <button onClick={() => toggleSelect(item.id)} className="text-muted-foreground hover:text-foreground transition-colors w-10">
-                              {selectedIds.has(item.id) ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
-                            </button>
+                            <div className="w-10">
+                              <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} />
+                            </div>
                             <span className="text-sm font-medium text-foreground truncate">{item.title}</span>
                             <span className="w-32 text-xs text-muted-foreground truncate">{item.category}</span>
                             <span className="w-20 text-xs text-muted-foreground text-right">{item.file_size || "—"}</span>
@@ -664,9 +666,7 @@ const AdminStudyMaterials = () => {
                           {/* Mobile row */}
                           <div className="md:hidden space-y-1.5">
                             <div className="flex items-center gap-2">
-                              <button onClick={() => toggleSelect(item.id)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                                {selectedIds.has(item.id) ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
-                              </button>
+                              <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
                               <span className="text-sm font-medium text-foreground truncate flex-1">{item.title}</span>
                             </div>
                             <div className="flex items-center justify-between pl-6">

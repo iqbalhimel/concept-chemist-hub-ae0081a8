@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle, CheckSquare, Square, Pencil } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pin, AlertTriangle, Pencil, Search, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import {
   DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent,
@@ -58,6 +59,7 @@ const AdminNotices = () => {
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [expandedEditId, setExpandedEditId] = useState<string | null>(null);
   const [expandedDeleteId, setExpandedDeleteId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const newTitleRef = useRef<HTMLInputElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -88,6 +90,17 @@ const AdminNotices = () => {
     setLoading(false);
     setOrderDirty(false);
   };
+
+  const filteredNotices = useMemo(() => {
+    if (!searchQuery.trim()) return notices;
+    const q = searchQuery.toLowerCase();
+    return notices.filter(n =>
+      n.title.toLowerCase().includes(q) ||
+      (n.description || "").toLowerCase().includes(q)
+    );
+  }, [notices, searchQuery]);
+
+  const isFiltering = searchQuery.trim() !== "";
 
   const addNotice = async () => {
     await csrfGuard(async () => {
@@ -150,7 +163,7 @@ const AdminNotices = () => {
     setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   };
   const toggleSelectAll = () => {
-    const allIds = notices.map(n => n.id);
+    const allIds = filteredNotices.map(n => n.id);
     setSelectedIds(allIds.every(id => selectedIds.has(id)) ? new Set() : new Set(allIds));
   };
   const bulkDelete = async () => {
@@ -194,7 +207,8 @@ const AdminNotices = () => {
 
   return (
     <div className="space-y-4 relative">
-      <div ref={topRef} className="flex items-center justify-between sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2 -mt-2">
+      {/* Header */}
+      <div ref={topRef} className="flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2 -mt-2">
         <h2 className="font-display text-2xl font-bold text-foreground">
           Notices <span className="text-base font-normal text-muted-foreground">({notices.length})</span>
         </h2>
@@ -216,25 +230,43 @@ const AdminNotices = () => {
         </div>
       </div>
 
-      {notices.length > 0 && (
-        <div className="flex items-center gap-2">
-          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
-            {notices.every(n => selectedIds.has(n.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
+      {/* Search */}
+      <div className="relative">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input className="pl-9 h-9" placeholder="Search notices..." value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setPage(1); }} />
+        {searchQuery && (
+          <button className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setSearchQuery("")}>
+            <X size={14} />
           </button>
+        )}
+      </div>
+      {isFiltering && (
+        <p className="text-xs text-muted-foreground">
+          Showing {filteredNotices.length} of {notices.length} notices matching "{searchQuery}"
+        </p>
+      )}
+
+      {/* Select All */}
+      {filteredNotices.length > 0 && (
+        <div className="admin-select-all">
+          <Checkbox
+            checked={filteredNotices.every(n => selectedIds.has(n.id))}
+            onCheckedChange={toggleSelectAll}
+          />
           <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
         </div>
       )}
 
-      <AdminPagination total={notices.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1); }} />
+      <AdminPagination total={filteredNotices.length} page={page} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1); }} />
 
       {(() => {
-        const pagedNotices = paginateItems(notices, page, pageSize);
+        const pagedNotices = paginateItems(filteredNotices, page, pageSize);
         return (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={pagedNotices.map(n => n.id)} strategy={verticalListSortingStrategy}>
               <div className="border border-border rounded-lg divide-y divide-border overflow-hidden">
                 {/* Desktop header */}
-                <div className="hidden md:grid md:grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-3 items-center px-4 py-2 bg-muted/40 text-xs font-medium text-muted-foreground">
+                <div className="hidden md:grid md:grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-3 items-center px-4 py-2.5 admin-table-header">
                   <span className="w-10" />
                   <span>Title</span>
                   <span className="w-24">Date</span>
@@ -245,7 +277,9 @@ const AdminNotices = () => {
                 </div>
 
                 {pagedNotices.length === 0 && (
-                  <div className="p-8 text-center text-muted-foreground text-sm">No notices found.</div>
+                  <div className="p-8 text-center text-muted-foreground text-sm">
+                    {isFiltering ? "No notices match your search." : "No notices found."}
+                  </div>
                 )}
 
                 {pagedNotices.map(n => {
@@ -259,9 +293,9 @@ const AdminNotices = () => {
                       <div className={`transition-colors ${selectedIds.has(n.id) ? "bg-primary/5" : ""} ${isExpired ? "opacity-50" : ""}`}>
                         {/* Desktop compact row */}
                         <div className="hidden md:grid md:grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-3 items-center px-3 py-3">
-                          <button onClick={() => toggleSelect(n.id)} className="text-muted-foreground hover:text-foreground transition-colors w-10">
-                            {selectedIds.has(n.id) ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
-                          </button>
+                          <div className="w-10">
+                            <Checkbox checked={selectedIds.has(n.id)} onCheckedChange={() => toggleSelect(n.id)} />
+                          </div>
                           <span className="text-sm font-medium text-foreground truncate">{n.title}</span>
                           <span className="w-24 text-xs text-muted-foreground">{formatDate(n.date)}</span>
                           <span className="w-24 text-xs text-muted-foreground">{a.expires_at ? formatDate(a.expires_at) : "—"}</span>
@@ -286,9 +320,7 @@ const AdminNotices = () => {
                         {/* Mobile compact row */}
                         <div className="md:hidden px-3 py-3 space-y-1.5">
                           <div className="flex items-center gap-2">
-                            <button onClick={() => toggleSelect(n.id)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                              {selectedIds.has(n.id) ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
-                            </button>
+                            <Checkbox checked={selectedIds.has(n.id)} onCheckedChange={() => toggleSelect(n.id)} className="shrink-0" />
                             <span className="text-sm font-medium text-foreground truncate flex-1">{n.title}</span>
                             {a.is_pinned && <Pin size={14} className="text-primary fill-primary shrink-0" />}
                           </div>
