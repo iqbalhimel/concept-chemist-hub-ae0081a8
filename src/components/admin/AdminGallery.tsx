@@ -63,6 +63,7 @@ const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }
 
 const AdminGallery = () => {
   const csrfGuard = useCsrfGuard();
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<string | null>(null);
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
