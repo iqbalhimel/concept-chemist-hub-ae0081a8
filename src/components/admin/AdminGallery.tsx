@@ -251,20 +251,15 @@ const AdminGallery = () => {
   };
   const bulkDeleteItems = async () => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`Delete ${selectedIds.size} selected image(s)?`)) return;
+    if (!window.confirm(`Move ${selectedIds.size} selected image(s) to trash?`)) return;
     await csrfGuard(async () => {
       setBulkDeleting(true);
-      // Remove storage files and DB records
+      const now = new Date().toISOString();
       for (const id of selectedIds) {
-        const item = items.find(i => i.id === id);
-        if (item?.image_url) {
-          const urlParts = item.image_url.split("/media/");
-          if (urlParts[1]) await supabase.storage.from("media").remove([urlParts[1]]);
-        }
-        await supabase.from("gallery").delete().eq("id", id);
+        await (supabase as any).from("gallery").update({ trashed_at: now }).eq("id", id);
       }
       setItems(prev => prev.filter(i => !selectedIds.has(i.id)));
-      toast.success(`${selectedIds.size} image(s) deleted`);
+      toast.success(`${selectedIds.size} image(s) moved to trash`);
       setSelectedIds(new Set());
       setBulkDeleting(false);
     });
