@@ -9,6 +9,7 @@ import BlogReactions from "@/components/BlogReactions";
 import BlogComments from "@/components/BlogComments";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { sanitizeHtml } from "@/lib/sanitize";
+import RelatedCrossContent from "@/components/RelatedCrossContent";
 
 interface BlogPostType {
   id: string;
