@@ -303,8 +303,8 @@ const AdminNotices = () => {
                           <span className="text-sm font-medium text-foreground truncate">{n.title}</span>
                           <span className="w-24 text-xs text-muted-foreground">{formatDate(n.date)}</span>
                           <span className="w-24 text-xs text-muted-foreground">{a.expires_at ? formatDate(a.expires_at) : "—"}</span>
-                          <span className={`w-16 text-center text-xs font-medium ${n.is_active ? "text-emerald-600" : "text-muted-foreground"}`}>
-                            {n.is_active ? "Active" : "Inactive"}
+                          <span className="w-16 text-center">
+                            <ContentStatusBadge status={contentStatus} />
                           </span>
                           <span className="w-16 text-center">
                             {a.is_pinned ? <Pin size={14} className="text-primary fill-primary mx-auto" /> : <span className="text-muted-foreground/30">—</span>}
