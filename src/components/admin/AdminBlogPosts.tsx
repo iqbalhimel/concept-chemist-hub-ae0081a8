@@ -449,10 +449,11 @@ const AdminBlogPosts = () => {
 
       {/* Select All */}
       {filteredPosts.length > 0 && (
-        <div className="flex items-center gap-2">
-          <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground transition-colors">
-            {filteredPosts.every(p => selectedIds.has(p.id)) ? <CheckSquare size={16} /> : <Square size={16} />}
-          </button>
+        <div className="admin-select-all">
+          <Checkbox
+            checked={filteredPosts.every(p => selectedIds.has(p.id))}
+            onCheckedChange={toggleSelectAll}
+          />
           <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
         </div>
       )}

@@ -287,7 +287,7 @@ const AdminTestimonials = () => {
               <div className="space-y-2">
                 {paginated.map(item => (
                   <SortableRow key={item.id} id={item.id}>
-                    <div className={`border rounded-lg p-4 transition-colors ${editId === item.id ? "border-primary bg-primary/5" : selectedIds.has(item.id) ? "border-primary/30 bg-primary/5" : "border-border bg-card"}`}>
+                    <div className={`admin-row p-4 ${editId === item.id ? "selected border-primary" : selectedIds.has(item.id) ? "selected" : ""}`}>
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />

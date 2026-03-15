@@ -183,7 +183,7 @@ const AdminFAQ = () => {
           )}
           {items.map(item => (
             <SortableRow key={item.id} id={item.id}>
-              <div className={`glass-card p-3 w-full max-w-full min-w-0 overflow-hidden ${selectedIds.has(item.id) ? "border-primary/30 bg-primary/5" : ""}`}>
+              <div className={`admin-card p-3 w-full max-w-full min-w-0 overflow-hidden ${selectedIds.has(item.id) ? "selected" : ""}`}>
                 {/* Desktop */}
                 <div className="hidden md:flex items-center gap-4">
                   <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
