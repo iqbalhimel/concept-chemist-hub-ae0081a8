@@ -74,6 +74,10 @@ const BlogPost = () => {
       setLoading(false);
 
       if (p) {
+        trackContentView("blog_post", p.id);
+      }
+
+      if (p) {
         const postSlug = p.slug || p.id;
         const defaultOgImage = get("seo", "og_image", "");
         const autoCanonical = `https://iqbalsir.bd/blog/${postSlug}`;
