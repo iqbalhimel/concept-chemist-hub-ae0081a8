@@ -20,26 +20,42 @@ Deno.serve(async (req) => {
   );
 
   // Fetch all content in parallel
-  const [postsRes, categoriesRes, noticesRes] = await Promise.all([
+  const [postsRes, categoriesRes, tagsRes, noticesRes, videosRes, materialsRes] = await Promise.all([
     supabase
       .from("blog_posts")
       .select("slug, id, updated_at")
       .eq("is_published", true)
+      .is("trashed_at", null)
       .order("sort_order", { ascending: true }),
     supabase
       .from("study_categories")
       .select("slug")
       .eq("is_active", true),
     supabase
+      .from("tags")
+      .select("slug"),
+    supabase
       .from("notices")
       .select("id, updated_at")
       .eq("is_active", true)
       .order("sort_order", { ascending: true }),
+    supabase
+      .from("educational_videos")
+      .select("id, updated_at")
+      .eq("is_published", true),
+    supabase
+      .from("study_materials")
+      .select("id, updated_at")
+      .eq("is_active", true)
+      .is("trashed_at", null),
   ]);
 
   const posts = postsRes.data;
   const categories = categoriesRes.data;
+  const tags = tagsRes.data;
   const notices = noticesRes.data;
+  const videos = videosRes.data;
+  const materials = materialsRes.data;
 
   const langs = ["en", "bn"];
   let urls = "";
@@ -66,6 +82,7 @@ Deno.serve(async (req) => {
   addUrl("/testimonials", "0.7", "weekly");
   addUrl("/notices", "0.7", "daily");
   addUrl("/resources", "0.8", "weekly");
+  addUrl("/videos", "0.7", "weekly");
 
   // Blog posts
   if (posts) {
@@ -76,8 +93,36 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Notices (individual notice pages if they exist, otherwise just the listing)
-  // The listing is already covered above
+  // Blog category pages
+  if (categories) {
+    for (const cat of categories) {
+      addUrl(`/blog/category/${cat.slug}`, "0.6", "weekly");
+    }
+  }
+
+  // Blog tag pages
+  if (tags) {
+    for (const tag of tags) {
+      addUrl(`/blog/tag/${tag.slug}`, "0.5", "weekly");
+    }
+  }
+
+  // Educational videos (videos page with anchor or individual)
+  if (videos) {
+    for (const video of videos) {
+      const lastmod = video.updated_at ? video.updated_at.split("T")[0] : undefined;
+      // Videos are displayed on the listing page; include individual anchors
+      addUrl(`/videos#${video.id}`, "0.4", "monthly", lastmod);
+    }
+  }
+
+  // Study materials
+  if (materials) {
+    for (const mat of materials) {
+      const lastmod = mat.updated_at ? mat.updated_at.split("T")[0] : undefined;
+      addUrl(`/resources#${mat.id}`, "0.4", "monthly", lastmod);
+    }
+  }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"

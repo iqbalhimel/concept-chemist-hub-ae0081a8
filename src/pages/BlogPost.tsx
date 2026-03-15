@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Clock, User, Calendar, ArrowUpRight, Share2, Link2, Check } from "lucide-react";
-import { setSeo, generateArticleSchema } from "@/lib/seo";
+import { setSeo, generateArticleSchema, generateBreadcrumbSchema } from "@/lib/seo";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Button } from "@/components/ui/button";
 import BlogReactions from "@/components/BlogReactions";
@@ -92,7 +92,15 @@ const BlogPost = () => {
           twitterTitle: pa.seo_twitter_title || undefined,
           twitterDescription: pa.seo_twitter_description || undefined,
           twitterImage: pa.seo_twitter_image || undefined,
-          jsonLd: generateArticleSchema(p),
+          jsonLd: [
+            generateArticleSchema(p),
+            generateBreadcrumbSchema([
+              { name: "Home", url: "https://iqbalsir.bd" },
+              { name: "Blog", url: "https://iqbalsir.bd/blog" },
+              { name: p.category, url: `https://iqbalsir.bd/blog/category/${p.category.toLowerCase().replace(/\s+/g, "-")}` },
+              { name: p.title, url: autoCanonical },
+            ]),
+          ],
         });
         // Set OG overrides if present
         if (pa.seo_og_title) {

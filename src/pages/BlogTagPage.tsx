@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowUpRight, Clock, User, ChevronLeft, ChevronRight, MessageSquare, ArrowLeft } from "lucide-react";
 import OptimizedImage from "@/components/OptimizedImage";
-import { setSeo } from "@/lib/seo";
+import { setSeo, generateBreadcrumbSchema } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -38,6 +38,11 @@ const BlogTagPage = () => {
       url: `https://iqbalsir.bd/blog/tag/${slug}`,
       canonicalUrl: `https://iqbalsir.bd/blog/tag/${slug}`,
       type: "website",
+      jsonLd: generateBreadcrumbSchema([
+        { name: "Home", url: "https://iqbalsir.bd" },
+        { name: "Blog", url: "https://iqbalsir.bd/blog" },
+        { name: `Tag: ${tagName}`, url: `https://iqbalsir.bd/blog/tag/${slug}` },
+      ]),
     });
     return cleanup;
   }, [tagName, slug]);

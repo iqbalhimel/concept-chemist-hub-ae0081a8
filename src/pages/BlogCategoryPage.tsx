@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowUpRight, Clock, User, ChevronLeft, ChevronRight, MessageSquare, ArrowLeft } from "lucide-react";
 import OptimizedImage from "@/components/OptimizedImage";
-import { setSeo } from "@/lib/seo";
+import { setSeo, generateBreadcrumbSchema } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBlogCategories } from "@/hooks/useBlogCategories";
@@ -43,6 +43,11 @@ const BlogCategoryPage = () => {
       url: `https://iqbalsir.bd/blog/category/${slug}`,
       canonicalUrl: `https://iqbalsir.bd/blog/category/${slug}`,
       type: "website",
+      jsonLd: generateBreadcrumbSchema([
+        { name: "Home", url: "https://iqbalsir.bd" },
+        { name: "Blog", url: "https://iqbalsir.bd/blog" },
+        { name: categoryName, url: `https://iqbalsir.bd/blog/category/${slug}` },
+      ]),
     });
     return cleanup;
   }, [categoryName, slug]);

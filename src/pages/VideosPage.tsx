@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, X, Clock, Tag, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import OptimizedImage from "@/components/OptimizedImage";
-import { setSeo } from "@/lib/seo";
+import { setSeo, generateVideoObjectSchema, generateBreadcrumbSchema } from "@/lib/seo";
 import RelatedBlogPosts from "@/components/RelatedBlogPosts";
 import { trackContentView } from "@/lib/trackContentView";
 
@@ -50,9 +50,29 @@ const VideosPage = () => {
       .or(`expire_at.is.null,expire_at.gte.${now}`)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        if (data) setVideos(data as Video[]);
+        if (data) {
+          setVideos(data as Video[]);
+          // Inject VideoObject schemas for first 10 videos + breadcrumb
+          const videoSchemas = (data as Video[]).slice(0, 10).map(v => generateVideoObjectSchema(v));
+          const breadcrumb = generateBreadcrumbSchema([
+            { name: "Home", url: "https://iqbalsir.bd" },
+            { name: "Videos", url: "https://iqbalsir.bd/videos" },
+          ]);
+          setSeo({
+            title: "Educational Videos – Iqbal Sir",
+            description: "Browse video lessons by Iqbal Sir covering Physics, Chemistry, and more for SSC & HSC students.",
+            url: "https://iqbalsir.bd/videos",
+            canonicalUrl: "https://iqbalsir.bd/videos",
+            type: "website",
+            jsonLd: [breadcrumb, ...videoSchemas],
+          });
+        }
         setLoading(false);
       });
+
+    return () => {
+      // Cleanup will be handled by next setSeo call
+    };
   }, []);
 
   const subjects = [...new Set(videos.map(v => v.subject).filter(Boolean))];

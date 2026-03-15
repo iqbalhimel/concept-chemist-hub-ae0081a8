@@ -151,6 +151,20 @@ export function generateEducationalOrgSchema(seoSettings: Record<string, string>
   };
 }
 
+export function generateWebSiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Iqbal Sir – Science Teacher",
+    url: "https://iqbalsir.bd",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://iqbalsir.bd/en/blog?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
 export function generateArticleSchema(post: {
   title: string;
   excerpt?: string | null;
@@ -172,6 +186,39 @@ export function generateArticleSchema(post: {
       "@type": "Person",
       name: "Iqbal Sir",
     },
+  };
+}
+
+export function generateVideoObjectSchema(video: {
+  title: string;
+  description?: string | null;
+  thumbnail_url?: string | null;
+  video_url?: string | null;
+  duration?: string | null;
+  created_at: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name: video.title,
+    description: video.description || video.title,
+    thumbnailUrl: video.thumbnail_url || undefined,
+    contentUrl: video.video_url || undefined,
+    uploadDate: video.created_at,
+    duration: video.duration ? `PT${video.duration.replace(/\s/g, "").toUpperCase()}` : undefined,
+  };
+}
+
+export function generateBreadcrumbSchema(items: { name: string; url: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.url,
+    })),
   };
 }
 
