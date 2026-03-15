@@ -490,6 +490,7 @@ const AdminBlogPosts = () => {
               </Button>
             </div>
           )}
+          <Button onClick={() => setShowTrash(true)} size="sm" variant="outline"><Trash2 size={14} className="mr-1" /> Trash</Button>
           <Button onClick={add} size="sm"><Plus size={14} className="mr-1" /> Add Post</Button>
         </div>
       </div>
