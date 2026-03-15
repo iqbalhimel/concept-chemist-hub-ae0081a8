@@ -207,13 +207,14 @@ const AdminTestimonials = () => {
   };
   const bulkDeleteItems = async () => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`Delete ${selectedIds.size} selected testimonial(s)?`)) return;
+    if (!window.confirm(`Move ${selectedIds.size} selected testimonial(s) to trash?`)) return;
     await csrfGuard(async () => {
       setBulkDeleting(true);
-      await Promise.all([...selectedIds].map(id => supabase.from("testimonials").delete().eq("id", id)));
+      const now = new Date().toISOString();
+      await Promise.all([...selectedIds].map(id => (supabase as any).from("testimonials").update({ trashed_at: now }).eq("id", id)));
       setItems(prev => prev.filter(i => !selectedIds.has(i.id)));
       if (editId && selectedIds.has(editId)) resetForm();
-      toast.success(`${selectedIds.size} testimonial(s) deleted`);
+      toast.success(`${selectedIds.size} testimonial(s) moved to trash`);
       setSelectedIds(new Set());
       setBulkDeleting(false);
     });
