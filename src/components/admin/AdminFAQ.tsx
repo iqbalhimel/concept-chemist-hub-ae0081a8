@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,9 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
-import { Plus, Trash2, Save, GripVertical, Pencil, X } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pencil, X, Search } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -47,6 +48,9 @@ const AdminFAQ = () => {
   const [orderChanged, setOrderChanged] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "all">(10);
   const titleRef = useRef<HTMLInputElement>(null);
   const newIdRef = useRef<string | null>(null);
 
@@ -66,6 +70,18 @@ const AdminFAQ = () => {
     setItems((data as FAQItem[]) || []);
     setLoading(false);
   };
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return items;
+    const q = searchQuery.toLowerCase();
+    return items.filter(i =>
+      i.question.toLowerCase().includes(q) ||
+      i.answer.toLowerCase().includes(q) ||
+      i.question_bn.toLowerCase().includes(q)
+    );
+  }, [items, searchQuery]);
+
+  const isFiltering = searchQuery.trim() !== "";
 
   const add = async () => {
     await csrfGuard(async () => {
@@ -136,7 +152,7 @@ const AdminFAQ = () => {
     setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   };
   const toggleSelectAll = () => {
-    const allIds = items.map(i => i.id);
+    const allIds = filteredItems.map(i => i.id);
     setSelectedIds(allIds.every(id => selectedIds.has(id)) ? new Set() : new Set(allIds));
   };
   const bulkDeleteItems = async () => {
@@ -156,8 +172,11 @@ const AdminFAQ = () => {
 
   return (
     <div className="space-y-4 w-full max-w-full min-w-0">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="font-display text-2xl font-bold text-foreground">FAQ</h2>
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2 -mt-2">
+        <h2 className="font-display text-2xl font-bold text-foreground">
+          FAQ <span className="text-base font-normal text-muted-foreground">({items.length})</span>
+        </h2>
         <div className="flex gap-2 flex-wrap">
           {selectedIds.size > 0 && (
             <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting} className="animate-in fade-in">
@@ -169,41 +188,56 @@ const AdminFAQ = () => {
         </div>
       </div>
 
+      {/* Search */}
+      <div className="relative">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input className="pl-9 h-9" placeholder="Search FAQs..." value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setPage(1); }} />
+        {searchQuery && (
+          <button className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setSearchQuery("")}>
+            <X size={14} />
+          </button>
+        )}
+      </div>
+      {isFiltering && (
+        <p className="text-xs text-muted-foreground">
+          Showing {filteredItems.length} of {items.length} FAQs matching "{searchQuery}"
+        </p>
+      )}
+
+      {/* Select All */}
+      {filteredItems.length > 0 && (
+        <div className="admin-select-all">
+          <Checkbox
+            checked={filteredItems.every(i => selectedIds.has(i.id))}
+            onCheckedChange={toggleSelectAll}
+          />
+          <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
+        </div>
+      )}
+
+      <AdminPagination
+        total={filteredItems.length}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+      />
+
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-          {items.length === 0 && <p className="text-muted-foreground text-sm">No FAQs added yet.</p>}
-          {items.length > 0 && (
-            <div className="admin-select-all">
-              <Checkbox
-                checked={items.every(i => selectedIds.has(i.id))}
-                onCheckedChange={toggleSelectAll}
-              />
-              <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
-            </div>
+        <SortableContext items={paginateItems(filteredItems, page, pageSize).map(i => i.id)} strategy={verticalListSortingStrategy}>
+          {filteredItems.length === 0 && (
+            <p className="text-muted-foreground text-sm text-center py-10">
+              {isFiltering ? "No FAQs match your search." : "No FAQs added yet."}
+            </p>
           )}
-          {items.map(item => (
-            <SortableRow key={item.id} id={item.id}>
-              <div className={`admin-card p-3 w-full max-w-full min-w-0 overflow-hidden ${selectedIds.has(item.id) ? "selected" : ""}`}>
-                {/* Desktop */}
-                <div className="hidden md:flex items-center gap-4">
-                  <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
-                  <span className="flex-1 font-medium text-foreground truncate">{item.question}</span>
-                  <div className="flex items-center gap-1 text-xs">
-                    <Switch checked={item.is_active} onCheckedChange={() => toggleActive(item)} />
-                    <span className={item.is_active ? "text-green-500" : "text-muted-foreground"}>{item.is_active ? "Active" : "Inactive"}</span>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="ghost" onClick={() => { setExpandedEditId(expandedEditId === item.id ? null : item.id); setExpandedDeleteId(null); }}><Pencil size={14} /></Button>
-                    <Button size="sm" variant="ghost" onClick={() => { setExpandedDeleteId(expandedDeleteId === item.id ? null : item.id); setExpandedEditId(null); }}><Trash2 size={14} /></Button>
-                  </div>
-                </div>
-                {/* Mobile */}
-                <div className="md:hidden space-y-2">
-                  <div className="flex items-center gap-2">
+          <div className="space-y-2">
+            {paginateItems(filteredItems, page, pageSize).map(item => (
+              <SortableRow key={item.id} id={item.id}>
+                <div className={`admin-card p-3 w-full max-w-full min-w-0 overflow-hidden ${selectedIds.has(item.id) ? "selected" : ""}`}>
+                  {/* Desktop */}
+                  <div className="hidden md:flex items-center gap-4">
                     <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
-                    <p className="font-medium text-foreground text-sm truncate">{item.question}</p>
-                  </div>
-                  <div className="flex items-center justify-between">
+                    <span className="flex-1 font-medium text-foreground truncate">{item.question}</span>
                     <div className="flex items-center gap-1 text-xs">
                       <Switch checked={item.is_active} onCheckedChange={() => toggleActive(item)} />
                       <span className={item.is_active ? "text-green-500" : "text-muted-foreground"}>{item.is_active ? "Active" : "Inactive"}</span>
@@ -213,48 +247,65 @@ const AdminFAQ = () => {
                       <Button size="sm" variant="ghost" onClick={() => { setExpandedDeleteId(expandedDeleteId === item.id ? null : item.id); setExpandedEditId(null); }}><Trash2 size={14} /></Button>
                     </div>
                   </div>
+                  {/* Mobile */}
+                  <div className="md:hidden space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
+                      <p className="font-medium text-foreground text-sm truncate">{item.question}</p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-xs">
+                        <Switch checked={item.is_active} onCheckedChange={() => toggleActive(item)} />
+                        <span className={item.is_active ? "text-green-500" : "text-muted-foreground"}>{item.is_active ? "Active" : "Inactive"}</span>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => { setExpandedEditId(expandedEditId === item.id ? null : item.id); setExpandedDeleteId(null); }}><Pencil size={14} /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => { setExpandedDeleteId(expandedDeleteId === item.id ? null : item.id); setExpandedEditId(null); }}><Trash2 size={14} /></Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Edit panel */}
+                  {expandedEditId === item.id && (
+                    <div className="mt-3 pt-3 border-t border-border space-y-3">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Question (English)</Label>
+                        <Input ref={titleRef} value={item.question} onChange={e => updateLocal(item.id, "question", e.target.value)} placeholder="Question in English" className="mt-1" />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Answer (English)</Label>
+                        <Textarea value={item.answer} onChange={e => updateLocal(item.id, "answer", e.target.value)} placeholder="Answer in English" rows={3} className="mt-1" />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">প্রশ্ন (বাংলা)</Label>
+                        <Input value={item.question_bn} onChange={e => updateLocal(item.id, "question_bn", e.target.value)} placeholder="বাংলায় প্রশ্ন লিখুন" className="mt-1" />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">উত্তর (বাংলা)</Label>
+                        <Textarea value={item.answer_bn} onChange={e => updateLocal(item.id, "answer_bn", e.target.value)} placeholder="বাংলায় উত্তর লিখুন" rows={3} className="mt-1" />
+                      </div>
+                      <div className="flex gap-2">
+                        <input type="hidden" name="_csrf" value={csrfToken || ""} />
+                        <Button size="sm" onClick={() => update(item.id, { question: item.question, answer: item.answer, question_bn: item.question_bn, answer_bn: item.answer_bn })}><Save size={14} className="mr-1" /> Save</Button>
+                        <Button size="sm" variant="outline" onClick={() => setExpandedEditId(null)}><X size={14} className="mr-1" /> Cancel</Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Delete confirmation */}
+                  {expandedDeleteId === item.id && (
+                    <div className="mt-3 pt-3 border-t border-destructive/30 space-y-2">
+                      <p className="text-sm text-destructive">Are you sure you want to delete this FAQ?</p>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => setExpandedDeleteId(null)}>Cancel</Button>
+                        <Button size="sm" variant="destructive" onClick={() => remove(item.id)}>Confirm Delete</Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {/* Edit panel */}
-                {expandedEditId === item.id && (
-                  <div className="mt-3 pt-3 border-t border-border space-y-3">
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Question (English)</Label>
-                      <Input ref={titleRef} value={item.question} onChange={e => updateLocal(item.id, "question", e.target.value)} placeholder="Question in English" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Answer (English)</Label>
-                      <Textarea value={item.answer} onChange={e => updateLocal(item.id, "answer", e.target.value)} placeholder="Answer in English" rows={3} className="mt-1" />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">প্রশ্ন (বাংলা)</Label>
-                      <Input value={item.question_bn} onChange={e => updateLocal(item.id, "question_bn", e.target.value)} placeholder="বাংলায় প্রশ্ন লিখুন" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">উত্তর (বাংলা)</Label>
-                      <Textarea value={item.answer_bn} onChange={e => updateLocal(item.id, "answer_bn", e.target.value)} placeholder="বাংলায় উত্তর লিখুন" rows={3} className="mt-1" />
-                    </div>
-                    <div className="flex gap-2">
-                      <input type="hidden" name="_csrf" value={csrfToken || ""} />
-                      <Button size="sm" onClick={() => update(item.id, { question: item.question, answer: item.answer, question_bn: item.question_bn, answer_bn: item.answer_bn })}><Save size={14} className="mr-1" /> Save</Button>
-                      <Button size="sm" variant="outline" onClick={() => setExpandedEditId(null)}><X size={14} className="mr-1" /> Cancel</Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Delete confirmation */}
-                {expandedDeleteId === item.id && (
-                  <div className="mt-3 pt-3 border-t border-destructive/30 space-y-2">
-                    <p className="text-sm text-destructive">Are you sure you want to delete this FAQ?</p>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => setExpandedDeleteId(null)}>Cancel</Button>
-                      <Button size="sm" variant="destructive" onClick={() => remove(item.id)}>Confirm Delete</Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </SortableRow>
-          ))}
+              </SortableRow>
+            ))}
+          </div>
         </SortableContext>
       </DndContext>
     </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, GripVertical, Pencil, Star, X, MessageSquareQuote } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Pencil, Star, X, MessageSquareQuote, Search } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCsrfGuard, useCsrfToken } from "@/hooks/useCsrfGuard";
 import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
@@ -71,6 +71,7 @@ const AdminTestimonials = () => {
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Form state
   const [form, setForm] = useState({
@@ -99,6 +100,19 @@ const AdminTestimonials = () => {
   };
 
   useEffect(() => { fetchItems(); }, []);
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return items;
+    const q = searchQuery.toLowerCase();
+    return items.filter(i =>
+      i.student_name.toLowerCase().includes(q) ||
+      i.student_info.toLowerCase().includes(q) ||
+      i.testimonial_text_en.toLowerCase().includes(q) ||
+      i.testimonial_text_bn.toLowerCase().includes(q)
+    );
+  }, [items, searchQuery]);
+
+  const isFiltering = searchQuery.trim() !== "";
 
   const resetForm = () => {
     setForm({ student_name: "", student_info: "", testimonial_text_en: "", testimonial_text_bn: "", rating: 5, sort_order: items.length, is_active: true });
@@ -171,7 +185,7 @@ const AdminTestimonials = () => {
     setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   };
   const toggleSelectAll = () => {
-    const allIds = items.map(i => i.id);
+    const allIds = filteredItems.map(i => i.id);
     setSelectedIds(allIds.every(id => selectedIds.has(id)) ? new Set() : new Set(allIds));
   };
   const bulkDeleteItems = async () => {
@@ -188,15 +202,15 @@ const AdminTestimonials = () => {
     });
   };
 
-  const paginated = paginateItems(items, page, pageSize);
+  const paginated = paginateItems(filteredItems, page, pageSize);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="font-display text-xl font-bold text-foreground">Testimonials</h2>
-          <p className="text-sm text-muted-foreground">{items.length} total</p>
-        </div>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2 -mt-2">
+        <h2 className="font-display text-2xl font-bold text-foreground">
+          Testimonials <span className="text-base font-normal text-muted-foreground">({items.length})</span>
+        </h2>
         <div className="flex gap-2 flex-wrap">
           {selectedIds.size > 0 && (
             <Button size="sm" variant="destructive" onClick={bulkDeleteItems} disabled={bulkDeleting} className="animate-in fade-in">
@@ -213,6 +227,22 @@ const AdminTestimonials = () => {
           </Button>
         </div>
       </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input className="pl-9 h-9" placeholder="Search testimonials..." value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setPage(1); }} />
+        {searchQuery && (
+          <button className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setSearchQuery("")}>
+            <X size={14} />
+          </button>
+        )}
+      </div>
+      {isFiltering && (
+        <p className="text-xs text-muted-foreground">
+          Showing {filteredItems.length} of {items.length} testimonials matching "{searchQuery}"
+        </p>
+      )}
 
       {/* Add/Edit Form */}
       {showForm && (
@@ -266,44 +296,55 @@ const AdminTestimonials = () => {
       {/* List */}
       {loading ? (
         <p className="text-muted-foreground text-sm">Loading...</p>
-      ) : items.length === 0 ? (
+      ) : filteredItems.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-border rounded-lg">
           <MessageSquareQuote size={40} className="mx-auto text-muted-foreground/30 mb-3" />
-          <p className="text-muted-foreground">No testimonials added yet.</p>
+          <p className="text-muted-foreground">{isFiltering ? "No testimonials match your search." : "No testimonials added yet."}</p>
         </div>
       ) : (
         <>
+          {/* Select All */}
+          <div className="admin-select-all">
+            <Checkbox
+              checked={filteredItems.every(i => selectedIds.has(i.id))}
+              onCheckedChange={toggleSelectAll}
+            />
+            <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
+          </div>
+
+          <AdminPagination
+            page={page}
+            pageSize={pageSize}
+            total={filteredItems.length}
+            onPageChange={setPage}
+            onPageSizeChange={(v) => { setPageSize(v); setPage(1); }}
+          />
+
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
-              {items.length > 0 && (
-                <div className="admin-select-all mb-2">
-                  <Checkbox
-                    checked={items.every(i => selectedIds.has(i.id))}
-                    onCheckedChange={toggleSelectAll}
-                  />
-                  <span className="text-xs text-muted-foreground">{selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}</span>
-                </div>
-              )}
+            <SortableContext items={paginated.map(i => i.id)} strategy={verticalListSortingStrategy}>
               <div className="space-y-2">
                 {paginated.map(item => (
                   <SortableRow key={item.id} id={item.id}>
                     <div className={`admin-row p-4 ${editId === item.id ? "selected border-primary" : selectedIds.has(item.id) ? "selected" : ""}`}>
-                      <div className="flex items-center justify-between gap-3">
+                      {/* Desktop */}
+                      <div className="hidden md:flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium text-foreground text-sm">{item.student_name}</span>
-                            <span className="text-xs text-muted-foreground">{item.student_info}</span>
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${item.is_active ? "bg-green-500/15 text-green-500" : "bg-muted text-muted-foreground"}`}>
-                              {item.is_active ? "Active" : "Inactive"}
-                            </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-medium text-foreground text-sm">{item.student_name}</span>
+                              <span className="text-xs text-muted-foreground">{item.student_info}</span>
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${item.is_active ? "bg-green-500/15 text-green-500" : "bg-muted text-muted-foreground"}`}>
+                                {item.is_active ? "Active" : "Inactive"}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 mt-1">
+                              {Array.from({ length: 5 }).map((_, s) => (
+                                <Star key={s} size={12} className={s < item.rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/20"} />
+                              ))}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.testimonial_text_en || item.testimonial_text_bn}</p>
                           </div>
-                          <div className="flex items-center gap-1 mt-1">
-                            {Array.from({ length: 5 }).map((_, s) => (
-                              <Star key={s} size={12} className={s < item.rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/20"} />
-                            ))}
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.testimonial_text_en || item.testimonial_text_bn}</p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleEdit(item)}>
@@ -314,22 +355,42 @@ const AdminTestimonials = () => {
                           </Button>
                         </div>
                       </div>
+
+                      {/* Mobile */}
+                      <div className="md:hidden space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Checkbox checked={selectedIds.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} className="shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-medium text-foreground text-sm">{item.student_name}</span>
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${item.is_active ? "bg-green-500/15 text-green-500" : "bg-muted text-muted-foreground"}`}>
+                                {item.is_active ? "Active" : "Inactive"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between pl-6">
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: 5 }).map((_, s) => (
+                              <Star key={s} size={10} className={s < item.rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/20"} />
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleEdit(item)}>
+                              <Pencil size={12} />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => handleDelete(item.id)}>
+                              <Trash2 size={12} />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </SortableRow>
                 ))}
               </div>
             </SortableContext>
           </DndContext>
-
-          {items.length > 10 && (
-            <AdminPagination
-              page={page}
-              pageSize={pageSize}
-              total={items.length}
-              onPageChange={setPage}
-              onPageSizeChange={(v) => { setPageSize(v); setPage(1); }}
-            />
-          )}
         </>
       )}
     </div>
