@@ -68,7 +68,7 @@ const AdminInsightsWidgets = () => {
         // Trash counts
         supabase.from("blog_posts").select("id", { count: "exact", head: true }).not("trashed_at", "is", null),
         supabase.from("notices").select("id", { count: "exact", head: true }).not("trashed_at", "is", null),
-        supabase.from("study_materials").select("id", { count: "exact", head: true }).not("trashed_at" as any, "is", null),
+        (supabase as any).from("study_materials").select("id", { count: "exact", head: true }).not("trashed_at", "is", null),
         supabase.from("testimonials").select("id", { count: "exact", head: true }).not("trashed_at", "is", null),
         supabase.from("gallery").select("id", { count: "exact", head: true }).not("trashed_at", "is", null),
       ]);
