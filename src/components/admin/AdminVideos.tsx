@@ -416,9 +416,13 @@ const AdminVideos = () => {
               <Label>Thumbnail {form.video_source === "upload" ? "*" : "(auto-synced)"}</Label>
               <div className="flex items-center gap-3 mt-1">
                 {form.thumbnail_url && <img src={form.thumbnail_url} alt="" className="w-24 h-14 object-cover rounded border border-border" />}
-                <Input type="file" accept="image/*" onChange={handleThumbnailUpload} disabled={uploading} className="min-w-0" />
+                <Input type="file" accept="image/*" onChange={handleThumbnailUpload} disabled={uploading} className="min-w-0 flex-1" />
+                <Button size="sm" variant="outline" onClick={() => setThumbPickerOpen(true)} type="button">
+                  <FolderOpen size={14} />
+                </Button>
               </div>
               {form.video_source !== "upload" && !form.thumbnail_url && <p className="text-xs text-muted-foreground mt-1">Paste a video URL below to auto-fetch thumbnail</p>}
+              <MediaPickerDialog open={thumbPickerOpen} onOpenChange={setThumbPickerOpen} onSelect={(url) => setForm(p => ({ ...p, thumbnail_url: url }))} accept="image" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

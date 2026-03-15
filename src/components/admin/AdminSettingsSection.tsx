@@ -133,8 +133,17 @@ const AdminSettingsSection = ({ section }: Props) => {
                 <Upload size={14} className="mr-1" />
                 {uploading === field.name ? "Uploading..." : "Upload"}
               </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => setPickerField(field.name)}>
+                <FolderOpen size={14} />
+              </Button>
             </div>
             {value && <img src={value} alt="Preview" className="mt-2 h-16 rounded-md border border-border object-contain" />}
+            <MediaPickerDialog
+              open={pickerField === field.name}
+              onOpenChange={(open) => { if (!open) setPickerField(null); }}
+              onSelect={(url) => update(field.name, url)}
+              accept="image"
+            />
           </div>
         );
       case "range":

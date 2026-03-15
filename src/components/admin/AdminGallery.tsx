@@ -423,6 +423,16 @@ const AdminGallery = () => {
           </DndContext>
         );
       })()}
+      <MediaPickerDialog
+        open={!!mediaPickerTarget}
+        onOpenChange={(open) => { if (!open) setMediaPickerTarget(null); }}
+        onSelect={(url) => {
+          if (mediaPickerTarget) {
+            updateLocal(mediaPickerTarget, "image_url", url);
+          }
+        }}
+        accept="image"
+      />
     </div>
   );
 };
