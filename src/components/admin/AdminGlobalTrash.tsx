@@ -292,6 +292,11 @@ const AdminGlobalTrash = () => {
             All deleted items across modules · Auto-deleted after 30 days
           </p>
         </div>
+        {items.length > 0 && (
+          <Button size="sm" variant="destructive" disabled={processing} onClick={emptyAllTrash}>
+            <Trash2 size={14} className="mr-1" /> Empty All Trash
+          </Button>
+        )}
       </div>
 
       {/* Search + Filter */}
