@@ -256,12 +256,12 @@ const AdminDashboard = () => {
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform lg:translate-x-0 flex flex-col h-[100dvh] lg:h-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card/95 backdrop-blur-sm border-r border-border transform transition-transform lg:translate-x-0 flex flex-col h-[100dvh] lg:h-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <h1 className="font-display text-lg font-bold gradient-text">Admin Panel</h1>
-          <button className="lg:hidden text-muted-foreground" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
+          <button className="lg:hidden text-muted-foreground hover:text-foreground transition-colors" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
         </div>
-        <nav className="p-3 space-y-0.5 flex-1 overflow-y-auto min-h-0">
+        <nav className="p-3 space-y-0.5 flex-1 overflow-y-auto min-h-0 scrollbar-thin">
           {navigation.map((entry, idx) => {
             if (!isGroup(entry)) {
               return renderNavItem(entry);
