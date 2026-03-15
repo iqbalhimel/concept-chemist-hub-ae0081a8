@@ -460,6 +460,20 @@ const AdminBlogPosts = () => {
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
+  if (showTrash) {
+    return (
+      <AdminTrashView
+        tableName="blog_posts"
+        moduleName="blog_posts"
+        labelSingular="post"
+        labelPlural="Posts"
+        getTitle={(item: any) => item.title}
+        getSubtitle={(item: any) => item.category}
+        onBack={() => { setShowTrash(false); fetchAll(); }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
