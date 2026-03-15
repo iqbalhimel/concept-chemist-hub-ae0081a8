@@ -673,7 +673,6 @@ const AdminStudyMaterials = () => {
                                 <span>{item.file_size || "—"}</span>
                               </div>
                               <ContentStatusBadge status={getContentStatus({ isActive: item.is_active, publishAt: (item as any).publish_at, expireAt: (item as any).expire_at })} />
-                              </span>
                             </div>
                             <div className="flex gap-2 pl-6">
                               <Button
