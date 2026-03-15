@@ -18,6 +18,7 @@ import {
   arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import AdminTrashView from "@/components/admin/AdminTrashView";
 
 interface Testimonial {
   id: string;
@@ -73,6 +74,7 @@ const AdminTestimonials = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showTrash, setShowTrash] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
@@ -94,6 +96,7 @@ const AdminTestimonials = () => {
     const { data, error } = await supabase
       .from("testimonials")
       .select("*")
+      .is("trashed_at" as any, null)
       .order("sort_order", { ascending: true });
     if (error) toast.error("Failed to load testimonials");
     else setItems((data as Testimonial[]) || []);
@@ -161,13 +164,13 @@ const AdminTestimonials = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this testimonial?")) return;
+    if (!confirm("Move this testimonial to trash?")) return;
     await csrfGuard(async () => {
       const item = items.find(i => i.id === id);
-      const { error } = await supabase.from("testimonials").delete().eq("id", id);
-      if (error) toast.error("Delete failed");
+      const { error } = await (supabase as any).from("testimonials").update({ trashed_at: new Date().toISOString() }).eq("id", id);
+      if (error) toast.error("Failed");
       else {
-        toast.success("Deleted");
+        toast.success("Moved to trash");
         logAdminActivity({ action: "delete", module: "testimonials", itemId: id, itemTitle: item?.student_name });
         if (editId === id) resetForm(); fetchItems();
       }
@@ -204,19 +207,34 @@ const AdminTestimonials = () => {
   };
   const bulkDeleteItems = async () => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`Delete ${selectedIds.size} selected testimonial(s)?`)) return;
+    if (!window.confirm(`Move ${selectedIds.size} selected testimonial(s) to trash?`)) return;
     await csrfGuard(async () => {
       setBulkDeleting(true);
-      await Promise.all([...selectedIds].map(id => supabase.from("testimonials").delete().eq("id", id)));
+      const now = new Date().toISOString();
+      await Promise.all([...selectedIds].map(id => (supabase as any).from("testimonials").update({ trashed_at: now }).eq("id", id)));
       setItems(prev => prev.filter(i => !selectedIds.has(i.id)));
       if (editId && selectedIds.has(editId)) resetForm();
-      toast.success(`${selectedIds.size} testimonial(s) deleted`);
+      toast.success(`${selectedIds.size} testimonial(s) moved to trash`);
       setSelectedIds(new Set());
       setBulkDeleting(false);
     });
   };
 
   const paginated = paginateItems(filteredItems, page, pageSize);
+
+  if (showTrash) {
+    return (
+      <AdminTrashView
+        tableName="testimonials"
+        moduleName="testimonials"
+        labelSingular="testimonial"
+        labelPlural="Testimonials"
+        getTitle={(item: any) => item.student_name}
+        getSubtitle={(item: any) => item.student_info}
+        onBack={() => { setShowTrash(false); fetchItems(); }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -231,6 +249,7 @@ const AdminTestimonials = () => {
               <Save size={14} className="mr-1" /> Save Order
             </Button>
           )}
+          <Button onClick={() => setShowTrash(true)} size="sm" variant="outline"><Trash2 size={14} className="mr-1" /> Trash</Button>
           <Button onClick={() => { resetForm(); setShowForm(true); setForm(f => ({ ...f, sort_order: items.length })); }} size="sm">
             <Plus size={14} className="mr-1" /> Add Testimonial
           </Button>

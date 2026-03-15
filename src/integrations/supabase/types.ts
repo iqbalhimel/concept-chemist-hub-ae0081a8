@@ -173,6 +173,7 @@ export type Database = {
           slug: string | null
           sort_order: number
           title: string
+          trashed_at: string | null
           updated_at: string
         }
         Insert: {
@@ -199,6 +200,7 @@ export type Database = {
           slug?: string | null
           sort_order?: number
           title: string
+          trashed_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -225,6 +227,7 @@ export type Database = {
           slug?: string | null
           sort_order?: number
           title?: string
+          trashed_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -445,6 +448,7 @@ export type Database = {
           label: string | null
           sort_order: number
           span: string | null
+          trashed_at: string | null
         }
         Insert: {
           alt?: string | null
@@ -454,6 +458,7 @@ export type Database = {
           label?: string | null
           sort_order?: number
           span?: string | null
+          trashed_at?: string | null
         }
         Update: {
           alt?: string | null
@@ -463,6 +468,7 @@ export type Database = {
           label?: string | null
           sort_order?: number
           span?: string | null
+          trashed_at?: string | null
         }
         Relationships: []
       }
@@ -524,6 +530,7 @@ export type Database = {
           seo_twitter_title: string | null
           sort_order: number
           title: string
+          trashed_at: string | null
           updated_at: string
         }
         Insert: {
@@ -547,6 +554,7 @@ export type Database = {
           seo_twitter_title?: string | null
           sort_order?: number
           title: string
+          trashed_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -570,6 +578,7 @@ export type Database = {
           seo_twitter_title?: string | null
           sort_order?: number
           title?: string
+          trashed_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -729,6 +738,7 @@ export type Database = {
           seo_twitter_title: string | null
           sort_order: number
           title: string
+          trashed_at: string | null
           updated_at: string
         }
         Insert: {
@@ -753,6 +763,7 @@ export type Database = {
           seo_twitter_title?: string | null
           sort_order?: number
           title: string
+          trashed_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -777,6 +788,7 @@ export type Database = {
           seo_twitter_title?: string | null
           sort_order?: number
           title?: string
+          trashed_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -861,6 +873,7 @@ export type Database = {
           student_name: string
           testimonial_text_bn: string
           testimonial_text_en: string
+          trashed_at: string | null
         }
         Insert: {
           created_at?: string
@@ -872,6 +885,7 @@ export type Database = {
           student_name: string
           testimonial_text_bn?: string
           testimonial_text_en?: string
+          trashed_at?: string | null
         }
         Update: {
           created_at?: string
@@ -883,6 +897,7 @@ export type Database = {
           student_name?: string
           testimonial_text_bn?: string
           testimonial_text_en?: string
+          trashed_at?: string | null
         }
         Relationships: []
       }

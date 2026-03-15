@@ -22,6 +22,8 @@ import SeoFieldsPanel from "@/components/admin/SeoFieldsPanel";
 import { validateTextInput, stripHtml } from "@/lib/sanitize";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
+import AdminTrashView from "@/components/admin/AdminTrashView";
+
 type Notice = Tables<"notices">;
 
 const formatDate = (d: string) => {
@@ -57,6 +59,7 @@ const AdminNotices = () => {
   const [newNoticeId, setNewNoticeId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [expandedEditId, setExpandedEditId] = useState<string | null>(null);
@@ -87,7 +90,7 @@ const AdminNotices = () => {
   }, [newNoticeId]);
 
   const fetchNotices = async () => {
-    const { data } = await supabase.from("notices").select("*").order("sort_order", { ascending: true });
+    const { data } = await supabase.from("notices").select("*").is("trashed_at", null).order("sort_order", { ascending: true });
     setNotices(data || []);
     setLoading(false);
     setOrderDirty(false);
@@ -158,11 +161,11 @@ const AdminNotices = () => {
   const deleteNotice = async (id: string) => {
     await csrfGuard(async () => {
       const notice = notices.find(n => n.id === id);
-      await supabase.from("notices").delete().eq("id", id);
+      await (supabase as any).from("notices").update({ trashed_at: new Date().toISOString() }).eq("id", id);
       setNotices(prev => prev.filter(n => n.id !== id));
       setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
       setExpandedDeleteId(null);
-      toast.success("Deleted");
+      toast.success("Moved to trash");
       logAdminActivity({ action: "delete", module: "notices", itemId: id, itemTitle: notice?.title });
     });
   };
@@ -176,12 +179,13 @@ const AdminNotices = () => {
   };
   const bulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`Delete ${selectedIds.size} selected notice(s)?`)) return;
+    if (!window.confirm(`Move ${selectedIds.size} selected notice(s) to trash?`)) return;
     await csrfGuard(async () => {
       setBulkDeleting(true);
-      for (const id of selectedIds) { await supabase.from("notices").delete().eq("id", id); }
+      const now = new Date().toISOString();
+      for (const id of selectedIds) { await (supabase as any).from("notices").update({ trashed_at: now }).eq("id", id); }
       setNotices(prev => prev.filter(n => !selectedIds.has(n.id)));
-      toast.success(`${selectedIds.size} notice(s) deleted`);
+      toast.success(`${selectedIds.size} notice(s) moved to trash`);
       setSelectedIds(new Set());
       setBulkDeleting(false);
     });
@@ -213,6 +217,20 @@ const AdminNotices = () => {
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
+  if (showTrash) {
+    return (
+      <AdminTrashView
+        tableName="notices"
+        moduleName="notices"
+        labelSingular="notice"
+        labelPlural="Notices"
+        getTitle={(item: any) => item.title}
+        getSubtitle={(item: any) => item.date}
+        onBack={() => { setShowTrash(false); fetchNotices(); }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4 relative">
       {/* Header */}
@@ -229,6 +247,7 @@ const AdminNotices = () => {
               </Button>
             </>
           )}
+          <Button onClick={() => setShowTrash(true)} size="sm" variant="outline"><Trash2 size={14} className="mr-1" /> Trash</Button>
           <Button onClick={addNotice} size="sm"><Plus size={14} className="mr-1" /> Add Notice</Button>
         </div>
       </div>

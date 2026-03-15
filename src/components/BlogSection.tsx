@@ -18,7 +18,7 @@ const BlogSection = () => {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const { data } = await supabase.from("blog_posts").select("*").eq("is_published", true).order("sort_order", { ascending: true }).limit(3);
+      const { data } = await supabase.from("blog_posts").select("*").eq("is_published", true).is("trashed_at", null).order("sort_order", { ascending: true }).limit(3);
       if (data && data.length > 0) {
         setPosts(data as BlogPost[]);
         const ids = data.map((d: any) => d.id);

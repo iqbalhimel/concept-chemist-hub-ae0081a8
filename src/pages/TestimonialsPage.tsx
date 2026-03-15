@@ -29,8 +29,8 @@ const TestimonialsPage = () => {
       const from = (page - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
       const [{ data }, { count }] = await Promise.all([
-        supabase.from("testimonials").select("*").eq("is_active", true).order("created_at", { ascending: false }).range(from, to),
-        supabase.from("testimonials").select("*", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("testimonials").select("*").eq("is_active", true).is("trashed_at" as any, null).order("created_at", { ascending: false }).range(from, to),
+        supabase.from("testimonials").select("*", { count: "exact", head: true }).eq("is_active", true).is("trashed_at" as any, null),
       ]);
       setItems((data as Testimonial[]) || []);
       setTotal(count || 0);

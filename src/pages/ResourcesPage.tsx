@@ -52,7 +52,7 @@ const ResourcesPage = () => {
     const fetchData = async () => {
       const now = new Date().toISOString();
       const [matRes, catRes] = await Promise.all([
-        supabase.from("study_materials").select("*").eq("is_active", true)
+        supabase.from("study_materials").select("*").eq("is_active", true).is("trashed_at" as any, null)
           .or(`publish_at.is.null,publish_at.lte.${now}`)
           .or(`expire_at.is.null,expire_at.gte.${now}`)
           .order("created_at", { ascending: false }),

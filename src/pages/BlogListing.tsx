@@ -54,6 +54,7 @@ const BlogListing = () => {
         .from("blog_posts")
         .select("*", { count: "exact" })
         .eq("is_published", true)
+        .is("trashed_at", null)
         .or(`scheduled_at.is.null,scheduled_at.lte.${new Date().toISOString()}`)
         .or(`expire_at.is.null,expire_at.gte.${new Date().toISOString()}`)
         .order("sort_order", { ascending: true });
@@ -98,6 +99,7 @@ const BlogListing = () => {
         .from("blog_posts")
         .select("category")
         .eq("is_published", true)
+        .is("trashed_at", null)
         .or(`scheduled_at.is.null,scheduled_at.lte.${new Date().toISOString()}`)
         .or(`expire_at.is.null,expire_at.gte.${new Date().toISOString()}`);
       if (data) {

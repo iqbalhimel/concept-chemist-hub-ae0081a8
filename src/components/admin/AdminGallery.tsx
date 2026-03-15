@@ -20,6 +20,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+import AdminTrashView from "@/components/admin/AdminTrashView";
+
 type GalleryItem = Tables<"gallery">;
 
 const SPAN_LABELS: Record<string, string> = {
@@ -79,6 +81,7 @@ const AdminGallery = () => {
   const [fileSizes, setFileSizes] = useState<Record<string, string>>({});
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const newTitleRef = useRef<HTMLInputElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
@@ -122,7 +125,7 @@ const AdminGallery = () => {
   }, [items]);
 
   const fetchAll = async () => {
-    const { data } = await supabase.from("gallery").select("*").order("sort_order", { ascending: true });
+    const { data } = await supabase.from("gallery").select("*").is("trashed_at", null).order("sort_order", { ascending: true });
     setItems(data || []);
     setLoading(false);
   };
@@ -208,14 +211,10 @@ const AdminGallery = () => {
   const remove = async (id: string, imageUrl: string) => {
     await csrfGuard(async () => {
       const item = items.find(i => i.id === id);
-      const urlParts = imageUrl.split("/media/");
-      if (urlParts[1]) {
-        await supabase.storage.from("media").remove([urlParts[1]]);
-      }
-      await supabase.from("gallery").delete().eq("id", id);
+      await (supabase as any).from("gallery").update({ trashed_at: new Date().toISOString() }).eq("id", id);
       setItems(prev => prev.filter(n => n.id !== id));
       setExpandedDeleteId(null);
-      toast.success("Deleted");
+      toast.success("Moved to trash");
       logAdminActivity({ action: "delete", module: "gallery", itemId: id, itemTitle: item?.label || "Gallery item" });
     });
   };
@@ -252,26 +251,34 @@ const AdminGallery = () => {
   };
   const bulkDeleteItems = async () => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`Delete ${selectedIds.size} selected image(s)?`)) return;
+    if (!window.confirm(`Move ${selectedIds.size} selected image(s) to trash?`)) return;
     await csrfGuard(async () => {
       setBulkDeleting(true);
-      // Remove storage files and DB records
+      const now = new Date().toISOString();
       for (const id of selectedIds) {
-        const item = items.find(i => i.id === id);
-        if (item?.image_url) {
-          const urlParts = item.image_url.split("/media/");
-          if (urlParts[1]) await supabase.storage.from("media").remove([urlParts[1]]);
-        }
-        await supabase.from("gallery").delete().eq("id", id);
+        await (supabase as any).from("gallery").update({ trashed_at: now }).eq("id", id);
       }
       setItems(prev => prev.filter(i => !selectedIds.has(i.id)));
-      toast.success(`${selectedIds.size} image(s) deleted`);
+      toast.success(`${selectedIds.size} image(s) moved to trash`);
       setSelectedIds(new Set());
       setBulkDeleting(false);
     });
   };
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
+
+  if (showTrash) {
+    return (
+      <AdminTrashView
+        tableName="gallery"
+        moduleName="gallery"
+        labelSingular="image"
+        labelPlural="Images"
+        getTitle={(item: any) => item.label || item.alt || "Untitled image"}
+        onBack={() => { setShowTrash(false); fetchAll(); }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -281,6 +288,7 @@ const AdminGallery = () => {
         </h2>
         <div className="flex gap-2">
           <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleUpload} />
+          <Button onClick={() => setShowTrash(true)} size="sm" variant="outline"><Trash2 size={14} className="mr-1" /> Trash</Button>
           <Button onClick={() => fileRef.current?.click()} size="sm" disabled={uploading}>
             <Upload size={14} className="mr-1" /> {uploading ? "Uploading..." : "Upload Images"}
           </Button>

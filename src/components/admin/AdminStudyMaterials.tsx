@@ -21,6 +21,8 @@ import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
+import AdminTrashView from "@/components/admin/AdminTrashView";
+
 type Material = Tables<"study_materials">;
 
 type StudyCategory = {
@@ -101,6 +103,7 @@ const AdminStudyMaterials = () => {
   const [newItemId, setNewItemId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [expandedEditId, setExpandedEditId] = useState<string | null>(null);
@@ -174,7 +177,7 @@ const AdminStudyMaterials = () => {
   }, [newItemId]);
 
   const fetchItems = async () => {
-    const { data } = await supabase.from("study_materials").select("*").order("sort_order");
+    const { data } = await supabase.from("study_materials").select("*").is("trashed_at" as any, null).order("sort_order");
     setItems(data || []);
     setLoading(false);
     setOrderDirty(false);
@@ -221,10 +224,10 @@ const AdminStudyMaterials = () => {
   const remove = async (id: string) => {
     await csrfGuard(async () => {
       const item = items.find(i => i.id === id);
-      await supabase.from("study_materials").delete().eq("id", id);
+      await (supabase as any).from("study_materials").update({ trashed_at: new Date().toISOString() }).eq("id", id);
       setItems(prev => prev.filter(n => n.id !== id));
       setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
-      toast.success("Deleted");
+      toast.success("Moved to trash");
       logAdminActivity({ action: "delete", module: "study_materials", itemId: id, itemTitle: item?.title });
     });
   };
@@ -253,14 +256,15 @@ const AdminStudyMaterials = () => {
 
   const bulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`Delete ${selectedIds.size} selected item(s)? This cannot be undone.`)) return;
+    if (!window.confirm(`Move ${selectedIds.size} selected item(s) to trash?`)) return;
     await csrfGuard(async () => {
       setBulkDeleting(true);
+      const now = new Date().toISOString();
       for (const id of selectedIds) {
-        await supabase.from("study_materials").delete().eq("id", id);
+        await (supabase as any).from("study_materials").update({ trashed_at: now }).eq("id", id);
       }
       setItems(prev => prev.filter(n => !selectedIds.has(n.id)));
-      toast.success(`${selectedIds.size} item(s) deleted`);
+      toast.success(`${selectedIds.size} item(s) moved to trash`);
       setSelectedIds(new Set());
       setBulkDeleting(false);
     });
@@ -421,6 +425,20 @@ const AdminStudyMaterials = () => {
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
+  if (showTrash) {
+    return (
+      <AdminTrashView
+        tableName="study_materials"
+        moduleName="study_materials"
+        labelSingular="material"
+        labelPlural="Materials"
+        getTitle={(item: any) => item.title}
+        getSubtitle={(item: any) => item.category}
+        onBack={() => { setShowTrash(false); fetchItems(); }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -440,6 +458,7 @@ const AdminStudyMaterials = () => {
               </Button>
             </>
           )}
+          <Button onClick={() => setShowTrash(true)} size="sm" variant="outline"><Trash2 size={14} className="mr-1" /> Trash</Button>
           <Button onClick={() => setShowCatManager(v => !v)} size="sm" variant="outline">
             <Tags size={14} className="mr-1" /> Categories
           </Button>

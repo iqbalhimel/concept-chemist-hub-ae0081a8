@@ -28,6 +28,7 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Tables } from "@/integrations/supabase/types";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
+import AdminTrashView from "@/components/admin/AdminTrashView";
 import { useBlogCategories } from "@/hooks/useBlogCategories";
 
 type Post = Tables<"blog_posts">;
@@ -287,13 +288,14 @@ const AdminBlogPosts = () => {
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   useEffect(() => { fetchAll(); }, []);
 
   const fetchAll = async () => {
-    const { data } = await supabase.from("blog_posts").select("*").order("sort_order", { ascending: true });
+    const { data } = await supabase.from("blog_posts").select("*").is("trashed_at", null).order("sort_order", { ascending: true });
     setPosts(data || []);
     setLoading(false);
   };
@@ -360,15 +362,15 @@ const AdminBlogPosts = () => {
   };
 
   const remove = async (id: string) => {
-    if (!window.confirm("Delete this post? This cannot be undone.")) return;
+    if (!window.confirm("Move this post to trash?")) return;
     await csrfGuard(async () => {
       const post = posts.find(p => p.id === id);
-      await supabase.from("blog_posts").delete().eq("id", id);
+      await (supabase as any).from("blog_posts").update({ trashed_at: new Date().toISOString() }).eq("id", id);
       setPosts(prev => prev.filter(p => p.id !== id));
       if (editingId === id) setEditingId(null);
-      toast.success("Deleted");
+      toast.success("Moved to trash");
       logAdminActivity({ action: "delete", module: "blog_posts", itemId: id, itemTitle: post?.title });
-    }, "content_delete", "Deleted blog post");
+    }, "content_delete", "Trashed blog post");
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -404,16 +406,17 @@ const AdminBlogPosts = () => {
   };
   const bulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`Delete ${selectedIds.size} selected post(s)?`)) return;
+    if (!window.confirm(`Move ${selectedIds.size} selected post(s) to trash?`)) return;
     await csrfGuard(async () => {
       setBulkDeleting(true);
-      await Promise.all([...selectedIds].map(id => supabase.from("blog_posts").delete().eq("id", id)));
+      const now = new Date().toISOString();
+      await Promise.all([...selectedIds].map(id => (supabase as any).from("blog_posts").update({ trashed_at: now }).eq("id", id)));
       setPosts(prev => prev.filter(p => !selectedIds.has(p.id)));
       if (editingId && selectedIds.has(editingId)) setEditingId(null);
-      toast.success(`${selectedIds.size} post(s) deleted`);
+      toast.success(`${selectedIds.size} post(s) moved to trash`);
       setSelectedIds(new Set());
       setBulkDeleting(false);
-    }, "content_delete", `Bulk deleted ${selectedIds.size} blog posts`);
+    }, "content_delete", `Bulk trashed ${selectedIds.size} blog posts`);
   };
   const bulkPublish = async (publish: boolean) => {
     if (selectedIds.size === 0) return;
@@ -457,6 +460,20 @@ const AdminBlogPosts = () => {
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
+  if (showTrash) {
+    return (
+      <AdminTrashView
+        tableName="blog_posts"
+        moduleName="blog_posts"
+        labelSingular="post"
+        labelPlural="Posts"
+        getTitle={(item: any) => item.title}
+        getSubtitle={(item: any) => item.category}
+        onBack={() => { setShowTrash(false); fetchAll(); }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -473,6 +490,7 @@ const AdminBlogPosts = () => {
               </Button>
             </div>
           )}
+          <Button onClick={() => setShowTrash(true)} size="sm" variant="outline"><Trash2 size={14} className="mr-1" /> Trash</Button>
           <Button onClick={add} size="sm"><Plus size={14} className="mr-1" /> Add Post</Button>
         </div>
       </div>
