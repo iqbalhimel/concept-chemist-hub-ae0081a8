@@ -458,6 +458,7 @@ const AdminStudyMaterials = () => {
               </Button>
             </>
           )}
+          <Button onClick={() => setShowTrash(true)} size="sm" variant="outline"><Trash2 size={14} className="mr-1" /> Trash</Button>
           <Button onClick={() => setShowCatManager(v => !v)} size="sm" variant="outline">
             <Tags size={14} className="mr-1" /> Categories
           </Button>
