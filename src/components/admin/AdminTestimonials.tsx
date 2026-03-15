@@ -96,6 +96,7 @@ const AdminTestimonials = () => {
     const { data, error } = await supabase
       .from("testimonials")
       .select("*")
+      .is("trashed_at" as any, null)
       .order("sort_order", { ascending: true });
     if (error) toast.error("Failed to load testimonials");
     else setItems((data as Testimonial[]) || []);
