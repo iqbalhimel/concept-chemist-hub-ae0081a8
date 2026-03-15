@@ -17,6 +17,7 @@ import ContactSection from "@/components/ContactSection";
 import GallerySection from "@/components/GallerySection";
 import VideoSection from "@/components/VideoSection";
 import FAQSection from "@/components/FAQSection";
+import RecommendedSection from "@/components/RecommendedSection";
 
 type Visibility = Record<string, string>;
 
@@ -54,6 +55,7 @@ const Index = () => {
         {show("show_notices") && <NoticesSection />}
         {show("show_resources") && <ResourcesSection />}
         {show("show_blog") && <BlogSection />}
+        {show("show_recommended") && <RecommendedSection />}
         {show("show_faq") && <FAQSection />}
         {show("show_contact") && <ContactSection />}
     </main>

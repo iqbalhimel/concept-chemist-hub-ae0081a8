@@ -9,6 +9,7 @@ import BlogReactions from "@/components/BlogReactions";
 import BlogComments from "@/components/BlogComments";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { sanitizeHtml } from "@/lib/sanitize";
+import RelatedCrossContent from "@/components/RelatedCrossContent";
 
 interface BlogPostType {
   id: string;
@@ -28,6 +29,7 @@ const BlogPost = () => {
   const { get } = useSiteSettings();
   const [post, setPost] = useState<(BlogPostType & { slug?: string | null }) | null>(null);
   const [related, setRelated] = useState<(BlogPostType & { slug?: string | null })[]>([]);
+  const [postTagNames, setPostTagNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -140,6 +142,15 @@ const BlogPost = () => {
           relatedPosts = catRelated || [];
         }
         setRelated(relatedPosts as (BlogPostType & { slug?: string | null })[]);
+
+        // Fetch tag names for cross-content matching
+        if (postTags && postTags.length > 0) {
+          const tagIdList = postTags.map((pt: any) => pt.tag_id);
+          const { data: tagRows } = await supabase.from("tags").select("name").in("id", tagIdList);
+          setPostTagNames((tagRows || []).map((t: any) => t.name));
+        } else {
+          setPostTagNames([]);
+        }
       }
     };
     fetchPost();
@@ -341,6 +352,10 @@ const BlogPost = () => {
             </div>
           </div>
         </section>
+      )}
+
+      {post && (
+        <RelatedCrossContent postCategory={post.category} postTags={postTagNames} />
       )}
 
     </>
