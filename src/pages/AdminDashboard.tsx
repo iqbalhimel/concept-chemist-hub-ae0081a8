@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, BookOpen, Bell, Download,
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
-  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp, Shield, Video,
+  Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp, Shield, Video, Tag,
   ChevronDown, ChevronRight, Home, PenTool, User, Phone, Wrench, Eye, Lock
 } from "lucide-react";
 import AdminNotices from "@/components/admin/AdminNotices";
@@ -31,6 +31,7 @@ import AdminPerformance from "@/components/admin/AdminPerformance";
 import AdminSeoMonitor from "@/components/admin/AdminSeoMonitor";
 import AdminSecurityLogs from "@/components/admin/AdminSecurityLogs";
 import AdminVideos from "@/components/admin/AdminVideos";
+import AdminBlogCategories from "@/components/admin/AdminBlogCategories";
 import AdminSettingsSection from "@/components/admin/AdminSettingsSection";
 import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 import {
@@ -42,7 +43,7 @@ import {
 
 type Tab =
   | "dashboard" | "analytics" | "seo" | "seo-monitor" | "performance"
-  | "notices" | "study-materials" | "blog" | "comments" | "testimonials"
+  | "notices" | "study-materials" | "blog" | "blog-categories" | "comments" | "testimonials"
   | "gallery" | "faq" | "media" | "themes" | "atmosphere"
   | "education" | "experience" | "achievements" | "approach" | "subjects"
   | "training" | "security-logs" | "videos"
@@ -86,6 +87,7 @@ const navigation: NavEntry[] = [
       { id: "notices", label: "Notices", icon: Bell },
       { id: "study-materials", label: "Study Materials", icon: Download },
       { id: "blog", label: "Blog Posts", icon: FileText },
+      { id: "blog-categories", label: "Blog Categories", icon: Tag },
       { id: "comments", label: "Comments", icon: MessageSquare },
       { id: "gallery", label: "Gallery", icon: Image },
       { id: "videos", label: "Educational Videos", icon: Video },
@@ -198,6 +200,7 @@ const AdminDashboard = () => {
       case "notices": return <AdminNotices />;
       case "study-materials": return <AdminStudyMaterials />;
       case "blog": return <AdminBlogPosts />;
+      case "blog-categories": return <AdminBlogCategories />;
       case "comments": return <AdminComments />;
       case "testimonials": return <AdminTestimonials />;
       case "gallery": return <AdminGallery />;

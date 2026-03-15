@@ -26,6 +26,7 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Tables } from "@/integrations/supabase/types";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
 import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
+import { useBlogCategories } from "@/hooks/useBlogCategories";
 
 type Post = Tables<"blog_posts">;
 
@@ -136,10 +137,12 @@ const SortableRow = ({
 /* ── Edit Panel ──────────────────────────────────── */
 
 const EditPanel = ({
-  post, onUpdateLocal, onSave, onClose,
+  post, onUpdateLocal, onSave, onClose, categoryOptions,
 }: {
-  post: Post; onUpdateLocal: (id: string, field: string, value: string | boolean) => void; onSave: (post: Post) => void; onClose: () => void;
-}) => (
+  post: Post; onUpdateLocal: (id: string, field: string, value: string | boolean) => void; onSave: (post: Post) => void; onClose: () => void; categoryOptions: string[];
+}) => {
+  const [customCat, setCustomCat] = useState(false);
+  return (
   <div className="border border-primary/30 rounded-lg bg-card p-5 space-y-3 animate-in slide-in-from-top-2">
     <div className="flex items-center justify-between">
       <h3 className="font-display text-lg font-bold text-foreground">Editing: {post.title}</h3>
@@ -164,7 +167,25 @@ const EditPanel = ({
           }
         }} placeholder="Title" />
       </div>
-      <Input value={post.category} onChange={e => onUpdateLocal(post.id, "category", e.target.value)} placeholder="Category" />
+      <div>
+        <label className="text-xs font-medium text-muted-foreground mb-1 block">Category</label>
+        {customCat ? (
+          <div className="flex gap-2">
+            <Input value={post.category} onChange={e => onUpdateLocal(post.id, "category", e.target.value)} placeholder="New category name" className="flex-1" />
+            <Button size="sm" variant="outline" onClick={() => setCustomCat(false)}>Use list</Button>
+          </div>
+        ) : (
+          <Select value={post.category || "__new__"} onValueChange={v => { if (v === "__new__") { setCustomCat(true); onUpdateLocal(post.id, "category", ""); } else onUpdateLocal(post.id, "category", v); }}>
+            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {categoryOptions.map(cat => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              ))}
+              <SelectItem value="__new__">+ Add new category</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+      </div>
     </div>
 
     <div className="space-y-1">
@@ -249,12 +270,14 @@ const EditPanel = ({
       </Button>
     </div>
   </div>
-);
+  );
+};
 
 /* ── Main Component ──────────────────────────────── */
 
 const AdminBlogPosts = () => {
   const csrfGuard = useCsrfGuard();
+  const { categories: managedCategories } = useBlogCategories();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -396,7 +419,14 @@ const AdminBlogPosts = () => {
     }, "content_update", `Bulk ${publish ? "published" : "unpublished"} ${selectedIds.size} blog posts`);
   };
 
-  const categories = useMemo(() => [...new Set(posts.map(p => p.category))].sort(), [posts]);
+  // Merge managed categories with any post-only categories for filter dropdown
+  const categories = useMemo(() => {
+    const postCats = [...new Set(posts.map(p => p.category))];
+    const merged = [...managedCategories];
+    const mergedSet = new Set(merged);
+    postCats.forEach(c => { if (!mergedSet.has(c)) merged.push(c); });
+    return merged.sort();
+  }, [posts, managedCategories]);
 
   const filteredPosts = useMemo(() => {
     let result = posts;
@@ -494,6 +524,7 @@ const AdminBlogPosts = () => {
           onUpdateLocal={updateLocal}
           onSave={savePost}
           onClose={() => setEditingId(null)}
+          categoryOptions={categories}
         />
       )}
 
