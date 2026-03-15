@@ -133,28 +133,18 @@ const AdminMediaLibrary = () => {
   const filtered = useMemo(() => {
     let result = items;
 
-    // Folder filter
     if (activeFolder !== null) {
       result = result.filter(i => i.folder === activeFolder);
     }
-
-    // Tag filter
     if (filterTag !== "__all__") {
       result = result.filter(i => i.tags.includes(filterTag));
     }
-
-    // Type filter
     if (filterType !== "__all__") {
       result = result.filter(i => getTypeLabel(i.file_type) === filterType);
     }
-
-    // Unused filter
     if (filterUnused) {
       result = result.filter(i => !usageCounts[i.file_url]);
     }
-    }
-
-    // Search
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(i =>
@@ -166,11 +156,11 @@ const AdminMediaLibrary = () => {
     }
 
     return result;
-  }, [items, activeFolder, filterTag, filterType, searchQuery]);
+  }, [items, activeFolder, filterTag, filterType, filterUnused, searchQuery, usageCounts]);
 
   const paginated = useMemo(() => paginateItems(filtered, page, pageSize), [filtered, page, pageSize]);
 
-  useEffect(() => { setPage(1); }, [searchQuery, activeFolder, filterTag, filterType, pageSize]);
+  useEffect(() => { setPage(1); }, [searchQuery, activeFolder, filterTag, filterType, filterUnused, pageSize]);
 
   // ─── Selection ───
   const toggleSelect = useCallback((id: string) => {
