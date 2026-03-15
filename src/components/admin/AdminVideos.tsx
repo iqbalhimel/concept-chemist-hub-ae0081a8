@@ -538,9 +538,7 @@ const AdminVideos = () => {
                       <TableCell className="text-xs">{sourceLabel(video.video_source)}</TableCell>
                       <TableCell className="text-muted-foreground text-xs">{new Date(video.created_at).toLocaleDateString()}</TableCell>
                       <TableCell>
-                        <Badge variant={video.is_published ? "default" : "secondary"} className="cursor-pointer" onClick={() => togglePublish(video)}>
-                          {video.is_published ? "Published" : "Draft"}
-                        </Badge>
+                        <ContentStatusBadge status={getContentStatus({ isPublished: video.is_published, publishAt: (video as any).publish_at, expireAt: (video as any).expire_at })} />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
