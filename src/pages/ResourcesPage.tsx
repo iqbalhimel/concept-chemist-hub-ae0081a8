@@ -9,6 +9,7 @@ import PdfViewer from "@/components/PdfViewer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { setSeo } from "@/lib/seo";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import RelatedBlogPosts from "@/components/RelatedBlogPosts";
 
 type StudyMaterial = Tables<"study_materials">;
 type StudyCategory = { id: string; name: string; slug: string; sort_order: number; is_active: boolean; };
