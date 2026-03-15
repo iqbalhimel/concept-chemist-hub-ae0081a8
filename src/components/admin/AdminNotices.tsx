@@ -90,7 +90,7 @@ const AdminNotices = () => {
   }, [newNoticeId]);
 
   const fetchNotices = async () => {
-    const { data } = await supabase.from("notices").select("*").order("sort_order", { ascending: true });
+    const { data } = await supabase.from("notices").select("*").is("trashed_at", null).order("sort_order", { ascending: true });
     setNotices(data || []);
     setLoading(false);
     setOrderDirty(false);
