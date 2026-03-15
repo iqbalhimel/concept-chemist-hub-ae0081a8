@@ -179,12 +179,13 @@ const AdminNotices = () => {
   };
   const bulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`Delete ${selectedIds.size} selected notice(s)?`)) return;
+    if (!window.confirm(`Move ${selectedIds.size} selected notice(s) to trash?`)) return;
     await csrfGuard(async () => {
       setBulkDeleting(true);
-      for (const id of selectedIds) { await supabase.from("notices").delete().eq("id", id); }
+      const now = new Date().toISOString();
+      for (const id of selectedIds) { await (supabase as any).from("notices").update({ trashed_at: now }).eq("id", id); }
       setNotices(prev => prev.filter(n => !selectedIds.has(n.id)));
-      toast.success(`${selectedIds.size} notice(s) deleted`);
+      toast.success(`${selectedIds.size} notice(s) moved to trash`);
       setSelectedIds(new Set());
       setBulkDeleting(false);
     });
