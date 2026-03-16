@@ -5,8 +5,12 @@
     "subjects": "পাঠ্য বিষয়",
     "experience": "অভিজ্ঞতা",
     "education": "শিক্ষাগত যোগ্যতা",
+    "gallery": "গ্যালারি",
+    "videos": "ভিডিও",
+    "testimonials": "প্রশংসাপত্র",
     "resources": "স্টাডি ম্যাটেরিয়াল",
     "blog": "ব্লগ",
+    "faq": "জিজ্ঞাসা",
     "contact": "যোগাযোগ"
   },
   "hero": {
