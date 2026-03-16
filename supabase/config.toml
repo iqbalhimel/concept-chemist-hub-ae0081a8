@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.auto-empty-trash]
 verify_jwt = false
+
+[functions.invite-admin]
+verify_jwt = false
+
+[functions.record-login]
+verify_jwt = false

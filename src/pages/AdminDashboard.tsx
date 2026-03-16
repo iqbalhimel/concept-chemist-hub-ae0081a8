@@ -7,7 +7,7 @@ import {
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
   Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp, Shield, Video, Tag,
-  ChevronDown, ChevronRight, Home, PenTool, User, Phone, Wrench, Eye, Lock, Activity, Trash2, Users
+  ChevronDown, ChevronRight, Home, PenTool, User, Phone, Wrench, Eye, Lock, Activity, Trash2, Users, History
 } from "lucide-react";
 import { canAccess, getRoleLabel } from "@/lib/permissions";
 import AdminNotices from "@/components/admin/AdminNotices";
@@ -41,6 +41,7 @@ import AdminActivityTimeline from "@/components/admin/AdminActivityTimeline";
 import AdminGlobalTrash from "@/components/admin/AdminGlobalTrash";
 import AdminProfile from "@/components/admin/AdminProfile";
 import AdminManagement from "@/components/admin/AdminManagement";
+import AdminLoginHistory from "@/components/admin/AdminLoginHistory";
 import {
   heroSectionConfig, aboutSectionConfig, homepageSectionsConfig,
   announcementBarConfig, coachingInfoConfig, contactDetailsConfig,
@@ -54,11 +55,10 @@ type Tab =
   | "gallery" | "faq" | "media" | "themes" | "atmosphere"
   | "education" | "experience" | "achievements" | "approach" | "subjects"
   | "training" | "security-logs" | "videos" | "global-trash" | "admin-profile" | "admin-management"
-  // Settings-based tabs
   | "hero-section" | "about-section" | "homepage-sections" | "announcement-bar"
   | "coaching-info" | "contact-details" | "social-links" | "whatsapp-chat"
   | "site-info" | "footer-settings" | "hero-animation"
-  | "activity-timeline";
+  | "activity-timeline" | "login-history";
 
 type NavItem = {
   id: Tab;
@@ -161,6 +161,7 @@ const fullNavigation: NavEntry[] = [
     items: [
       { id: "admin-profile", label: "Admin Profile", icon: User },
       { id: "admin-management", label: "Admin Management", icon: Users },
+      { id: "login-history", label: "Login History", icon: History },
       { id: "security-logs", label: "Security Logs", icon: Shield },
       { id: "activity-timeline", label: "Activity Timeline", icon: Activity },
     ],
@@ -266,6 +267,7 @@ const AdminDashboard = () => {
       case "global-trash": return <AdminGlobalTrash />;
       case "admin-profile": return <AdminProfile />;
       case "admin-management": return <AdminManagement />;
+      case "login-history": return <AdminLoginHistory />;
       case "hero-section": return <AdminSettingsSection section={heroSectionConfig} />;
       case "about-section": return <AdminSettingsSection section={aboutSectionConfig} />;
       case "homepage-sections": return <AdminSettingsSection section={homepageSectionsConfig} />;

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { History, Search, RefreshCw, CheckCircle, XCircle, Loader2 } from "lucide-react";
-import AdminPagination from "@/components/admin/AdminPagination";
+import AdminPagination, { paginateItems } from "@/components/admin/AdminPagination";
 
 interface LoginEntry {
   id: string;
@@ -18,14 +18,13 @@ interface LoginEntry {
   success: boolean;
 }
 
-const PAGE_SIZE = 20;
-
 const AdminLoginHistory = () => {
   const [entries, setEntries] = useState<LoginEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [successFilter, setSuccessFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "all">(20);
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -56,8 +55,7 @@ const AdminLoginHistory = () => {
     });
   }, [entries, search, successFilter]);
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paged = paginateItems(filtered, page, pageSize);
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("en-US", {
@@ -129,7 +127,7 @@ const AdminLoginHistory = () => {
                       <TableRow key={e.id}>
                         <TableCell>
                           {e.success ? (
-                            <span className="flex items-center gap-1 text-green-500 text-xs font-medium">
+                            <span className="flex items-center gap-1 text-xs font-medium text-primary">
                               <CheckCircle size={13} /> Success
                             </span>
                           ) : (
@@ -149,11 +147,15 @@ const AdminLoginHistory = () => {
                   </TableBody>
                 </Table>
               </div>
-              {totalPages > 1 && (
-                <div className="mt-4">
-                  <AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-                </div>
-              )}
+              <div className="mt-4">
+                <AdminPagination
+                  total={filtered.length}
+                  page={page}
+                  pageSize={pageSize}
+                  onPageChange={setPage}
+                  onPageSizeChange={setPageSize}
+                />
+              </div>
             </>
           )}
         </CardContent>
