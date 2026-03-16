@@ -64,7 +64,13 @@ Deno.serve(async (req) => {
     }
 
     // Invite user via admin API
-    const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email);
+    // Build the redirect URL so the invite link lands on /auth/callback
+    const siteUrl = Deno.env.get("SITE_URL") || supabaseUrl.replace(".supabase.co", "");
+    const redirectTo = `${req.headers.get("origin") || siteUrl}/auth/callback`;
+
+    const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
+      redirectTo,
+    });
     if (inviteError) {
       return new Response(JSON.stringify({ error: inviteError.message }), {
         status: 400,
