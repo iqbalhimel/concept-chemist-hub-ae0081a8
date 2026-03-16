@@ -24,6 +24,7 @@ const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const BlogPostPage = lazy(() => import("./pages/BlogPost"));
 const BlogListing = lazy(() => import("./pages/BlogListing"));
 const BlogCategoryPage = lazy(() => import("./pages/BlogCategoryPage"));
@@ -85,6 +86,7 @@ const AppRoutes = () => (
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route
           path="/admin"
           element={
