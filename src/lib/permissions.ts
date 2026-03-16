@@ -41,7 +41,7 @@ export const canAccess = (role: AdminRole | null, tab: string): boolean => {
 };
 
 export const canManageAdmins = (role: AdminRole | null): boolean => {
-  return role === "super_admin" || role === "admin";
+  return role === "super_admin";
 };
 
 export const getRoleLabel = (role: AdminRole): string => {
