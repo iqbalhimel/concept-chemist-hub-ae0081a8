@@ -5,8 +5,12 @@
     "subjects": "Subjects",
     "experience": "Experience",
     "education": "Education",
+    "gallery": "Gallery",
+    "videos": "Videos",
+    "testimonials": "Testimonials",
     "resources": "Resources",
     "blog": "Blog",
+    "faq": "FAQ",
     "contact": "Contact"
   },
   "hero": {

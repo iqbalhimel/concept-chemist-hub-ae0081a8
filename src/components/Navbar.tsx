@@ -21,10 +21,14 @@ const Navbar = () => {
     { label: t.nav.subjects, href: "#subjects" },
     { label: t.nav.experience, href: "#experience" },
     { label: t.nav.education, href: "#education" },
+    { label: t.nav.gallery, href: "#gallery" },
+    { label: t.nav.videos, href: "#videos" },
+    { label: t.nav.testimonials, href: "#testimonials" },
     { label: t.nav.resources, href: "#resources" },
     { label: t.nav.blog, href: "#blog" },
+    { label: t.nav.faq, href: "#faq" },
     { label: t.nav.contact, href: "#contact" },
-  ], [t.nav.about, t.nav.blog, t.nav.contact, t.nav.education, t.nav.experience, t.nav.home, t.nav.resources, t.nav.subjects]);
+  ], [t.nav]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
