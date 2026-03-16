@@ -271,7 +271,8 @@ const Navbar = () => {
                 <div className="px-3 pb-3">
                   <div className="glass-card p-2">
                     <div className="flex flex-col">
-                      {allLinks.map((link) => {
+                      {/* Primary mobile links */}
+                      {mobilePrimaryLinks.map((link) => {
                         const active = activeHref === link.href;
                         return (
                           <a
@@ -280,6 +281,7 @@ const Navbar = () => {
                             onClick={(e) => {
                               e.preventDefault();
                               setMobileOpen(false);
+                              setMobileAccordion(null);
                               const id = link.href.replace("#", "");
                               setTimeout(() => {
                                 document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -294,6 +296,70 @@ const Navbar = () => {
                           >
                             {link.label}
                           </a>
+                        );
+                      })}
+
+                      {/* Accordion groups */}
+                      {mobileGroups.map((group) => {
+                        const isOpen = mobileAccordion === group.label;
+                        const hasActive = group.items.some((i) => i.href === activeHref);
+                        return (
+                          <div key={group.label}>
+                            <button
+                              onClick={() => setMobileAccordion(isOpen ? null : group.label)}
+                              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors ${
+                                hasActive
+                                  ? "bg-secondary/60 text-foreground"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+                              }`}
+                            >
+                              <span>{group.label}</span>
+                              <ChevronRight
+                                size={16}
+                                className={`transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
+                              />
+                            </button>
+                            <AnimatePresence>
+                              {isOpen && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  transition={{ duration: 0.15 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="pl-3 flex flex-col">
+                                    {group.items.map((link) => {
+                                      const active = activeHref === link.href;
+                                      return (
+                                        <a
+                                          key={link.href}
+                                          href={link.href}
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            setMobileOpen(false);
+                                            setMobileAccordion(null);
+                                            const id = link.href.replace("#", "");
+                                            setTimeout(() => {
+                                              document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                            }, 200);
+                                          }}
+                                          className={`px-4 py-3 rounded-xl transition-colors text-sm ${
+                                            active
+                                              ? "bg-secondary/60 text-foreground"
+                                              : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+                                          }`}
+                                          aria-current={active ? "page" : undefined}
+                                        >
+                                          {link.label}
+                                        </a>
+                                      );
+                                    })}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         );
                       })}
                     </div>
