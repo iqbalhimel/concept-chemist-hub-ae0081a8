@@ -91,7 +91,7 @@ async function checkPage(url: string): Promise<any> {
 }
 
 serve(async (req) => {
-  const baseHeaders = buildCorsHeaders(req);
+  const baseHeaders = corsHeaders;
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: baseHeaders });

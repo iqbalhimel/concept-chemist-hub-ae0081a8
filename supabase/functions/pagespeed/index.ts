@@ -102,7 +102,7 @@ function emptyResult(url: string, strategy: "mobile" | "desktop", message: strin
 }
 
 serve(async (req) => {
-  const baseHeaders = buildCorsHeaders(req);
+  const baseHeaders = corsHeaders;
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: baseHeaders });
