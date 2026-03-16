@@ -15,6 +15,7 @@ import {
 import OrphanContentWidget from "@/components/admin/OrphanContentWidget";
 import TrendingContentWidget from "@/components/admin/widgets/TrendingContentWidget";
 import WeeklyGrowthWidget from "@/components/admin/widgets/WeeklyGrowthWidget";
+import ViewsTrendWidget from "@/components/admin/widgets/ViewsTrendWidget";
 
 interface RecentComment {
   id: string;
