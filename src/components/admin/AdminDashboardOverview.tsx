@@ -115,6 +115,7 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
         <div>
           <h3 className="font-display text-lg font-bold text-foreground mb-3">Content Insights</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <ViewsTrendWidget />
             <MostViewedPostsWidget data={insights.topPosts} />
             <MostViewedMaterialsWidget data={insights.topMaterials} />
             <MostWatchedVideosWidget data={insights.topVideos} />
