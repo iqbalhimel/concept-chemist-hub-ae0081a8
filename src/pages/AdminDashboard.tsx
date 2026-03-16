@@ -51,7 +51,7 @@ type Tab =
   | "notices" | "study-materials" | "blog" | "blog-categories" | "blog-tags" | "comments" | "testimonials"
   | "gallery" | "faq" | "media" | "themes" | "atmosphere"
   | "education" | "experience" | "achievements" | "approach" | "subjects"
-  | "training" | "security-logs" | "videos" | "global-trash"
+  | "training" | "security-logs" | "videos" | "global-trash" | "admin-profile"
   // Settings-based tabs
   | "hero-section" | "about-section" | "homepage-sections" | "announcement-bar"
   | "coaching-info" | "contact-details" | "social-links" | "whatsapp-chat"
