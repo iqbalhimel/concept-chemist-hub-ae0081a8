@@ -38,6 +38,7 @@ import AdminSettingsSection from "@/components/admin/AdminSettingsSection";
 import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 import AdminActivityTimeline from "@/components/admin/AdminActivityTimeline";
 import AdminGlobalTrash from "@/components/admin/AdminGlobalTrash";
+import AdminProfile from "@/components/admin/AdminProfile";
 import {
   heroSectionConfig, aboutSectionConfig, homepageSectionsConfig,
   announcementBarConfig, coachingInfoConfig, contactDetailsConfig,
@@ -50,7 +51,7 @@ type Tab =
   | "notices" | "study-materials" | "blog" | "blog-categories" | "blog-tags" | "comments" | "testimonials"
   | "gallery" | "faq" | "media" | "themes" | "atmosphere"
   | "education" | "experience" | "achievements" | "approach" | "subjects"
-  | "training" | "security-logs" | "videos" | "global-trash"
+  | "training" | "security-logs" | "videos" | "global-trash" | "admin-profile"
   // Settings-based tabs
   | "hero-section" | "about-section" | "homepage-sections" | "announcement-bar"
   | "coaching-info" | "contact-details" | "social-links" | "whatsapp-chat"
@@ -156,6 +157,7 @@ const navigation: NavEntry[] = [
     label: "Security",
     icon: Lock,
     items: [
+      { id: "admin-profile", label: "Admin Profile", icon: User },
       { id: "security-logs", label: "Security Logs", icon: Shield },
       { id: "activity-timeline", label: "Activity Timeline", icon: Activity },
     ],
@@ -238,6 +240,7 @@ const AdminDashboard = () => {
       case "videos": return <AdminVideos />;
       case "activity-timeline": return <AdminActivityTimeline />;
       case "global-trash": return <AdminGlobalTrash />;
+      case "admin-profile": return <AdminProfile />;
       // Settings-based tabs
       case "hero-section": return <AdminSettingsSection section={heroSectionConfig} />;
       case "about-section": return <AdminSettingsSection section={aboutSectionConfig} />;
