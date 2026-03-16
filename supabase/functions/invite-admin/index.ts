@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     });
 
     if (inviteError) {
-      // If user already exists, find them by email
+      // If user already exists, find them by email and send a notification
       if (inviteError.message.includes("already been registered")) {
         const { data: { users }, error: listError } = await adminClient.auth.admin.listUsers();
         if (listError) {
@@ -92,6 +92,11 @@ Deno.serve(async (req) => {
           });
         }
         newUserId = existingUser.id;
+
+        // Send a password reset / magic link so the existing user gets an email notification
+        await adminClient.auth.resetPasswordForEmail(email, {
+          redirectTo,
+        });
       } else {
         return new Response(JSON.stringify({ error: inviteError.message }), {
           status: 400,
