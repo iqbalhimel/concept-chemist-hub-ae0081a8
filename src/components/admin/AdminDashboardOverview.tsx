@@ -3,8 +3,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Bell, Download, Image, MessageSquare, User, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AdminInsightsWidgets from "@/components/admin/AdminInsightsWidgets";
+import {
+  useInsightsData,
+  MostViewedPostsWidget,
+  MostViewedMaterialsWidget,
+  MostWatchedVideosWidget,
+  RecentUploadsWidget,
+  ScheduledContentWidget,
+  TrashSummaryWidget,
+} from "@/components/admin/AdminInsightsWidgets";
 import OrphanContentWidget from "@/components/admin/OrphanContentWidget";
+import TrendingContentWidget from "@/components/admin/widgets/TrendingContentWidget";
+import WeeklyGrowthWidget from "@/components/admin/widgets/WeeklyGrowthWidget";
 
 interface RecentComment {
   id: string;
@@ -36,6 +46,7 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState({ posts: 0, notices: 0, materials: 0, gallery: 0, comments: 0 });
   const [recentComments, setRecentComments] = useState<RecentComment[]>([]);
+  const insights = useInsightsData();
 
   useEffect(() => {
     const fetch = async () => {
@@ -56,7 +67,6 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
         comments: comments.count || 0,
       });
 
-      // Fetch post titles for recent comments
       if (recent.data && recent.data.length > 0) {
         const postIds = [...new Set(recent.data.map(c => c.post_id))];
         const { data: postsData } = await supabase.from("blog_posts").select("id, title").in("id", postIds);
@@ -92,13 +102,28 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
         <p className="text-muted-foreground text-sm">Overview of your website content.</p>
       </div>
 
+      {/* 1. Overview Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {stats.map(s => (
           <StatCard key={s.label} icon={s.icon} label={s.label} count={s.count} loading={loading} />
         ))}
       </div>
 
-      {/* Quick Actions */}
+      {/* 2. Content Insights */}
+      {!insights.loading && (
+        <div>
+          <h3 className="font-display text-lg font-bold text-foreground mb-3">Content Insights</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <MostViewedPostsWidget data={insights.topPosts} />
+            <MostViewedMaterialsWidget data={insights.topMaterials} />
+            <MostWatchedVideosWidget data={insights.topVideos} />
+            <TrendingContentWidget />
+            <WeeklyGrowthWidget />
+          </div>
+        </div>
+      )}
+
+      {/* 3. Quick Actions */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Quick Actions</CardTitle>
@@ -116,6 +141,17 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
         </CardContent>
       </Card>
 
+      {/* 4. Recent Uploads */}
+      {!insights.loading && (
+        <RecentUploadsWidget data={insights.recent} />
+      )}
+
+      {/* 5. Scheduled to Publish */}
+      {!insights.loading && (
+        <ScheduledContentWidget data={insights.scheduled} />
+      )}
+
+      {/* 6. Recent Comments */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center justify-between">
@@ -150,19 +186,18 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
         </CardContent>
       </Card>
 
-      {/* Insights Widgets */}
-      <div>
-        <h3 className="font-display text-lg font-bold text-foreground mb-3">Content Insights</h3>
-        <AdminInsightsWidgets />
-      </div>
-
-      {/* SEO: Orphan Content */}
+      {/* 7. SEO Health */}
       <div>
         <h3 className="font-display text-lg font-bold text-foreground mb-3">SEO Health</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <OrphanContentWidget />
         </div>
       </div>
+
+      {/* 8. Trash Summary */}
+      {!insights.loading && (
+        <TrashSummaryWidget data={insights.trashCounts} />
+      )}
     </div>
   );
 };
