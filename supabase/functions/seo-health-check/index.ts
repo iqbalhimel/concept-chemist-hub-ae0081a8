@@ -11,19 +11,6 @@ const IP_MAX_REQUESTS = 30;
 
 const ipWindow = new Map<string, { count: number; windowStart: number }>();
 
-function getCorsOrigin(req: Request): string {
-  const origin = req.headers.get("origin") || "";
-  return ALLOWED_ORIGINS.has(origin) ? origin : "";
-}
-
-function buildCorsHeaders(req: Request) {
-  const origin = getCorsOrigin(req);
-  return {
-    ...corsHeaders,
-    ...(origin ? { "Access-Control-Allow-Origin": origin } : {}),
-  };
-}
-
 function getIp(req: Request): string {
   const forwarded = req.headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0].trim();
