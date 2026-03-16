@@ -1,0 +1,99 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    // Verify caller is authenticated admin
+    const authHeader = req.headers.get("authorization") || "";
+    if (!authHeader.toLowerCase().startsWith("bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // Verify the caller using their JWT
+    const callerClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user: caller }, error: authError } = await callerClient.auth.getUser();
+    if (authError || !caller) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check caller has admin/super_admin role
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    const { data: callerRole } = await adminClient.rpc("get_admin_role", { _user_id: caller.id });
+    if (!callerRole || !["admin", "super_admin"].includes(callerRole)) {
+      return new Response(JSON.stringify({ error: "Forbidden: only admins can invite" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Parse request
+    const { email, name, role } = await req.json();
+    if (!email || !role) {
+      return new Response(JSON.stringify({ error: "Email and role are required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const validRoles = ["super_admin", "admin", "editor", "moderator"];
+    if (!validRoles.includes(role)) {
+      return new Response(JSON.stringify({ error: "Invalid role" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Invite user via admin API
+    const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email);
+    if (inviteError) {
+      return new Response(JSON.stringify({ error: inviteError.message }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const newUserId = inviteData.user.id;
+
+    // Create profile
+    await adminClient.from("profiles").upsert({
+      user_id: newUserId,
+      name: name || "",
+    }, { onConflict: "user_id" });
+
+    // Assign role
+    await adminClient.from("user_roles").upsert({
+      user_id: newUserId,
+      role: role,
+    }, { onConflict: "user_id,role" });
+
+    return new Response(JSON.stringify({ success: true, user_id: newUserId }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    console.error("invite-admin error:", err);
+    return new Response(JSON.stringify({ error: "Internal error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});

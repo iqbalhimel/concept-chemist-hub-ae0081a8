@@ -39,6 +39,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .upsert({ user_id: userId, last_login_at: new Date().toISOString() } as any, { onConflict: "user_id" })
         .select()
         .single();
+
+      // Record login history with IP and device detection (fire-and-forget)
+      const deviceInfo = `${navigator.userAgent}`;
+      supabase.functions
+        .invoke("record-login", { body: { device_info: deviceInfo, success: true } })
+        .catch((err) => console.warn("[AuthContext] Failed to record login:", err));
     } else {
       setAdminRole(null);
     }

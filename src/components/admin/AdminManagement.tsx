@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Plus, Shield, Loader2, Search, UserX, UserCheck } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Users, Plus, Shield, Loader2, Search, UserX, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { AdminRole, ASSIGNABLE_ROLES, getRoleLabel, getRoleBadgeColor, canManageAdmins } from "@/lib/permissions";
 import { logAdminActivity } from "@/lib/activityLogger";
@@ -27,18 +28,17 @@ const AdminManagement = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // New admin form
-  const [showForm, setShowForm] = useState(false);
-  const [newEmail, setNewEmail] = useState("");
-  const [newName, setNewName] = useState("");
-  const [newRole, setNewRole] = useState<AdminRole>("editor");
-  const [creating, setCreating] = useState(false);
+  // Invite modal
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteName, setInviteName] = useState("");
+  const [inviteRole, setInviteRole] = useState<AdminRole>("editor");
+  const [inviting, setInviting] = useState(false);
 
   const canManage = canManageAdmins(adminRole);
 
   const fetchAdmins = async () => {
     setLoading(true);
-    // Get all user_roles entries
     const { data: roles } = await supabase
       .from("user_roles")
       .select("user_id, role, created_at");
@@ -49,7 +49,6 @@ const AdminManagement = () => {
       return;
     }
 
-    // Get profiles for these users
     const userIds = roles.map(r => r.user_id);
     const { data: profiles } = await supabase
       .from("profiles")
@@ -63,7 +62,7 @@ const AdminManagement = () => {
       user_id: r.user_id,
       role: r.role as AdminRole,
       name: profileMap[r.user_id]?.name || "Unnamed",
-      email: "", // We'll show user_id since we can't query auth.users
+      email: "",
       avatar_url: profileMap[r.user_id]?.avatar_url || null,
       last_login_at: profileMap[r.user_id]?.last_login_at || null,
       created_at: r.created_at,
@@ -73,9 +72,7 @@ const AdminManagement = () => {
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchAdmins();
-  }, []);
+  useEffect(() => { fetchAdmins(); }, []);
 
   const handleUpdateRole = async (userId: string, newRole: AdminRole) => {
     try {
@@ -123,28 +120,34 @@ const AdminManagement = () => {
     }
   };
 
-  const handleCreateAdmin = async () => {
-    if (!newEmail.trim()) return toast.error("Email is required");
-    setCreating(true);
+  const handleInviteAdmin = async () => {
+    if (!inviteEmail.trim()) return toast.error("Email is required");
+    setInviting(true);
     try {
-      // Create auth user via admin invite - we'll insert the role directly
-      // Since we can't create auth users from client, we add the role for an existing user
-      // The admin needs to provide the user_id of an existing auth user
-      // For simplicity, we'll use email lookup via a workaround
+      const { data, error } = await supabase.functions.invoke("invite-admin", {
+        body: { email: inviteEmail.trim(), name: inviteName.trim(), role: inviteRole },
+      });
 
-      // Insert into user_roles - the user must already exist in auth
-      // We'll create a profile and role entry
-      toast.info("The user must already have an account. Adding their role...");
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      // We need the user_id - since we can't query auth.users, prompt for it
-      // For now, store a placeholder - in production this would use an edge function
-      toast.error("To add a new admin, the user must first create an account via the login page. Then provide their user ID.");
-      setCreating(false);
-      return;
+      await logAdminActivity({
+        action: "create",
+        module: "site_settings",
+        itemId: data?.user_id || "",
+        itemTitle: `Invited ${inviteEmail.trim()} as ${getRoleLabel(inviteRole)}`,
+      });
+
+      toast.success(`Invitation sent to ${inviteEmail.trim()}`);
+      setShowInvite(false);
+      setInviteEmail("");
+      setInviteName("");
+      setInviteRole("editor");
+      fetchAdmins();
     } catch (err: any) {
-      toast.error(err.message || "Failed to create admin");
+      toast.error(err.message || "Failed to invite admin");
     } finally {
-      setCreating(false);
+      setInviting(false);
     }
   };
 
@@ -172,6 +175,9 @@ const AdminManagement = () => {
           <h2 className="font-display text-2xl font-bold text-foreground mb-1">Admin Management</h2>
           <p className="text-muted-foreground text-sm">Manage admin users and their roles.</p>
         </div>
+        <Button onClick={() => setShowInvite(true)} size="sm" className="gap-1.5">
+          <Plus size={14} /> Invite Admin
+        </Button>
       </div>
 
       {/* Search */}
@@ -204,7 +210,6 @@ const AdminManagement = () => {
             <div className="space-y-3">
               {filtered.map(admin => (
                 <div key={admin.user_id} className="flex items-center gap-4 p-4 rounded-lg border border-border bg-card hover:bg-muted/30 transition-colors">
-                  {/* Avatar */}
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
                     {admin.avatar_url ? (
                       <img src={admin.avatar_url} alt="" className="w-full h-full object-cover" />
@@ -212,25 +217,17 @@ const AdminManagement = () => {
                       <Users size={18} className="text-primary" />
                     )}
                   </div>
-
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{admin.name}</p>
                     <p className="text-xs text-muted-foreground truncate">{admin.user_id.slice(0, 8)}...</p>
                   </div>
-
-                  {/* Role Badge */}
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full border shrink-0 ${getRoleBadgeColor(admin.role)}`}>
                     {getRoleLabel(admin.role)}
                   </span>
-
-                  {/* Last Login */}
                   <div className="hidden sm:block text-right shrink-0">
                     <p className="text-[10px] text-muted-foreground">Last login</p>
                     <p className="text-xs text-foreground">{formatDate(admin.last_login_at)}</p>
                   </div>
-
-                  {/* Actions */}
                   {admin.user_id !== user?.id && (
                     <div className="flex items-center gap-1 shrink-0">
                       <Select
@@ -258,7 +255,6 @@ const AdminManagement = () => {
                       </Button>
                     </div>
                   )}
-
                   {admin.user_id === user?.id && (
                     <span className="text-[10px] text-muted-foreground italic shrink-0">You</span>
                   )}
@@ -268,6 +264,61 @@ const AdminManagement = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Invite Admin Modal */}
+      <Dialog open={showInvite} onOpenChange={setShowInvite}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail size={18} className="text-primary" />
+              Invite Admin
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label htmlFor="invite-name">Name</Label>
+              <Input
+                id="invite-name"
+                value={inviteName}
+                onChange={e => setInviteName(e.target.value)}
+                placeholder="Admin name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="invite-email">Email *</Label>
+              <Input
+                id="invite-email"
+                type="email"
+                value={inviteEmail}
+                onChange={e => setInviteEmail(e.target.value)}
+                placeholder="admin@example.com"
+                required
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Role</Label>
+              <Select value={inviteRole} onValueChange={v => setInviteRole(v as AdminRole)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(["super_admin", "admin", "editor", "moderator"] as AdminRole[]).map(r => (
+                    <SelectItem key={r} value={r}>{getRoleLabel(r)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInvite(false)}>Cancel</Button>
+            <Button onClick={handleInviteAdmin} disabled={inviting}>
+              {inviting ? "Sending..." : "Send Invitation"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
