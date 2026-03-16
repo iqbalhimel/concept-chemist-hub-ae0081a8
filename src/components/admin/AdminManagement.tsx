@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Users, Plus, Shield, Loader2, Search, UserX, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { AdminRole, ASSIGNABLE_ROLES, getRoleLabel, getRoleBadgeColor, canManageAdmins } from "@/lib/permissions";
