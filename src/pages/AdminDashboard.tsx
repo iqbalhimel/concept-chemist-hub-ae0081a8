@@ -157,6 +157,7 @@ const navigation: NavEntry[] = [
     label: "Security",
     icon: Lock,
     items: [
+      { id: "admin-profile", label: "Admin Profile", icon: User },
       { id: "security-logs", label: "Security Logs", icon: Shield },
       { id: "activity-timeline", label: "Activity Timeline", icon: Activity },
     ],
