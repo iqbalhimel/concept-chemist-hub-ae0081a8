@@ -16,16 +16,20 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for recovery token in URL hash
+    // Check for recovery or invite token in URL hash
     const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
+    if (hash.includes("type=recovery") || hash.includes("type=invite") || hash.includes("type=magiclink")) {
       setReady(true);
     } else {
-      // Also listen for auth state change with recovery event
+      // Also listen for auth state change with recovery or sign-in event
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-        if (event === "PASSWORD_RECOVERY") {
+        if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
           setReady(true);
         }
+      });
+      // Check existing session (token may have been auto-exchanged)
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) setReady(true);
       });
       return () => subscription.unsubscribe();
     }
