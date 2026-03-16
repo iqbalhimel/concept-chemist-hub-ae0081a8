@@ -11,7 +11,7 @@ const PERMISSIONS: Record<AdminRole, Set<string>> = {
     "hero-section", "about-section", "homepage-sections", "announcement-bar",
     "coaching-info", "contact-details", "social-links", "whatsapp-chat",
     "site-info", "footer-settings", "hero-animation",
-    "activity-timeline", "admin-management",
+    "activity-timeline", "admin-management", "login-history",
   ]),
   admin: new Set([
     "dashboard", "analytics", "seo", "seo-monitor", "performance",
@@ -22,7 +22,7 @@ const PERMISSIONS: Record<AdminRole, Set<string>> = {
     "hero-section", "about-section", "homepage-sections", "announcement-bar",
     "coaching-info", "contact-details", "social-links", "whatsapp-chat",
     "site-info", "footer-settings", "hero-animation",
-    "activity-timeline", "admin-management",
+    "activity-timeline", "admin-management", "login-history",
   ]),
   editor: new Set([
     "dashboard", "admin-profile",
