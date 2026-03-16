@@ -77,6 +77,39 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_login_history: {
+        Row: {
+          admin_id: string
+          created_at: string
+          device_info: string | null
+          id: string
+          ip_address: string | null
+          location: string | null
+          login_time: string
+          success: boolean
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          location?: string | null
+          login_time?: string
+          success?: boolean
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          location?: string | null
+          login_time?: string
+          success?: boolean
+        }
+        Relationships: []
+      }
       blog_post_comments: {
         Row: {
           content: string
