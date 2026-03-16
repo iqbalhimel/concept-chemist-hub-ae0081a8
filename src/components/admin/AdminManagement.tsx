@@ -305,7 +305,7 @@ const AdminManagement = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {(["super_admin", "admin", "editor", "moderator"] as AdminRole[]).map(r => (
+                  {ASSIGNABLE_ROLES.map(r => (
                     <SelectItem key={r} value={r}>{getRoleLabel(r)}</SelectItem>
                   ))}
                 </SelectContent>

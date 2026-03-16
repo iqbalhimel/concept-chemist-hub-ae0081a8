@@ -64,4 +64,4 @@ export const getRoleBadgeColor = (role: AdminRole): string => {
   return colors[role] || "bg-muted text-muted-foreground";
 };
 
-export const ASSIGNABLE_ROLES: AdminRole[] = ["super_admin", "editor", "moderator"];
+export const ASSIGNABLE_ROLES: AdminRole[] = ["admin", "editor", "moderator"];
