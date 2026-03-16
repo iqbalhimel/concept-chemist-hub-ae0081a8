@@ -38,6 +38,7 @@ import AdminSettingsSection from "@/components/admin/AdminSettingsSection";
 import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 import AdminActivityTimeline from "@/components/admin/AdminActivityTimeline";
 import AdminGlobalTrash from "@/components/admin/AdminGlobalTrash";
+import AdminProfile from "@/components/admin/AdminProfile";
 import {
   heroSectionConfig, aboutSectionConfig, homepageSectionsConfig,
   announcementBarConfig, coachingInfoConfig, contactDetailsConfig,

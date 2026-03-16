@@ -93,12 +93,10 @@ const AdminProfile = () => {
     if (!file || !user) return;
     setUploading(true);
     try {
-      const result = await secureUpload(file, "media", `avatars/${user.id}`);
-      if (result.error) throw new Error(result.error);
-      const { data: urlData } = supabase.storage
-        .from("media")
-        .getPublicUrl(result.path!);
-      setAvatarUrl(urlData.publicUrl);
+      const result = await secureUpload(file, file.type, file.name, {
+        directory: `avatars/${user.id}`,
+      });
+      setAvatarUrl(result.publicUrl);
       toast.success("Photo uploaded");
     } catch (err: any) {
       toast.error(err.message || "Upload failed");
