@@ -164,9 +164,11 @@ serve(async (req) => {
       });
     }
 
+    const apiKey = Deno.env.get("GOOGLE_PAGESPEED_API_KEY") || "";
+    const keyParam = apiKey ? `&key=${apiKey}` : "";
     const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(
       url,
-    )}&strategy=${strategy}&category=performance&category=seo&category=accessibility&category=best-practices`;
+    )}&strategy=${strategy}&category=performance&category=seo&category=accessibility&category=best-practices${keyParam}`;
 
     const response = await fetch(apiUrl);
     const data = await response.json();
