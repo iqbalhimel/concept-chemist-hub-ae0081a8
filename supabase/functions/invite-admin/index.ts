@@ -67,6 +67,9 @@ Deno.serve(async (req) => {
     // Try to invite the user; if they already exist, look them up instead
     let newUserId: string;
 
+    const origin = req.headers.get("origin") || "https://concept-chemist-hub.lovable.app";
+    const redirectTo = `${origin}/auth/callback`;
+
     const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
       redirectTo,
     });
