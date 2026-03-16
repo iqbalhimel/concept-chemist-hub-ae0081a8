@@ -273,6 +273,7 @@ const AdminManagement = () => {
               <Mail size={18} className="text-primary" />
               Invite Admin
             </DialogTitle>
+            <DialogDescription>Send an email invitation to add a new admin user.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
