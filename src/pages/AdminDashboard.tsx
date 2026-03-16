@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,9 @@ import {
   Image, HelpCircle, Palette, Settings, LogOut, Menu, X,
   MessageSquare, Globe, MessageSquareQuote, GraduationCap,
   Briefcase, Trophy, Lightbulb, Atom, BarChart3, CloudSun, Search, Zap, TrendingUp, Shield, Video, Tag,
-  ChevronDown, ChevronRight, Home, PenTool, User, Phone, Wrench, Eye, Lock, Activity, Trash2
+  ChevronDown, ChevronRight, Home, PenTool, User, Phone, Wrench, Eye, Lock, Activity, Trash2, Users
 } from "lucide-react";
+import { canAccess, getRoleLabel } from "@/lib/permissions";
 import AdminNotices from "@/components/admin/AdminNotices";
 import AdminStudyMaterials from "@/components/admin/AdminStudyMaterials";
 import AdminBlogPosts from "@/components/admin/AdminBlogPosts";
@@ -39,6 +40,7 @@ import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 import AdminActivityTimeline from "@/components/admin/AdminActivityTimeline";
 import AdminGlobalTrash from "@/components/admin/AdminGlobalTrash";
 import AdminProfile from "@/components/admin/AdminProfile";
+import AdminManagement from "@/components/admin/AdminManagement";
 import {
   heroSectionConfig, aboutSectionConfig, homepageSectionsConfig,
   announcementBarConfig, coachingInfoConfig, contactDetailsConfig,
@@ -51,7 +53,7 @@ type Tab =
   | "notices" | "study-materials" | "blog" | "blog-categories" | "blog-tags" | "comments" | "testimonials"
   | "gallery" | "faq" | "media" | "themes" | "atmosphere"
   | "education" | "experience" | "achievements" | "approach" | "subjects"
-  | "training" | "security-logs" | "videos" | "global-trash" | "admin-profile"
+  | "training" | "security-logs" | "videos" | "global-trash" | "admin-profile" | "admin-management"
   // Settings-based tabs
   | "hero-section" | "about-section" | "homepage-sections" | "announcement-bar"
   | "coaching-info" | "contact-details" | "social-links" | "whatsapp-chat"
@@ -74,7 +76,7 @@ type NavEntry = NavItem | NavGroup;
 
 const isGroup = (entry: NavEntry): entry is NavGroup => "items" in entry;
 
-const navigation: NavEntry[] = [
+const fullNavigation: NavEntry[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "global-trash", label: "Trash", icon: Trash2 },
   {
@@ -158,27 +160,39 @@ const navigation: NavEntry[] = [
     icon: Lock,
     items: [
       { id: "admin-profile", label: "Admin Profile", icon: User },
+      { id: "admin-management", label: "Admin Management", icon: Users },
       { id: "security-logs", label: "Security Logs", icon: Shield },
       { id: "activity-timeline", label: "Activity Timeline", icon: Activity },
     ],
   },
 ];
 
-// Flatten all tab IDs for label lookup
-const allItems: NavItem[] = navigation.flatMap(e => isGroup(e) ? e.items : [e]);
-
 const AdminDashboard = () => {
-  const { signOut, user } = useAuth();
+  const { signOut, user, adminRole } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [trashCount, setTrashCount] = useState(0);
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
-    const set = new Set<string>();
-    navigation.forEach(e => {
-      if (isGroup(e) && e.items.some(i => i.id === "dashboard")) set.add(e.label);
-    });
-    return set;
-  });
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  // Filter navigation based on role permissions
+  const navigation = useMemo(() => {
+    return fullNavigation.reduce<NavEntry[]>((acc, entry) => {
+      if (isGroup(entry)) {
+        const filteredItems = entry.items.filter(item => canAccess(adminRole, item.id));
+        if (filteredItems.length > 0) {
+          acc.push({ ...entry, items: filteredItems });
+        }
+      } else {
+        if (canAccess(adminRole, entry.id)) {
+          acc.push(entry);
+        }
+      }
+      return acc;
+    }, []);
+  }, [adminRole]);
+
+  // Flatten for label lookup
+  const allItems: NavItem[] = navigation.flatMap(e => isGroup(e) ? e.items : [e]);
 
   useEffect(() => {
     const fetchTrashCount = async () => {
@@ -201,9 +215,10 @@ const AdminDashboard = () => {
   };
 
   const handleTabClick = (tab: Tab) => {
+    // Check permission before navigating
+    if (!canAccess(adminRole, tab)) return;
     setActiveTab(tab);
     setSidebarOpen(false);
-    // Auto-expand the group containing this tab
     navigation.forEach(e => {
       if (isGroup(e) && e.items.some(i => i.id === tab)) {
         setExpandedGroups(prev => new Set(prev).add(e.label));
@@ -212,8 +227,17 @@ const AdminDashboard = () => {
   };
 
   const renderContent = () => {
+    // Permission gate
+    if (activeTab !== "dashboard" && !canAccess(adminRole, activeTab)) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <Shield size={48} className="text-muted-foreground" />
+          <p className="text-muted-foreground">You don't have permission to access this section.</p>
+        </div>
+      );
+    }
+
     switch (activeTab) {
-      // Existing component tabs
       case "analytics": return <AdminAnalytics />;
       case "seo": return <AdminSEO />;
       case "seo-monitor": return <AdminSeoMonitor />;
@@ -241,7 +265,7 @@ const AdminDashboard = () => {
       case "activity-timeline": return <AdminActivityTimeline />;
       case "global-trash": return <AdminGlobalTrash />;
       case "admin-profile": return <AdminProfile />;
-      // Settings-based tabs
+      case "admin-management": return <AdminManagement />;
       case "hero-section": return <AdminSettingsSection section={heroSectionConfig} />;
       case "about-section": return <AdminSettingsSection section={aboutSectionConfig} />;
       case "homepage-sections": return <AdminSettingsSection section={homepageSectionsConfig} />;
@@ -283,6 +307,7 @@ const AdminDashboard = () => {
   );
 
   const activeLabel = allItems.find(i => i.id === activeTab)?.label || "Dashboard";
+  const roleLabel = adminRole ? getRoleLabel(adminRole) : "";
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -295,7 +320,7 @@ const AdminDashboard = () => {
           <button className="lg:hidden text-muted-foreground hover:text-foreground transition-colors" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
         </div>
         <nav className="p-3 space-y-0.5 flex-1 overflow-y-auto min-h-0 scrollbar-thin">
-          {navigation.map((entry, idx) => {
+          {navigation.map((entry) => {
             if (!isGroup(entry)) {
               return renderNavItem(entry);
             }
@@ -324,7 +349,14 @@ const AdminDashboard = () => {
           })}
         </nav>
         <div className="p-3 border-t border-border shrink-0 space-y-2">
-          <div className="text-xs text-muted-foreground truncate px-3">{user?.email}</div>
+          <div className="flex items-center gap-2 px-3">
+            <span className="text-xs text-muted-foreground truncate flex-1">{user?.email}</span>
+            {roleLabel && (
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
+                {roleLabel}
+              </span>
+            )}
+          </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={() => window.open("/", "_blank")}>
               <Globe size={13} className="mr-1" /> View Site

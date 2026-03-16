@@ -694,6 +694,7 @@ export type Database = {
           bio: string | null
           created_at: string
           id: string
+          last_login_at: string | null
           name: string
           phone: string | null
           updated_at: string
@@ -704,6 +705,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           id?: string
+          last_login_at?: string | null
           name?: string
           phone?: string | null
           updated_at?: string
@@ -714,6 +716,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           id?: string
+          last_login_at?: string | null
           name?: string
           phone?: string | null
           updated_at?: string
@@ -1131,6 +1134,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_admin_role: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1142,9 +1146,10 @@ export type Database = {
         Args: { p_content_id: string; p_content_type: string }
         Returns: undefined
       }
+      is_any_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "super_admin" | "editor" | "moderator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1272,7 +1277,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "super_admin", "editor", "moderator"],
     },
   },
 } as const
