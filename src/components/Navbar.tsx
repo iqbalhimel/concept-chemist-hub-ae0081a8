@@ -1,16 +1,18 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Menu, X, Moon, Sun, ChevronDown } from "lucide-react";
+import { Menu, X, Moon, Sun, ChevronDown, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBrightness } from "@/contexts/BrightnessContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 type NavItem = { label: string; href: string };
+type NavGroup = { label: string; items: NavItem[] };
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
   const [activeHref, setActiveHref] = useState("#home");
   const moreRef = useRef<HTMLDivElement>(null);
   const { mode, toggle } = useBrightness();
