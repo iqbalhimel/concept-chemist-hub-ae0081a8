@@ -64,21 +64,40 @@ Deno.serve(async (req) => {
     }
 
     // Invite user via admin API
-    // Build the redirect URL so the invite link lands on /auth/callback
-    const siteUrl = Deno.env.get("SITE_URL") || supabaseUrl.replace(".supabase.co", "");
-    const redirectTo = `${req.headers.get("origin") || siteUrl}/auth/callback`;
+    // Try to invite the user; if they already exist, look them up instead
+    let newUserId: string;
 
     const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
       redirectTo,
     });
-    if (inviteError) {
-      return new Response(JSON.stringify({ error: inviteError.message }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
-    const newUserId = inviteData.user.id;
+    if (inviteError) {
+      // If user already exists, find them by email
+      if (inviteError.message.includes("already been registered")) {
+        const { data: { users }, error: listError } = await adminClient.auth.admin.listUsers();
+        if (listError) {
+          return new Response(JSON.stringify({ error: listError.message }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const existingUser = users.find((u: any) => u.email === email);
+        if (!existingUser) {
+          return new Response(JSON.stringify({ error: "User not found" }), {
+            status: 404,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        newUserId = existingUser.id;
+      } else {
+        return new Response(JSON.stringify({ error: inviteError.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else {
+      newUserId = inviteData.user.id;
+    }
 
     // Create profile
     await adminClient.from("profiles").upsert({
