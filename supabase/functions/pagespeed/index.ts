@@ -45,10 +45,6 @@ function getIp(req: Request): string {
   if (forwarded) return forwarded.split(",")[0].trim();
   return req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || "unknown";
 }
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
-  return req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || "unknown";
-}
 
 function isSuspiciousUserAgent(ua: string | null): boolean {
   if (!ua || ua === "-" || ua.trim().length < 6) return true;
