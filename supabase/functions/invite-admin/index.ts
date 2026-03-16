@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     let newUserId: string;
 
     const origin = req.headers.get("origin") || "https://concept-chemist-hub.lovable.app";
-    const redirectTo = `${origin}/auth/callback`;
+    const redirectTo = `${origin}/reset-password`;
 
     const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
       redirectTo,
