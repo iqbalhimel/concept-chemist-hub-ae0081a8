@@ -1,34 +1,58 @@
-import { useMemo, useState, useEffect } from "react";
-import { Menu, X, Moon, Sun } from "lucide-react";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { Menu, X, Moon, Sun, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBrightness } from "@/contexts/BrightnessContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
+type NavItem = { label: string; href: string };
+
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [activeHref, setActiveHref] = useState("#home");
+  const moreRef = useRef<HTMLDivElement>(null);
   const { mode, toggle } = useBrightness();
   const { lang, t, switchLang } = useLanguage();
   const { get } = useSiteSettings();
 
   const siteName = get("site_info", "site_name", "Iqbal Sir");
 
-  const navLinks = useMemo(() => [
+  const primaryLinks: NavItem[] = useMemo(() => [
     { label: t.nav.home, href: "#home" },
     { label: t.nav.about, href: "#about" },
     { label: t.nav.subjects, href: "#subjects" },
     { label: t.nav.experience, href: "#experience" },
     { label: t.nav.education, href: "#education" },
+    { label: t.nav.blog, href: "#blog" },
+    { label: t.nav.contact, href: "#contact" },
+  ], [t.nav]);
+
+  const moreLinks: NavItem[] = useMemo(() => [
+    { label: t.nav.approach, href: "#approach" },
+    { label: t.nav.achievements, href: "#student-success" },
+    { label: t.nav.training, href: "#professional-training" },
     { label: t.nav.gallery, href: "#gallery" },
     { label: t.nav.videos, href: "#videos" },
     { label: t.nav.testimonials, href: "#testimonials" },
-    { label: t.nav.resources, href: "#resources" },
-    { label: t.nav.blog, href: "#blog" },
+    { label: t.nav.notices, href: "#notices" },
+    { label: t.nav.downloads, href: "#resources" },
     { label: t.nav.faq, href: "#faq" },
-    { label: t.nav.contact, href: "#contact" },
   ], [t.nav]);
+
+  const allLinks = useMemo(() => [...primaryLinks, ...moreLinks], [primaryLinks, moreLinks]);
+
+  // Close "More" dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -38,12 +62,12 @@ const Navbar = () => {
 
   useEffect(() => {
     let raf = 0;
-    const ids = navLinks.map((l) => l.href.replace("#", ""));
+    const ids = allLinks.map((l) => l.href.replace("#", ""));
     const onScroll = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         const y = window.scrollY + 120;
-        let current = navLinks[0]?.href ?? "#home";
+        let current = allLinks[0]?.href ?? "#home";
         for (const id of ids) {
           const el = document.getElementById(id);
           if (!el) continue;
@@ -59,7 +83,32 @@ const Navbar = () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
     };
-  }, [navLinks]);
+  }, [allLinks]);
+
+  const isMoreActive = moreLinks.some((l) => l.href === activeHref);
+
+  const renderLink = (link: NavItem, active: boolean) => (
+    <a
+      key={link.href}
+      href={link.href}
+      className={`px-3 py-2 text-sm rounded-xl transition-all ${
+        active
+          ? "text-foreground bg-secondary/60"
+          : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+      }`}
+      aria-current={active ? "page" : undefined}
+    >
+      <span className="relative">
+        {link.label}
+        {active && (
+          <span
+            aria-hidden
+            className="absolute left-1/2 -bottom-2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary shadow-[0_0_0_6px_hsl(var(--primary)/0.18)]"
+          />
+        )}
+      </span>
+    </a>
+  );
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-[90]">
@@ -78,31 +127,59 @@ const Navbar = () => {
 
             {/* Desktop */}
             <div className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => {
-                const active = activeHref === link.href;
-                return (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    className={`px-3 py-2 text-sm rounded-xl transition-all ${
-                      active
-                        ? "text-foreground bg-secondary/60"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
-                    }`}
-                    aria-current={active ? "page" : undefined}
-                  >
-                    <span className="relative">
-                      {link.label}
-                      {active && (
-                        <span
-                          aria-hidden
-                          className="absolute left-1/2 -bottom-2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary shadow-[0_0_0_6px_hsl(var(--primary)/0.18)]"
-                        />
-                      )}
-                    </span>
-                  </a>
-                );
-              })}
+              {primaryLinks.map((link) => renderLink(link, activeHref === link.href))}
+
+              {/* More dropdown */}
+              <div className="relative" ref={moreRef}>
+                <button
+                  onClick={() => setMoreOpen(!moreOpen)}
+                  className={`px-3 py-2 text-sm rounded-xl transition-all flex items-center gap-1 ${
+                    isMoreActive
+                      ? "text-foreground bg-secondary/60"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+                  }`}
+                >
+                  <span className="relative">
+                    {t.nav.more}
+                    {isMoreActive && (
+                      <span
+                        aria-hidden
+                        className="absolute left-1/2 -bottom-2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary shadow-[0_0_0_6px_hsl(var(--primary)/0.18)]"
+                      />
+                    )}
+                  </span>
+                  <ChevronDown size={14} className={`transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`} />
+                </button>
+                <AnimatePresence>
+                  {moreOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-background/80 backdrop-blur-2xl border border-border shadow-xl p-1.5 z-50"
+                    >
+                      {moreLinks.map((link) => {
+                        const active = activeHref === link.href;
+                        return (
+                          <a
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setMoreOpen(false)}
+                            className={`block px-3 py-2 text-sm rounded-lg transition-colors ${
+                              active
+                                ? "text-foreground bg-secondary/60"
+                                : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+                            }`}
+                          >
+                            {link.label}
+                          </a>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               <div className="mx-2 h-6 w-px bg-border/70" aria-hidden />
 
@@ -159,7 +236,7 @@ const Navbar = () => {
                 <div className="px-3 pb-3">
                   <div className="glass-card p-2">
                     <div className="flex flex-col">
-                      {navLinks.map((link) => {
+                      {allLinks.map((link) => {
                         const active = activeHref === link.href;
                         return (
                           <a
