@@ -45,6 +45,39 @@ const Navbar = () => {
 
   const allLinks = useMemo(() => [...primaryLinks, ...moreLinks], [primaryLinks, moreLinks]);
 
+  // Mobile-specific: top-level items + accordion groups
+  const mobilePrimaryLinks: NavItem[] = useMemo(() => [
+    { label: t.nav.home, href: "#home" },
+    { label: t.nav.about, href: "#about" },
+    { label: t.nav.subjects, href: "#subjects" },
+    { label: t.nav.blog, href: "#blog" },
+    { label: t.nav.contact, href: "#contact" },
+  ], [t.nav]);
+
+  const mobileGroups: NavGroup[] = useMemo(() => [
+    {
+      label: t.nav.academic_group,
+      items: [
+        { label: t.nav.experience, href: "#experience" },
+        { label: t.nav.education, href: "#education" },
+        { label: t.nav.approach, href: "#approach" },
+        { label: t.nav.achievements, href: "#student-success" },
+        { label: t.nav.training, href: "#professional-training" },
+      ],
+    },
+    {
+      label: t.nav.resources_group,
+      items: [
+        { label: t.nav.gallery, href: "#gallery" },
+        { label: t.nav.videos, href: "#videos" },
+        { label: t.nav.testimonials, href: "#testimonials" },
+        { label: t.nav.notices, href: "#notices" },
+        { label: t.nav.downloads, href: "#resources" },
+        { label: t.nav.faq, href: "#faq" },
+      ],
+    },
+  ], [t.nav]);
+
   // Close "More" dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
