@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Users, Plus, Shield, Loader2, Search, UserX, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { AdminRole, ASSIGNABLE_ROLES, getRoleLabel, getRoleBadgeColor, canManageAdmins } from "@/lib/permissions";
@@ -273,6 +273,7 @@ const AdminManagement = () => {
               <Mail size={18} className="text-primary" />
               Invite Admin
             </DialogTitle>
+            <DialogDescription>Send an email invitation to add a new admin user.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
