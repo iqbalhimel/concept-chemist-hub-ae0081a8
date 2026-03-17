@@ -42,6 +42,7 @@ import AdminGlobalTrash from "@/components/admin/AdminGlobalTrash";
 import AdminProfile from "@/components/admin/AdminProfile";
 import AdminManagement from "@/components/admin/AdminManagement";
 import AdminLoginHistory from "@/components/admin/AdminLoginHistory";
+import AdminHomepageSectionContent from "@/components/admin/AdminHomepageSectionContent";
 import {
   heroSectionConfig, aboutSectionConfig, homepageSectionsConfig,
   announcementBarConfig, coachingInfoConfig, contactDetailsConfig,
@@ -56,6 +57,7 @@ type Tab =
   | "education" | "experience" | "achievements" | "approach" | "subjects"
   | "training" | "security-logs" | "videos" | "global-trash" | "admin-profile" | "admin-management"
   | "hero-section" | "about-section" | "homepage-sections" | "announcement-bar"
+  | "homepage-section-content"
   | "coaching-info" | "contact-details" | "social-links" | "whatsapp-chat"
   | "site-info" | "footer-settings" | "hero-animation"
   | "activity-timeline" | "login-history";
@@ -86,6 +88,7 @@ const fullNavigation: NavEntry[] = [
       { id: "hero-section", label: "Hero Section", icon: Globe },
       { id: "about-section", label: "About Section", icon: Globe },
       { id: "homepage-sections", label: "Sections Toggle", icon: Eye },
+      { id: "homepage-section-content", label: "Section Content", icon: FileText },
       { id: "announcement-bar", label: "Announcement Bar", icon: Bell },
     ],
   },
@@ -271,6 +274,7 @@ const AdminDashboard = () => {
       case "hero-section": return <AdminSettingsSection section={heroSectionConfig} />;
       case "about-section": return <AdminSettingsSection section={aboutSectionConfig} />;
       case "homepage-sections": return <AdminSettingsSection section={homepageSectionsConfig} />;
+      case "homepage-section-content": return <AdminHomepageSectionContent />;
       case "announcement-bar": return <AdminSettingsSection section={announcementBarConfig} />;
       case "coaching-info": return <AdminSettingsSection section={coachingInfoConfig} />;
       case "contact-details": return <AdminSettingsSection section={contactDetailsConfig} />;

@@ -32,7 +32,7 @@
     "img_alt": "মোঃ ইকবাল হুসেন – বিজ্ঞান শিক্ষক"
   },
   "about": {
-    "title_1": "",
+    "title_1": "আমার সম্পর্কে",
     "title_highlight": "ইকবাল স্যার",
     "subtitle": "মোঃ ইকবাল হুসেন — সহকারী শিক্ষক (বিজ্ঞান) ও বিজ্ঞান শিক্ষক",
     "intro": "<strong>২০১৪ সাল থেকে ১০+ বছরের শিক্ষকতার অভিজ্ঞতা</strong> নিয়ে ইকবাল স্যার কিশোরগঞ্জ জেলা স্মরণী বালিকা উচ্চ বিদ্যালয়ে সহকারী শিক্ষক (বিজ্ঞান) হিসেবে কর্মরত।",
@@ -42,7 +42,24 @@
     "highlight_1": "ধারণাভিত্তিক শিক্ষা",
     "highlight_2": "মাল্টিমিডিয়া ক্লাস",
     "highlight_3": "শিক্ষার্থী-বান্ধব",
-    "highlight_4": "মজবুত ভিত্তি"
+    "highlight_4": "মজবুত ভিত্তি",
+    "coaching_title": "কোচিং সংক্রান্ত তথ্য",
+    "coaching_location": "স্থান",
+    "coaching_class_days": "ক্লাসের দিন",
+    "coaching_class_time": "ক্লাসের সময়",
+    "coaching_batch_size": "ব্যাচ সাইজ",
+    "coaching_target": "লক্ষ্য শিক্ষার্থী",
+    "coaching_medium": "মাধ্যম"
+  },
+  "videos": {
+    "badge": "শিক্ষামূলক ভিডিও",
+    "title_1": "দেখো &",
+    "title_highlight": "শিখো",
+    "subtitle": "গুরুত্বপূর্ণ বিষয়গুলো নিয়ে ভিডিও লেসন দেখো",
+    "page_title": "শিক্ষামূলক ভিডিও",
+    "page_subtitle": "সব ভিডিও লেসন এক জায়গায়",
+    "search_placeholder": "ভিডিও খুঁজুন...",
+    "filter_all_subjects": "সব বিষয়"
   },
   "subjects": {
     "title_1": "পাঠ্য",
@@ -57,7 +74,12 @@
     "mathematics": "গণিত",
     "higher_math": "উচ্চতর গণিত",
     "general_science": "সাধারণ বিজ্ঞান",
-    "ict": "তথ্য ও যোগাযোগ প্রযুক্তি"
+    "ict": "তথ্য ও যোগাযোগ প্রযুক্তি",
+    "category_other": "অন্যান্য",
+    "untitled": "শিরোনামহীন",
+    "category_ssc": "SSC স্তর",
+    "category_hsc": "HSC স্তর",
+    "category_class_6_10": "৬ষ্ঠ-১০ম শ্রেণি"
   },
   "approach": {
     "title_1": "শিক্ষাদানের",

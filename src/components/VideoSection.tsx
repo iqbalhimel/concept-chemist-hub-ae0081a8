@@ -36,7 +36,7 @@ const VideoSection = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [activeVideo, setActiveVideo] = useState<Video | null>(null);
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
 
   useEffect(() => {
     supabase
@@ -59,13 +59,13 @@ const VideoSection = () => {
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
-              Educational Videos
+              {t.videos.badge}
             </span>
             <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">
-              Watch &amp; <span className="gradient-text">Learn</span>
+              {t.videos.title_1} <span className="gradient-text">{t.videos.title_highlight}</span>
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Explore video lessons on key topics
+              {t.videos.subtitle}
             </p>
           </div>
 

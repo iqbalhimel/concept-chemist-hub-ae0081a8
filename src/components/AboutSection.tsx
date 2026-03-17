@@ -44,12 +44,12 @@ const AboutSection = () => {
   ];
 
   const coachingItems = coaching ? [
-    { icon: MapPin, label: "Location", value: coaching.location },
-    { icon: Calendar, label: "Class Days", value: coaching.class_days },
-    { icon: Clock, label: "Class Time", value: coaching.class_time },
-    { icon: UsersRound, label: "Batch Size", value: coaching.batch_size },
-    { icon: GraduationCap, label: "Target", value: coaching.target_students },
-    { icon: Languages, label: "Medium", value: coaching.medium },
+    { icon: MapPin, label: t.about.coaching_location, value: coaching.location },
+    { icon: Calendar, label: t.about.coaching_class_days, value: coaching.class_days },
+    { icon: Clock, label: t.about.coaching_class_time, value: coaching.class_time },
+    { icon: UsersRound, label: t.about.coaching_batch_size, value: coaching.batch_size },
+    { icon: GraduationCap, label: t.about.coaching_target, value: coaching.target_students },
+    { icon: Languages, label: t.about.coaching_medium, value: coaching.medium },
   ].filter(item => item.value) : [];
 
   return (
@@ -86,7 +86,7 @@ const AboutSection = () => {
               className="glass-card p-6 md:p-8 mb-10"
             >
               <h3 className="font-display font-semibold text-foreground text-xl mb-5 text-center">
-                🎓 Coaching Information
+                🎓 {t.about.coaching_title}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {coachingItems.map((item, i) => (

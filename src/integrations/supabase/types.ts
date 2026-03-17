@@ -562,6 +562,45 @@ export type Database = {
         }
         Relationships: []
       }
+      homepage_sections: {
+        Row: {
+          badge_bn: string | null
+          badge_en: string | null
+          id: string
+          is_active: boolean
+          section_key: string
+          subtitle_bn: string | null
+          subtitle_en: string | null
+          title_bn: string | null
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          badge_bn?: string | null
+          badge_en?: string | null
+          id?: string
+          is_active?: boolean
+          section_key: string
+          subtitle_bn?: string | null
+          subtitle_en?: string | null
+          title_bn?: string | null
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          badge_bn?: string | null
+          badge_en?: string | null
+          id?: string
+          is_active?: boolean
+          section_key?: string
+          subtitle_bn?: string | null
+          subtitle_en?: string | null
+          title_bn?: string | null
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notices: {
         Row: {
           created_at: string

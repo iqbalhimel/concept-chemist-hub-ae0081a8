@@ -547,14 +547,32 @@ const ScienceHeroCanvas = () => {
     // Create elements with random spawn across hero + minimum spacing
     const spawnTypes = isMobile ? MOBILE_TYPES : PLACEMENT_ORDER;
     const elements: ScienceElement[] = createSpacedElements(w, h, spawnTypes, adminMinSpacing);
+
+    // Sort once by render layer (physics → chemistry → biology).
+    // The order depends only on `type` which never changes, so sorting
+    // every frame (60×/sec) is unnecessary work and causes constant GC churn.
+    const renderLayer = (e: ScienceElement) =>
+      BIOLOGY_TYPES.has(e.type) ? 2 : (["benzene", "water", "network"].includes(e.type) ? 1 : 0);
+    elements.sort((a, b) => renderLayer(a) - renderLayer(b));
+
     let tick = 0;
 
     const MIN_DIST = adminMinSpacing;
 
+    // Cache color palette for 60 s — avoids calling getTimeOfDay() 60×/sec
+    let cachedColors = timeColors[
+      (["morning","noon","evening","night"].includes(timeOverride) ? timeOverride as TimeOfDay : getTimeOfDay())
+    ];
+    let colorsCachedAt = Date.now();
     const getColors = () => {
-      const valid = ["morning", "noon", "evening", "night"];
-      const active: TimeOfDay = valid.includes(timeOverride) ? (timeOverride as TimeOfDay) : getTimeOfDay();
-      return timeColors[active];
+      const now = Date.now();
+      if (now - colorsCachedAt > 60_000) {
+        const valid = ["morning", "noon", "evening", "night"];
+        const active: TimeOfDay = valid.includes(timeOverride) ? (timeOverride as TimeOfDay) : getTimeOfDay();
+        cachedColors = timeColors[active];
+        colorsCachedAt = now;
+      }
+      return cachedColors;
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -591,13 +609,8 @@ const ScienceHeroCanvas = () => {
         }
       }
 
-      // Render in layer order: physics → chemistry → biology (on top)
-      const sorted = [...elements].sort((a, b) => {
-        const order = (e: ScienceElement) => BIOLOGY_TYPES.has(e.type) ? 2 : (["benzene", "water", "network"].includes(e.type) ? 1 : 0);
-        return order(a) - order(b);
-      });
-
-      for (const el of sorted) {
+      // Elements are already sorted by render layer at initialisation.
+      for (const el of elements) {
         // Slow drift adjustments for smooth roaming
         if (tick % 90 === 0) {
           el.vx += rand(-0.03, 0.03);

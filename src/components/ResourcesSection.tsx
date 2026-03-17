@@ -1,12 +1,15 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Download, FolderOpen, FileText, Eye, X, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import PdfViewer from "@/components/PdfViewer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
+
+// Lazy-load PdfViewer so pdfjs-dist (~280 KB) is only fetched when the
+// user opens the PDF preview dialog, not on initial page load.
+const PdfViewer = lazy(() => import("@/components/PdfViewer"));
 
 type StudyMaterial = Tables<"study_materials">;
 
@@ -198,7 +201,11 @@ const ResourcesSection = () => {
             </Button>
           </div>
           <div className="flex-1 overflow-hidden" style={{ height: "calc(90vh - 56px)" }}>
-            {previewUrl && <PdfViewer url={previewUrl} title={previewTitle} />}
+            {previewUrl && (
+              <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground text-sm">Loading viewer…</div>}>
+                <PdfViewer url={previewUrl} title={previewTitle} />
+              </Suspense>
+            )}
           </div>
         </DialogContent>
       </Dialog>

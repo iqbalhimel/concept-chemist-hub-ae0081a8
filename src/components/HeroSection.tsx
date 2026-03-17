@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, ChevronDown, Download } from "lucide-react";
-import iqbalSir from "@/assets/iqbal-sir.png";
+import iqbalSirPng from "@/assets/iqbal-sir.png";
+import iqbalSirWebp from "@/assets/iqbal-sir.webp";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import ScienceHeroCanvas from "./ScienceHeroCanvas";
@@ -94,7 +95,28 @@ const HeroSection = () => {
               <div aria-hidden className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/45 to-accent/35 blur-2xl opacity-70" />
               <div className="relative w-full h-full rounded-full p-1 bg-gradient-to-br from-primary/55 to-accent/45">
                 <div className="w-full h-full rounded-full overflow-hidden glass-card border-0 bg-card/35 backdrop-blur-2xl">
-                  <img src={heroImage || iqbalSir} alt={t.hero.img_alt} className="w-full h-full object-cover object-top" loading="eager" />
+                  {heroImage ? (
+                    <img
+                      src={heroImage}
+                      alt={t.hero.img_alt}
+                      className="w-full h-full object-cover object-top"
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="sync"
+                    />
+                  ) : (
+                    <picture>
+                      <source srcSet={iqbalSirWebp} type="image/webp" />
+                      <img
+                        src={iqbalSirPng}
+                        alt={t.hero.img_alt}
+                        className="w-full h-full object-cover object-top"
+                        loading="eager"
+                        fetchPriority="high"
+                        decoding="sync"
+                      />
+                    </picture>
+                  )}
                 </div>
               </div>
             </div>
