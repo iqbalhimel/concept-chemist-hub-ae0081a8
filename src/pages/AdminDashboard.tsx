@@ -176,7 +176,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [trashCount, setTrashCount] = useState(0);
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   // Filter navigation based on role permissions
   const navigation = useMemo(() => {
@@ -210,12 +210,7 @@ const AdminDashboard = () => {
   }, [activeTab]);
 
   const toggleGroup = (label: string) => {
-    setExpandedGroups(prev => {
-      const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
-      return next;
-    });
+    setActiveMenu(activeMenu === label ? null : label);
   };
 
   const handleTabClick = (tab: Tab) => {
@@ -225,7 +220,7 @@ const AdminDashboard = () => {
     setSidebarOpen(false);
     navigation.forEach(e => {
       if (isGroup(e) && e.items.some(i => i.id === tab)) {
-        setExpandedGroups(prev => new Set(prev).add(e.label));
+        setActiveMenu(e.label);
       }
     });
   };
@@ -331,7 +326,7 @@ const AdminDashboard = () => {
               return renderNavItem(entry);
             }
             const GroupIcon = entry.icon;
-            const expanded = expandedGroups.has(entry.label);
+            const expanded = activeMenu === entry.label;
             const hasActive = entry.items.some(i => i.id === activeTab);
             return (
               <div key={entry.label} className="mt-1">
