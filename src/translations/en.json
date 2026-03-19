@@ -42,7 +42,24 @@
     "highlight_1": "Concept-Based Learning",
     "highlight_2": "Multimedia Classes",
     "highlight_3": "Student-Friendly",
-    "highlight_4": "Strong Fundamentals"
+    "highlight_4": "Strong Fundamentals",
+    "coaching_title": "Coaching Information",
+    "coaching_location": "Location",
+    "coaching_class_days": "Class Days",
+    "coaching_class_time": "Class Time",
+    "coaching_batch_size": "Batch Size",
+    "coaching_target": "Target",
+    "coaching_medium": "Medium"
+  },
+  "videos": {
+    "badge": "Educational Videos",
+    "title_1": "Watch &",
+    "title_highlight": "Learn",
+    "subtitle": "Explore video lessons on key topics",
+    "page_title": "Educational Videos",
+    "page_subtitle": "Browse all video lessons",
+    "search_placeholder": "Search videos...",
+    "filter_all_subjects": "All Subjects"
   },
   "subjects": {
     "title_1": "Teaching",
@@ -57,7 +74,12 @@
     "mathematics": "Mathematics",
     "higher_math": "Higher Mathematics",
     "general_science": "General Science",
-    "ict": "ICT"
+    "ict": "ICT",
+    "category_other": "Other",
+    "untitled": "Untitled",
+    "category_ssc": "SSC Level",
+    "category_hsc": "HSC Level",
+    "category_class_6_10": "Class 6–10"
   },
   "approach": {
     "title_1": "Teaching",

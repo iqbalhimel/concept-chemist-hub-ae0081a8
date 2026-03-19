@@ -42,6 +42,7 @@ import AdminGlobalTrash from "@/components/admin/AdminGlobalTrash";
 import AdminProfile from "@/components/admin/AdminProfile";
 import AdminManagement from "@/components/admin/AdminManagement";
 import AdminLoginHistory from "@/components/admin/AdminLoginHistory";
+import AdminHomepageSectionContent from "@/components/admin/AdminHomepageSectionContent";
 import {
   heroSectionConfig, aboutSectionConfig, homepageSectionsConfig,
   announcementBarConfig, coachingInfoConfig, contactDetailsConfig,
@@ -56,6 +57,7 @@ type Tab =
   | "education" | "experience" | "achievements" | "approach" | "subjects"
   | "training" | "security-logs" | "videos" | "global-trash" | "admin-profile" | "admin-management"
   | "hero-section" | "about-section" | "homepage-sections" | "announcement-bar"
+  | "homepage-section-content"
   | "coaching-info" | "contact-details" | "social-links" | "whatsapp-chat"
   | "site-info" | "footer-settings" | "hero-animation"
   | "activity-timeline" | "login-history";
@@ -86,6 +88,7 @@ const fullNavigation: NavEntry[] = [
       { id: "hero-section", label: "Hero Section", icon: Globe },
       { id: "about-section", label: "About Section", icon: Globe },
       { id: "homepage-sections", label: "Sections Toggle", icon: Eye },
+      { id: "homepage-section-content", label: "Section Content", icon: FileText },
       { id: "announcement-bar", label: "Announcement Bar", icon: Bell },
     ],
   },
@@ -173,7 +176,8 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [trashCount, setTrashCount] = useState(0);
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [trashVersion, setTrashVersion] = useState(0);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   // Filter navigation based on role permissions
   const navigation = useMemo(() => {
@@ -197,22 +201,17 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const fetchTrashCount = async () => {
-      const tables = ["blog_posts", "notices", "study_materials", "testimonials", "gallery"];
+      const tables = ["blog_posts", "notices", "study_materials", "testimonials", "gallery", "educational_videos"];
       const results = await Promise.all(
         tables.map(t => (supabase as any).from(t).select("id", { count: "exact", head: true }).not("trashed_at", "is", null))
       );
       setTrashCount(results.reduce((sum, r) => sum + (r.count ?? 0), 0));
     };
     fetchTrashCount();
-  }, [activeTab]);
+  }, [activeTab, trashVersion]);
 
   const toggleGroup = (label: string) => {
-    setExpandedGroups(prev => {
-      const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
-      return next;
-    });
+    setActiveMenu(activeMenu === label ? null : label);
   };
 
   const handleTabClick = (tab: Tab) => {
@@ -222,7 +221,7 @@ const AdminDashboard = () => {
     setSidebarOpen(false);
     navigation.forEach(e => {
       if (isGroup(e) && e.items.some(i => i.id === tab)) {
-        setExpandedGroups(prev => new Set(prev).add(e.label));
+        setActiveMenu(e.label);
       }
     });
   };
@@ -264,13 +263,14 @@ const AdminDashboard = () => {
       case "security-logs": return <AdminSecurityLogs />;
       case "videos": return <AdminVideos />;
       case "activity-timeline": return <AdminActivityTimeline />;
-      case "global-trash": return <AdminGlobalTrash />;
+      case "global-trash": return <AdminGlobalTrash onTrashChange={() => setTrashVersion(v => v + 1)} />;
       case "admin-profile": return <AdminProfile />;
       case "admin-management": return <AdminManagement />;
       case "login-history": return <AdminLoginHistory />;
       case "hero-section": return <AdminSettingsSection section={heroSectionConfig} />;
       case "about-section": return <AdminSettingsSection section={aboutSectionConfig} />;
       case "homepage-sections": return <AdminSettingsSection section={homepageSectionsConfig} />;
+      case "homepage-section-content": return <AdminHomepageSectionContent />;
       case "announcement-bar": return <AdminSettingsSection section={announcementBarConfig} />;
       case "coaching-info": return <AdminSettingsSection section={coachingInfoConfig} />;
       case "contact-details": return <AdminSettingsSection section={contactDetailsConfig} />;
@@ -327,7 +327,7 @@ const AdminDashboard = () => {
               return renderNavItem(entry);
             }
             const GroupIcon = entry.icon;
-            const expanded = expandedGroups.has(entry.label);
+            const expanded = activeMenu === entry.label;
             const hasActive = entry.items.some(i => i.id === activeTab);
             return (
               <div key={entry.label} className="mt-1">

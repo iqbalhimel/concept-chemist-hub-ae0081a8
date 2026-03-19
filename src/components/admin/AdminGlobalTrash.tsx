@@ -63,6 +63,14 @@ const MODULES: ModuleConfig[] = [
     badgeClass: "border-rose-500/40 text-rose-600 bg-rose-500/10 dark:text-rose-400",
     getTitle: r => r.label || r.alt || "Image",
   },
+  {
+    table: "educational_videos",
+    module: "educational_videos",
+    label: "Video",
+    badgeClass: "border-sky-500/40 text-sky-600 bg-sky-500/10 dark:text-sky-400",
+    getTitle: r => r.title || "Untitled",
+    getSubtitle: r => r.subject,
+  },
 ];
 
 /* ── Helpers ───────────────────────────────────────────────── */
@@ -120,7 +128,11 @@ const DaysRemainingBadge = ({ trashedAt }: { trashedAt: string }) => {
 
 /* ── Component ─────────────────────────────────────────────── */
 
-const AdminGlobalTrash = () => {
+interface AdminGlobalTrashProps {
+  onTrashChange?: () => void;
+}
+
+const AdminGlobalTrash = ({ onTrashChange }: AdminGlobalTrashProps) => {
   const csrfGuard = useCsrfGuard();
   const [items, setItems] = useState<TrashItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -231,6 +243,7 @@ const AdminGlobalTrash = () => {
 
       setItems(prev => prev.filter(i => !ids.includes(i.id)));
       setSelectedIds(new Set());
+      onTrashChange?.();
       toast.success(`${targets.length} item${targets.length > 1 ? "s" : ""} restored`);
       setProcessing(false);
     });
@@ -256,6 +269,7 @@ const AdminGlobalTrash = () => {
 
       setItems(prev => prev.filter(i => !ids.includes(i.id)));
       setSelectedIds(new Set());
+      onTrashChange?.();
       toast.success(`${targets.length} item${targets.length > 1 ? "s" : ""} permanently deleted`);
       setProcessing(false);
     });

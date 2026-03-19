@@ -1,9 +1,8 @@
 import { motion } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { memo } from "react";
 import { BookOpen, Monitor, Users, Lightbulb, MapPin, Calendar, Clock, UsersRound, GraduationCap, Languages } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { supabase } from "@/integrations/supabase/client";
 import { sanitizeHtml } from "@/lib/sanitize";
 
 type CoachingInfo = Record<string, string>;
@@ -13,23 +12,11 @@ const vp = { once: true, amount: 0.15 as const };
 
 const AboutSection = () => {
   const { t, lang } = useLanguage();
-  const { get } = useSiteSettings();
-  const [coaching, setCoaching] = useState<CoachingInfo | null>(null);
+  const { get, settings } = useSiteSettings();
 
   const isBn = lang === "bn";
 
-  useEffect(() => {
-    supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", "coaching")
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.value && typeof data.value === "object") {
-          setCoaching(data.value as CoachingInfo);
-        }
-      });
-  }, []);
+  const coaching = (settings["coaching"] as CoachingInfo | undefined) || null;
 
   const intro = get("about", isBn ? "intro_text_bn" : "intro_text_en", "") || get("about", "intro_text_en", "") || t.about.intro;
   const point1 = get("about", isBn ? "point_1_bn" : "point_1_en", "") || get("about", "point_1_en", "") || t.about.point_1;
@@ -44,12 +31,12 @@ const AboutSection = () => {
   ];
 
   const coachingItems = coaching ? [
-    { icon: MapPin, label: "Location", value: coaching.location },
-    { icon: Calendar, label: "Class Days", value: coaching.class_days },
-    { icon: Clock, label: "Class Time", value: coaching.class_time },
-    { icon: UsersRound, label: "Batch Size", value: coaching.batch_size },
-    { icon: GraduationCap, label: "Target", value: coaching.target_students },
-    { icon: Languages, label: "Medium", value: coaching.medium },
+    { icon: MapPin, label: t.about.coaching_location, value: coaching.location },
+    { icon: Calendar, label: t.about.coaching_class_days, value: coaching.class_days },
+    { icon: Clock, label: t.about.coaching_class_time, value: coaching.class_time },
+    { icon: UsersRound, label: t.about.coaching_batch_size, value: coaching.batch_size },
+    { icon: GraduationCap, label: t.about.coaching_target, value: coaching.target_students },
+    { icon: Languages, label: t.about.coaching_medium, value: coaching.medium },
   ].filter(item => item.value) : [];
 
   return (
@@ -86,7 +73,7 @@ const AboutSection = () => {
               className="glass-card p-6 md:p-8 mb-10"
             >
               <h3 className="font-display font-semibold text-foreground text-xl mb-5 text-center">
-                🎓 Coaching Information
+                🎓 {t.about.coaching_title}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {coachingItems.map((item, i) => (
@@ -116,4 +103,4 @@ const AboutSection = () => {
   );
 };
 
-export default AboutSection;
+export default memo(AboutSection);

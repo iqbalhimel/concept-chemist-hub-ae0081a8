@@ -6,6 +6,7 @@ import OptimizedImage from "@/components/OptimizedImage";
 import { setSeo, generateVideoObjectSchema, generateBreadcrumbSchema } from "@/lib/seo";
 import RelatedBlogPosts from "@/components/RelatedBlogPosts";
 import { trackContentView } from "@/lib/trackContentView";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Video = {
   id: string;
@@ -39,6 +40,7 @@ const VideosPage = () => {
   const [activeVideo, setActiveVideo] = useState<Video | null>(null);
   const [search, setSearch] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
+  const { t } = useLanguage();
 
   useEffect(() => {
     const now = new Date().toISOString();
@@ -90,9 +92,9 @@ const VideosPage = () => {
         <div className="container mx-auto">
           <div className="text-center mb-10">
             <h1 className="font-display text-3xl md:text-5xl font-bold mb-4">
-              Educational <span className="gradient-text">Videos</span>
+              {t.videos.page_title}
             </h1>
-            <p className="text-muted-foreground max-w-xl mx-auto">Browse all video lessons</p>
+            <p className="text-muted-foreground max-w-xl mx-auto">{t.videos.page_subtitle}</p>
           </div>
 
           {/* Filters */}
@@ -101,7 +103,7 @@ const VideosPage = () => {
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search videos..."
+                placeholder={t.videos.search_placeholder}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 rounded-lg bg-card border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -113,7 +115,7 @@ const VideosPage = () => {
                 onChange={e => setSubjectFilter(e.target.value)}
                 className="px-3 py-2 rounded-lg bg-card border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
-                <option value="">All Subjects</option>
+                <option value="">{t.videos.filter_all_subjects}</option>
                 {subjects.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             )}

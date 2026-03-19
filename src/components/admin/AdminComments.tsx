@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Trash2, MessageSquare, Reply, User } from "lucide-react";
 import { useCsrfGuard } from "@/hooks/useCsrfGuard";
@@ -28,6 +33,7 @@ const AdminComments = () => {
   const [posts, setPosts] = useState<PostInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterPost, setFilterPost] = useState("__all__");
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; isReply: boolean } | null>(null);
 
   useEffect(() => {
     fetchAll();
@@ -43,25 +49,25 @@ const AdminComments = () => {
     setLoading(false);
   };
 
-  const deleteComment = async (id: string) => {
-    if (!window.confirm("Delete this comment and all its replies?")) return;
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    const { id, isReply } = pendingDelete;
+    setPendingDelete(null);
     await csrfGuard(async () => {
       const { error } = await supabase.from("blog_post_comments").delete().eq("id", id);
       if (error) { toast.error(error.message); return; }
-      setComments(prev => prev.filter(c => c.id !== id && c.parent_id !== id));
-      toast.success("Comment deleted");
+      if (isReply) {
+        setComments(prev => prev.filter(c => c.id !== id));
+        toast.success("Reply deleted");
+      } else {
+        setComments(prev => prev.filter(c => c.id !== id && c.parent_id !== id));
+        toast.success("Comment deleted");
+      }
     });
   };
 
-  const deleteReply = async (id: string) => {
-    if (!window.confirm("Delete this reply?")) return;
-    await csrfGuard(async () => {
-      const { error } = await supabase.from("blog_post_comments").delete().eq("id", id);
-      if (error) { toast.error(error.message); return; }
-      setComments(prev => prev.filter(c => c.id !== id));
-      toast.success("Reply deleted");
-    });
-  };
+  const deleteComment = (id: string) => setPendingDelete({ id, isReply: false });
+  const deleteReply = (id: string) => setPendingDelete({ id, isReply: true });
 
   const filtered = filterPost === "__all__" ? comments : comments.filter(c => c.post_id === filterPost);
   const topLevel = filtered.filter(c => !c.parent_id);
@@ -78,6 +84,25 @@ const AdminComments = () => {
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
   return (
+    <>
+    <AlertDialog open={!!pendingDelete} onOpenChange={open => { if (!open) setPendingDelete(null); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Confirm deletion</AlertDialogTitle>
+          <AlertDialogDescription>
+            {pendingDelete?.isReply
+              ? "Delete this reply? This action cannot be undone."
+              : "Delete this comment and all its replies? This action cannot be undone."}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2 -mt-2">
         <h2 className="font-display text-2xl font-bold text-foreground">
@@ -151,6 +176,7 @@ const AdminComments = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

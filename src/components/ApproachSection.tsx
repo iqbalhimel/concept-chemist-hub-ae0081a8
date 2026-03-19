@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Target, Lightbulb, MonitorPlay, Heart, BookOpen, Users, Star, Award } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +31,10 @@ const ApproachSection = () => {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
           {items.map((item, i) => {
             const Icon = iconMap[item?.icon ?? ""] || Lightbulb;
-            const title = lang === "bn" ? (item?.title_bn || item?.title_en || "Untitled") : (item?.title_en || item?.title_bn || "Untitled");
+            const fallbackUntitled = t.subjects?.untitled ?? "Untitled";
+            const title = lang === "bn"
+              ? (item?.title_bn || item?.title_en || fallbackUntitled)
+              : (item?.title_en || item?.title_bn || fallbackUntitled);
             const desc = lang === "bn" ? (item?.description_bn || item?.description_en || "") : (item?.description_en || item?.description_bn || "");
             return (
               <motion.div
@@ -62,4 +65,4 @@ const ApproachSection = () => {
   );
 };
 
-export default ApproachSection;
+export default memo(ApproachSection);

@@ -52,10 +52,10 @@ const AdminDashboardOverview = ({ onNavigate }: { onNavigate: (tab: string) => v
   useEffect(() => {
     const fetch = async () => {
       const [posts, notices, materials, gallery, comments, recent] = await Promise.all([
-        supabase.from("blog_posts").select("id", { count: "exact", head: true }),
-        supabase.from("notices").select("id", { count: "exact", head: true }),
-        supabase.from("study_materials").select("id", { count: "exact", head: true }),
-        supabase.from("gallery").select("id", { count: "exact", head: true }),
+        supabase.from("blog_posts").select("id", { count: "exact", head: true }).is("trashed_at", null),
+        supabase.from("notices").select("id", { count: "exact", head: true }).is("trashed_at", null),
+        supabase.from("study_materials").select("id", { count: "exact", head: true }).is("trashed_at", null),
+        supabase.from("gallery").select("id", { count: "exact", head: true }).is("trashed_at", null),
         supabase.from("blog_post_comments").select("id", { count: "exact", head: true }),
         supabase.from("blog_post_comments").select("id, user_name, content, created_at, post_id").order("created_at", { ascending: false }).limit(5),
       ]);

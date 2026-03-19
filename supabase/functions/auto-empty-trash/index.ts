@@ -12,6 +12,7 @@ const TABLES_WITH_TRASH = [
   "study_materials",
   "testimonials",
   "gallery",
+  "educational_videos",
 ];
 
 Deno.serve(async (req) => {

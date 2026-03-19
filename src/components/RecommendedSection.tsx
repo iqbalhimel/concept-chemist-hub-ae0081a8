@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowUpRight, Clock, User, FolderOpen, Play, Download } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import OptimizedImage from "@/components/OptimizedImage";
+import { useHomepageSection } from "@/hooks/useHomepageSection";
 
 interface BlogPost {
   id: string;
@@ -33,6 +34,7 @@ interface Video {
 
 const RecommendedSection = () => {
   const { lang, t } = useLanguage();
+  const { data: sectionCopy } = useHomepageSection("recommended");
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
@@ -75,17 +77,29 @@ const RecommendedSection = () => {
 
   const hasContent = posts.length > 0 || materials.length > 0 || videos.length > 0;
   if (!hasContent) return null;
+  if (sectionCopy && sectionCopy.is_active === false) return null;
+
+  const isBn = lang === "bn";
+  const badge = (isBn ? sectionCopy?.badge_bn : sectionCopy?.badge_en) || (isBn ? "সুপারিশ" : "Recommended");
+  const titleRaw = (isBn ? sectionCopy?.title_bn : sectionCopy?.title_en) || (isBn ? "শিক্ষার্থীদের জন্য |সুপারিশ" : "Recommended for |Students");
+  const subtitle =
+    (isBn ? sectionCopy?.subtitle_bn : sectionCopy?.subtitle_en) ||
+    (isBn ? "সর্বশেষ প্রবন্ধ, স্টাডি ম্যাটেরিয়াল ও ভিডিও লেসন" : "Latest articles, study materials, and video lessons");
+
+  const [titlePart1, titleHighlight] = titleRaw.includes("|")
+    ? titleRaw.split("|").map((s) => s.trim())
+    : [titleRaw, ""];
 
   return (
     <section className="section-padding" id="recommended">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <span className="badge-soft text-primary border border-primary/20 mb-5">Recommended</span>
+          <span className="badge-soft text-primary border border-primary/20 mb-5">{badge}</span>
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-            Recommended for <span className="gradient-text">Students</span>
+            {titlePart1}{titleHighlight ? " " : ""}{titleHighlight && <span className="gradient-text">{titleHighlight}</span>}
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Latest articles, study materials, and video lessons
+            {subtitle}
           </p>
         </div>
 

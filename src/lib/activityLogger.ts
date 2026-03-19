@@ -7,7 +7,7 @@ export type ActivityModule =
   | "gallery" | "testimonials" | "faq" | "media_library"
   | "subjects" | "achievements" | "experience" | "education"
   | "professional_training" | "teaching_approach" | "themes"
-  | "site_settings" | "seo" | "blog_categories" | "tags";
+  | "site_settings" | "seo" | "blog_categories" | "tags" | "homepage_sections";
 
 interface LogParams {
   action: ActivityAction;

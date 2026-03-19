@@ -56,16 +56,19 @@ export function useAdminSearch() {
           .from("blog_posts")
           .select("id, title, category, created_at")
           .ilike("title", pattern)
+          .is("trashed_at", null)
           .limit(LIMIT_PER_MODULE),
         supabase
           .from("notices")
           .select("id, title, date")
           .ilike("title", pattern)
+          .is("trashed_at", null)
           .limit(LIMIT_PER_MODULE),
         supabase
           .from("study_materials")
           .select("id, title, category")
           .ilike("title", pattern)
+          .is("trashed_at", null)
           .limit(LIMIT_PER_MODULE),
         supabase
           .from("educational_videos")
@@ -76,11 +79,13 @@ export function useAdminSearch() {
           .from("gallery")
           .select("id, label, image_url")
           .ilike("label", pattern)
+          .is("trashed_at", null)
           .limit(LIMIT_PER_MODULE),
         supabase
           .from("testimonials")
           .select("id, student_name, student_info")
           .ilike("student_name", pattern)
+          .is("trashed_at", null)
           .limit(LIMIT_PER_MODULE),
         supabase
           .from("faq")

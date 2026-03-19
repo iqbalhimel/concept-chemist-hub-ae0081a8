@@ -1,13 +1,16 @@
 import { motion } from "framer-motion";
 import { ArrowRight, ChevronDown, Download } from "lucide-react";
-import iqbalSir from "@/assets/iqbal-sir.png";
+import iqbalSirPng from "@/assets/iqbal-sir.png";
+import iqbalSirWebp from "@/assets/iqbal-sir.webp";
+import { useMemo, lazy, Suspense, memo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import ScienceHeroCanvas from "./ScienceHeroCanvas";
+
+const ScienceHeroCanvas = lazy(() => import("./ScienceHeroCanvas"));
 
 const HeroSection = () => {
   const { t, lang } = useLanguage();
-  const { get } = useSiteSettings();
+  const { get, loaded: settingsLoaded } = useSiteSettings();
 
   const isBn = lang === "bn";
   const tagline = get("hero", isBn ? "tagline_bn" : "tagline_en", "") || get("hero", "tagline_en", "") || t.hero.badge;
@@ -16,6 +19,32 @@ const HeroSection = () => {
   const ctaText = get("hero", isBn ? "cta_text_bn" : "cta_text_en", "") || get("hero", "cta_text_en", "") || t.hero.cta_batch;
   const ctaLink = get("hero", "cta_link", "#contact");
   const heroImage = get("hero", "hero_image", "");
+  const heroAnimationEnabled = settingsLoaded && get("hero_animation", "enabled", "") === "true";
+
+  const parseNumberSetting = (value: string | undefined) => {
+    if (!value) return undefined;
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  };
+
+  const heroAnimationConfig = useMemo(() => {
+    if (!settingsLoaded || !heroAnimationEnabled) {
+      return {
+        minSpacing: undefined,
+        repulsionForce: undefined,
+        minSpeed: undefined,
+        maxSpeed: undefined,
+      };
+    }
+    return {
+      minSpacing: parseNumberSetting(get("hero_animation", "min_spacing", "")),
+      repulsionForce: parseNumberSetting(get("hero_animation", "repulsion_force", "")),
+      minSpeed: parseNumberSetting(get("hero_animation", "min_speed", "")),
+      maxSpeed: parseNumberSetting(get("hero_animation", "max_speed", "")),
+    };
+  }, [get, heroAnimationEnabled, settingsLoaded]);
 
   let titlePart1 = t.hero.title_1;
   let titleHighlight = t.hero.title_highlight;
@@ -34,7 +63,16 @@ const HeroSection = () => {
       className="section-shell relative min-h-[100dvh] md:min-h-screen flex items-center hero-gradient overflow-hidden w-full max-w-full"
     >
       {/* Science animation canvas - z-index 1 */}
-      <ScienceHeroCanvas />
+      {heroAnimationEnabled && settingsLoaded && (
+        <Suspense fallback={null}>
+          <ScienceHeroCanvas
+            minSpacing={heroAnimationConfig.minSpacing}
+            repulsionForce={heroAnimationConfig.repulsionForce}
+            minSpeed={heroAnimationConfig.minSpeed}
+            maxSpeed={heroAnimationConfig.maxSpeed}
+          />
+        </Suspense>
+      )}
 
       <div aria-hidden className="absolute inset-0 opacity-40">
         <div className="absolute inset-0 bg-grid" />
@@ -94,7 +132,28 @@ const HeroSection = () => {
               <div aria-hidden className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/45 to-accent/35 blur-2xl opacity-70" />
               <div className="relative w-full h-full rounded-full p-1 bg-gradient-to-br from-primary/55 to-accent/45">
                 <div className="w-full h-full rounded-full overflow-hidden glass-card border-0 bg-card/35 backdrop-blur-2xl">
-                  <img src={heroImage || iqbalSir} alt={t.hero.img_alt} className="w-full h-full object-cover object-top" loading="eager" />
+                  {heroImage ? (
+                    <img
+                      src={heroImage}
+                      alt={t.hero.img_alt}
+                      className="w-full h-full object-cover object-top"
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="sync"
+                    />
+                  ) : (
+                    <picture>
+                      <source srcSet={iqbalSirWebp} type="image/webp" />
+                      <img
+                        src={iqbalSirPng}
+                        alt={t.hero.img_alt}
+                        className="w-full h-full object-cover object-top"
+                        loading="eager"
+                        fetchPriority="high"
+                        decoding="sync"
+                      />
+                    </picture>
+                  )}
                 </div>
               </div>
             </div>
@@ -117,4 +176,4 @@ const HeroSection = () => {
   );
 };
 
-export default HeroSection;
+export default memo(HeroSection);
