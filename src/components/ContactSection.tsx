@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Phone, Mail, MessageCircle, Facebook, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+
+const LocationMap = lazy(() => import("@/components/LocationMap"));
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const vp = { once: true, amount: 0.15 as const };
@@ -82,9 +84,9 @@ const ContactSection = () => {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="max-w-5xl mx-auto mt-12"
         >
-          <div className="glass-card rounded-2xl h-[360px] flex items-center justify-center text-muted-foreground text-center px-6">
-            Map temporarily disabled
-          </div>
+          <Suspense fallback={<div className="glass-card rounded-2xl h-[360px] flex items-center justify-center text-muted-foreground">Loading map...</div>}>
+            <LocationMap />
+          </Suspense>
         </motion.div>
       </div>
     </section>
