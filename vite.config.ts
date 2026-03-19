@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
-    include: ["leaflet", "react-leaflet"],
+    exclude: ["leaflet", "react-leaflet"],
   },
   build: {
     // Raise the warning limit slightly; we control chunking manually
