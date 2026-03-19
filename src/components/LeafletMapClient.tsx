@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Circle, Popup } from "react-leaflet";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -9,9 +8,32 @@ const SCHOOL_NAME = "Zilla Smarani Girls' High School";
 const SCHOOL_ADDRESS = "Kishoreganj, Bangladesh";
 
 const LeafletMapClient = () => {
-  const customIcon = useMemo(
-    () =>
-      L.divIcon({
+  const mapRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    const map = L.map(mapRef.current, {
+      zoomControl: true,
+      scrollWheelZoom: true,
+    }).setView([SCHOOL_LAT, SCHOOL_LNG], 15);
+
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 19,
+    }).addTo(map);
+
+    const circle = L.circle([SCHOOL_LAT, SCHOOL_LNG], {
+      radius: 250,
+      color: "rgba(124,58,237,0.4)",
+      weight: 1.5,
+      dashArray: "6 4",
+      fillColor: "rgba(124,58,237,0.06)",
+      fillOpacity: 1,
+    }).addTo(map);
+
+    const marker = L.marker([SCHOOL_LAT, SCHOOL_LNG], {
+      icon: L.divIcon({
         html: `<div style="width: 40px; height: 52px;">
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="52" viewBox="0 0 40 52">
             <circle cx="20" cy="20" r="18" fill="rgba(124,58,237,0.3)" opacity="0.5"/>
@@ -26,51 +48,34 @@ const LeafletMapClient = () => {
         iconAnchor: [20, 52],
         popupAnchor: [0, -52],
       }),
-    []
-  );
+    }).addTo(map);
+
+    marker.bindPopup(
+      `<div style="font-family: 'Space Grotesk', sans-serif;">
+        <div style="font-weight: 700; margin-bottom: 4px;">${SCHOOL_NAME}</div>
+        <div style="font-size: 12px; opacity: 0.75; margin-bottom: 6px;">${SCHOOL_ADDRESS}</div>
+        <div style="font-size: 12px; font-weight: 600; margin-bottom: 10px;">📘 SSC Science Coaching Location</div>
+        <a
+          href="https://www.google.com/maps/dir/?api=1&destination=${SCHOOL_LAT},${SCHOOL_LNG}"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;font-size:12px;font-weight:600;text-decoration:none;"
+        >
+          Get Directions
+        </a>
+      </div>`
+    );
+
+    return () => {
+      circle.remove();
+      marker.remove();
+      map.remove();
+    };
+  }, []);
 
   return (
     <div className="relative rounded-2xl overflow-hidden border border-border/60 shadow-lg">
-      <MapContainer
-        center={[SCHOOL_LAT, SCHOOL_LNG]}
-        zoom={15}
-        scrollWheelZoom
-        style={{ height: "360px", width: "100%" }}
-        className="rounded-2xl"
-      >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-        />
-        <Circle
-          center={[SCHOOL_LAT, SCHOOL_LNG]}
-          radius={250}
-          pathOptions={{
-            color: "rgba(124,58,237,0.4)",
-            fillColor: "rgba(124,58,237,0.06)",
-            fillOpacity: 1,
-            weight: 1.5,
-            dashArray: "6 4",
-          }}
-        />
-        <Marker position={[SCHOOL_LAT, SCHOOL_LNG]} icon={customIcon}>
-          <Popup>
-            <div className="p-2">
-              <h4 className="font-bold text-sm mb-1">{SCHOOL_NAME}</h4>
-              <p className="text-xs opacity-70 mb-1">{SCHOOL_ADDRESS}</p>
-              <p className="text-xs font-medium opacity-80 mb-2">📘 SSC Science Coaching Location</p>
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${SCHOOL_LAT},${SCHOOL_LNG}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground"
-              >
-                Get Directions
-              </a>
-            </div>
-          </Popup>
-        </Marker>
-      </MapContainer>
+      <div ref={mapRef} style={{ height: "360px", width: "100%" }} className="rounded-2xl" />
     </div>
   );
 };
