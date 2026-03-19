@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
     // Ensure only one React instance is used across all chunks
-    dedupe: ["react", "react-dom", "react/jsx-runtime"],
+    dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
     include: ["leaflet", "react-leaflet"],
