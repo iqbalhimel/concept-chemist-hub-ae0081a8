@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
-import { useState, lazy, Suspense } from "react";
+import { useState } from "react";
 import { Phone, Mail, MessageCircle, Facebook, Send } from "lucide-react";
 import { toast } from "sonner";
-const LocationMap = lazy(() => import("@/components/LocationMap"));
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -75,10 +74,17 @@ const ContactSection = () => {
             </form>
           </motion.div>
         </div>
-        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} transition={{ duration: 0.5, delay: 0.3 }} className="max-w-5xl mx-auto mt-12">
-          <Suspense fallback={<div className="glass-card rounded-2xl h-[360px] animate-pulse" />}>
-            <LocationMap />
-          </Suspense>
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={vp}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="max-w-5xl mx-auto mt-12"
+        >
+          <div className="glass-card rounded-2xl h-[360px] flex items-center justify-center text-muted-foreground text-center px-6">
+            Map temporarily disabled
+          </div>
         </motion.div>
       </div>
     </section>
