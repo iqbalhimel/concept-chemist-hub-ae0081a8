@@ -25,6 +25,7 @@ export type FieldDef = {
   min?: number;
   max?: number;
   step?: number;
+  defaultValue?: string;
 };
 
 export type SectionConfig = {
@@ -98,7 +99,8 @@ const AdminSettingsSection = ({ section }: Props) => {
   };
 
   const renderField = (field: FieldDef) => {
-    const value = settings[field.name] || "";
+    const stored = settings[field.name];
+    const value = stored ?? field.defaultValue ?? "";
 
     switch (field.type) {
       case "toggle":

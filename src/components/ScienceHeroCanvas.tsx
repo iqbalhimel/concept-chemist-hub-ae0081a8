@@ -508,7 +508,14 @@ const DRAW_MAP: Record<ScienceElement["type"], (ctx: CanvasRenderingContext2D, e
   dna: drawDNA, neuron: drawNeuron, cell: drawCell,
 };
 
-const ScienceHeroCanvas = () => {
+type ScienceHeroCanvasProps = {
+  minSpacing?: number;
+  repulsionForce?: number;
+  minSpeed?: number;
+  maxSpeed?: number;
+};
+
+const ScienceHeroCanvas = ({ minSpacing, repulsionForce, minSpeed, maxSpeed }: ScienceHeroCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const mouseRef = useRef({ x: -1, y: -1 });
@@ -538,11 +545,10 @@ const ScienceHeroCanvas = () => {
     };
     resize();
 
-    // Read admin animation settings (values stored as strings, with sensible defaults)
-    const adminMinSpacing = Number(get("hero_animation", "min_spacing", "0")) || (isMobile ? 110 : 140);
-    const adminRepulsion = (Number(get("hero_animation", "repulsion_force", "0")) || 25) / 1000;
-    const adminMinSpeed = (Number(get("hero_animation", "min_speed", "0")) || (isMobile ? 12 : 10)) / 100;
-    const adminMaxSpeed = (Number(get("hero_animation", "max_speed", "0")) || (isMobile ? 46 : 42)) / 100;
+    const adminMinSpacing = minSpacing ?? (isMobile ? 110 : 140);
+    const adminRepulsion = (repulsionForce ?? 25) / 1000;
+    const adminMinSpeed = (minSpeed ?? (isMobile ? 12 : 10)) / 100;
+    const adminMaxSpeed = (maxSpeed ?? (isMobile ? 46 : 42)) / 100;
 
     // Create elements with random spawn across hero + minimum spacing
     const spawnTypes = isMobile ? MOBILE_TYPES : PLACEMENT_ORDER;
@@ -708,7 +714,7 @@ const ScienceHeroCanvas = () => {
         canvas.parentElement?.removeEventListener("mouseleave", onMouseLeave);
       }
     };
-  }, [timeOverride]);
+  }, [timeOverride, minSpacing, repulsionForce, minSpeed, maxSpeed]);
 
   return (
     <canvas

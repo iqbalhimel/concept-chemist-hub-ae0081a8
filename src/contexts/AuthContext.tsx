@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { logSecurityEvent } from "@/lib/securityLogger";
 import type { AdminRole } from "@/lib/permissions";
@@ -22,8 +22,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminRole, setAdminRole] = useState<AdminRole | null>(null);
   const [loading, setLoading] = useState(true);
+  const lastCheckedUserRef = useRef<string | null>(null);
 
   const checkAdmin = async (userId: string) => {
+    if (lastCheckedUserRef.current === userId) return;
+    lastCheckedUserRef.current = userId;
     // Check if user has any admin role
     const { data: anyAdmin } = await supabase.rpc("is_any_admin", { _user_id: userId });
     setIsAdmin(!!anyAdmin);
@@ -31,7 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (anyAdmin) {
       // Get the specific role
       const { data: role } = await supabase.rpc("get_admin_role", { _user_id: userId });
-      setAdminRole((role as AdminRole) || "admin");
+      setAdminRole((role as AdminRole) || null);
 
       // Update last_login_at in profiles
       await supabase
@@ -68,10 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdmin(session.user.id);
-      }
-      setLoading(false);
+      if (!session?.user) setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -90,6 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       user_id: user?.id || undefined,
     });
     await supabase.auth.signOut();
+    lastCheckedUserRef.current = null;
     setIsAdmin(false);
     setAdminRole(null);
   };

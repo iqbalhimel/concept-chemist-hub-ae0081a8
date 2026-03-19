@@ -31,7 +31,8 @@ const MODULE_LABELS: Record<string, string> = {
   faq: "FAQ", media_library: "Media", subjects: "Subjects", achievements: "Achievements",
   experience: "Experience", education: "Education", professional_training: "Training",
   teaching_approach: "Approach", themes: "Themes", site_settings: "Site Settings",
-  seo: "SEO", blog_categories: "Blog Categories",
+  seo: "SEO", blog_categories: "Blog Categories", tags: "Blog Tags",
+  homepage_sections: "Homepage Sections",
 };
 
 const formatTimeAgo = (dateStr: string) => {

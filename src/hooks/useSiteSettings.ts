@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 type SiteSettings = Record<string, Record<string, string>>;
@@ -54,8 +54,11 @@ export const useSiteSettings = () => {
     return () => { listeners.delete(listener); };
   }, []);
 
-  const get = (section: string, field: string, fallback = "") =>
-    settings[section]?.[field] || fallback;
+  const get = useCallback(
+    (section: string, field: string, fallback = "") =>
+      settings[section]?.[field] || fallback,
+    [settings]
+  );
 
   return { settings, loaded, get };
 };

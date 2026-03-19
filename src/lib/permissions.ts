@@ -24,7 +24,7 @@ const PERMISSIONS: Record<AdminRole, Set<string>> = {
     "homepage-section-content",
     "coaching-info", "contact-details", "social-links", "whatsapp-chat",
     "site-info", "footer-settings", "hero-animation",
-    "activity-timeline", "admin-management", "login-history",
+    "activity-timeline", "login-history",
   ]),
   editor: new Set([
     "dashboard", "admin-profile",

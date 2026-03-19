@@ -67,8 +67,9 @@ Deno.serve(async (req) => {
     // Try to invite the user; if they already exist, look them up instead
     let newUserId: string;
 
-    const origin = req.headers.get("origin") || "https://concept-chemist-hub.lovable.app";
-    const redirectTo = `${origin}/reset-password`;
+    const originHeader = req.headers.get("origin");
+    const siteUrl = Deno.env.get("SITE_URL") || originHeader || Deno.env.get("SUPABASE_URL")!.replace(".supabase.co", ".app");
+    const redirectTo = `${siteUrl}/reset-password`;
 
     const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
       redirectTo,

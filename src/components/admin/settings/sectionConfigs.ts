@@ -161,6 +161,7 @@ export const heroAnimationConfig: SectionConfig = {
   icon: Atom,
   description: "Adjust the particle animation parameters on the hero section.",
   fields: [
+    { name: "enabled", label: "Hero Animation", type: "toggle", defaultValue: "true" },
     { name: "min_spacing", label: "Minimum Spacing (px)", type: "range", min: 60, max: 250, step: 10 },
     { name: "repulsion_force", label: "Repulsion Force", type: "range", min: 5, max: 80, step: 5 },
     { name: "min_speed", label: "Minimum Speed", type: "range", min: 2, max: 30, step: 1 },

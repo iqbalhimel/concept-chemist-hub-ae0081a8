@@ -1,5 +1,5 @@
-import { useState, useEffect, lazy, Suspense } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { lazy, Suspense } from "react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Critical above-fold sections — eagerly bundled
@@ -24,24 +24,12 @@ const RecommendedSection = lazy(() => import("@/components/RecommendedSection"))
 const FAQSection = lazy(() => import("@/components/FAQSection"));
 const ContactSection = lazy(() => import("@/components/ContactSection"));
 
-type Visibility = Record<string, string>;
-
 const Index = () => {
-  const [vis, setVis] = useState<Visibility | null>(null);
+  const { settings, loaded } = useSiteSettings();
+  const vis = settings["homepage_sections"] as Record<string, string> | undefined;
 
-  useEffect(() => {
-    supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", "homepage_sections")
-      .maybeSingle()
-      .then(({ data }) => {
-        setVis((data?.value as Visibility) || {});
-      });
-  }, []);
-
-  // While loading, show all sections (default visible)
-  const show = (key: string) => vis === null || vis[key] !== "false";
+  // While loading (not yet fetched), show all sections (default visible)
+  const show = (key: string) => !loaded || vis?.[key] !== "false";
 
   return (
     <main id="main-content" role="main" className="relative">

@@ -74,12 +74,14 @@ const AdminManagement = () => {
 
   useEffect(() => { fetchAdmins(); }, []);
 
-  const handleUpdateRole = async (userId: string, newRole: AdminRole) => {
+  const handleUpdateRole = async (userId: string, currentRole: AdminRole, newRole: AdminRole) => {
+    if (currentRole === newRole) return;
     try {
       const { error } = await supabase
         .from("user_roles")
         .update({ role: newRole })
-        .eq("user_id", userId);
+        .eq("user_id", userId)
+        .eq("role", currentRole);
       if (error) throw error;
 
       await logAdminActivity({
@@ -232,12 +234,18 @@ const AdminManagement = () => {
                     <div className="flex items-center gap-1 shrink-0">
                       <Select
                         value={admin.role}
-                        onValueChange={(val) => handleUpdateRole(admin.user_id, val as AdminRole)}
+                        onValueChange={(val) => handleUpdateRole(admin.user_id, admin.role, val as AdminRole)}
+                        disabled={admin.role === "super_admin"}
                       >
                         <SelectTrigger className="w-[130px] h-8 text-xs">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
+                          {admin.role === "super_admin" && (
+                            <SelectItem value="super_admin" className="text-xs" disabled>
+                              {getRoleLabel("super_admin")}
+                            </SelectItem>
+                          )}
                           {ASSIGNABLE_ROLES.map(r => (
                             <SelectItem key={r} value={r} className="text-xs">
                               {getRoleLabel(r)}

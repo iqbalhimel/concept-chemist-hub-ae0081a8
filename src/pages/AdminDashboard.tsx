@@ -176,6 +176,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [trashCount, setTrashCount] = useState(0);
+  const [trashVersion, setTrashVersion] = useState(0);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   // Filter navigation based on role permissions
@@ -200,14 +201,14 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const fetchTrashCount = async () => {
-      const tables = ["blog_posts", "notices", "study_materials", "testimonials", "gallery"];
+      const tables = ["blog_posts", "notices", "study_materials", "testimonials", "gallery", "educational_videos"];
       const results = await Promise.all(
         tables.map(t => (supabase as any).from(t).select("id", { count: "exact", head: true }).not("trashed_at", "is", null))
       );
       setTrashCount(results.reduce((sum, r) => sum + (r.count ?? 0), 0));
     };
     fetchTrashCount();
-  }, [activeTab]);
+  }, [activeTab, trashVersion]);
 
   const toggleGroup = (label: string) => {
     setActiveMenu(activeMenu === label ? null : label);
@@ -262,7 +263,7 @@ const AdminDashboard = () => {
       case "security-logs": return <AdminSecurityLogs />;
       case "videos": return <AdminVideos />;
       case "activity-timeline": return <AdminActivityTimeline />;
-      case "global-trash": return <AdminGlobalTrash />;
+      case "global-trash": return <AdminGlobalTrash onTrashChange={() => setTrashVersion(v => v + 1)} />;
       case "admin-profile": return <AdminProfile />;
       case "admin-management": return <AdminManagement />;
       case "login-history": return <AdminLoginHistory />;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { X } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -41,4 +41,4 @@ const AnnouncementBar = () => {
   );
 };
 
-export default AnnouncementBar;
+export default memo(AnnouncementBar);

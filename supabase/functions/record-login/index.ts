@@ -65,32 +65,23 @@ Deno.serve(async (req) => {
     });
 
     // Suspicious login detection
-    // 1. Check for new IP
-    const { data: prevIps } = await adminClient
-      .from("admin_login_history")
-      .select("ip_address")
-      .eq("admin_id", user.id)
-      .eq("success", true)
-      .neq("ip_address", ip)
-      .limit(1);
-
+    // 1. Check if this IP was seen before this login (exclude the row we just inserted)
     const { count: totalLogins } = await adminClient
       .from("admin_login_history")
       .select("id", { count: "exact", head: true })
       .eq("admin_id", user.id)
       .eq("success", true);
 
-    const isNewIp = (totalLogins ?? 0) > 1 && (!prevIps || prevIps.length === 0 || 
-      // Actually check if THIS ip has been seen before
-      await (async () => {
-        const { count } = await adminClient
-          .from("admin_login_history")
-          .select("id", { count: "exact", head: true })
-          .eq("admin_id", user.id)
-          .eq("ip_address", ip)
-          .eq("success", true);
-        return (count ?? 0) <= 1; // only the one we just inserted
-      })());
+    const { count: seenIpCount } = await adminClient
+      .from("admin_login_history")
+      .select("id", { count: "exact", head: true })
+      .eq("admin_id", user.id)
+      .eq("ip_address", ip)
+      .eq("success", true);
+
+    // isNewIp: user has more than 1 successful login total, and this IP has only
+    // appeared once (the row we just inserted — i.e., never seen before).
+    const isNewIp = (totalLogins ?? 0) > 1 && (seenIpCount ?? 0) <= 1;
 
     // 2. Check for new device
     let isNewDevice = false;

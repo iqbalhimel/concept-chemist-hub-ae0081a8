@@ -16,17 +16,19 @@ const generateToken = (): string => {
 };
 
 export const CsrfProvider = ({ children }: { children: ReactNode }) => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const [token, setToken] = useState<string | null>(null);
 
-  // Generate a new token when admin session starts
+  // Generate a new token as soon as a user session exists.
+  // isAdmin is resolved asynchronously; waiting for it causes a window where
+  // the token is null and valid mutations get blocked with a CSRF error.
   useEffect(() => {
-    if (user && isAdmin) {
+    if (user) {
       setToken(generateToken());
     } else {
       setToken(null);
     }
-  }, [user, isAdmin]);
+  }, [user]);
 
   const validateToken = useCallback(
     (submittedToken: string): boolean => {

@@ -16,6 +16,7 @@ interface LoginEntry {
   device_info: string | null;
   location: string | null;
   success: boolean;
+  admin_name?: string;
 }
 
 const AdminLoginHistory = () => {
@@ -33,7 +34,20 @@ const AdminLoginHistory = () => {
       .select("*")
       .order("login_time", { ascending: false })
       .limit(500);
-    setEntries((data as LoginEntry[]) || []);
+    const entries = (data as LoginEntry[]) || [];
+
+    if (entries.length > 0) {
+      const ids = [...new Set(entries.map(e => e.admin_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, name")
+        .in("user_id", ids);
+      const nameMap: Record<string, string> = {};
+      profiles?.forEach(p => { nameMap[p.user_id] = p.name || ""; });
+      setEntries(entries.map(e => ({ ...e, admin_name: nameMap[e.admin_id] || "" })));
+    } else {
+      setEntries(entries);
+    }
     setLoading(false);
   };
 
@@ -48,7 +62,8 @@ const AdminLoginHistory = () => {
         return (
           (e.ip_address || "").toLowerCase().includes(q) ||
           (e.device_info || "").toLowerCase().includes(q) ||
-          e.admin_id.toLowerCase().includes(q)
+          e.admin_id.toLowerCase().includes(q) ||
+          (e.admin_name || "").toLowerCase().includes(q)
         );
       }
       return true;
@@ -136,8 +151,10 @@ const AdminLoginHistory = () => {
                             </span>
                           )}
                         </TableCell>
-                        <TableCell className="text-xs font-mono text-muted-foreground">
-                          {e.admin_id.slice(0, 8)}...
+                        <TableCell className="text-xs text-muted-foreground">
+                          <span className="font-medium text-foreground">{e.admin_name || "Unknown"}</span>
+                          <br />
+                          <span className="font-mono text-[10px]">{e.admin_id.slice(0, 8)}…</span>
                         </TableCell>
                         <TableCell className="text-xs">{e.ip_address || "—"}</TableCell>
                         <TableCell className="text-xs max-w-[200px] truncate">{e.device_info || "—"}</TableCell>
