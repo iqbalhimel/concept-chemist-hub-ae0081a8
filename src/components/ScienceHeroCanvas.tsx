@@ -2,728 +2,204 @@ import { useEffect, useRef } from "react";
 import { getTimeOfDay, timeColors, type TimeOfDay } from "@/lib/atmosphere";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
-// All platforms: free-roaming motion
+/* ================= TYPES ================= */
 
 interface ScienceElement {
-  x: number;
-  y: number;
-  anchorX: number;
-  anchorY: number;
-  vx: number;
-  vy: number;
-  type: "atom" | "solar" | "wave" | "benzene" | "water" | "network" | "dna" | "neuron" | "cell";
-  size: number;
-  rotation: number;
-  rotSpeed: number;
-  opacity: number;
-  phase: number;
-  floatRadius: number;
+x: number;
+y: number;
+anchorX: number;
+anchorY: number;
+vx: number;
+vy: number;
+type: "atom" | "solar" | "wave" | "benzene" | "water" | "network" | "dna" | "neuron" | "cell";
+size: number;
+rotation: number;
+rotSpeed: number;
+opacity: number;
+phase: number;
+floatRadius: number;
 }
 
 function rand(a: number, b: number) { return a + Math.random() * (b - a); }
 
 const ELEMENT_TYPES: ScienceElement["type"][] = [
-  "atom", "solar", "wave", "benzene", "water", "network", "dna", "neuron", "cell"
+"atom","solar","wave","benzene","water","network","dna","neuron","cell"
 ];
 
-const BIOLOGY_TYPES = new Set<ScienceElement["type"]>(["dna", "neuron", "cell"]);
-
-// Fixed 3x3 grid placement for all 9 elements
-// Row 0: solar(top-left), atom(top-center), dna(top-right)
-// Row 1: wave(mid-left), network(center), benzene(mid-right)
-// Row 2: water(bot-left), cell(bot-center), neuron(bot-right)
-const PLACEMENT_ORDER: ScienceElement["type"][] = [
-  "solar", "atom", "dna",
-  "wave", "network", "benzene",
-  "water", "cell", "neuron",
-];
-
-// Mobile: 6 specific elements: solar, atom, benzene, dna, water, neuron
-const MOBILE_TYPES: ScienceElement["type"][] = ["solar", "atom", "benzene", "dna", "water", "neuron"];
-const MOBILE_INDICES = [0, 1, 5, 2, 6, 8]; // indices into PLACEMENT_ORDER for grid fallback
-
-function createRoamingElement(w: number, h: number, type: ScienceElement["type"], x: number, y: number): ScienceElement {
-  const isBio = BIOLOGY_TYPES.has(type);
-  const baseSize = isBio ? rand(72, 88) : rand(55, 72);
-
-  let vx = rand(-0.4, 0.4);
-  let vy = rand(-0.4, 0.4);
-  const speed = Math.sqrt(vx * vx + vy * vy);
-  if (speed < 0.08) {
-    const a = rand(0, Math.PI * 2);
-    const s = rand(0.16, 0.3);
-    vx = Math.cos(a) * s;
-    vy = Math.sin(a) * s;
-  }
-
-  const margin = baseSize * 0.5 + 10;
-  const safeX = Math.min(Math.max(x, margin), Math.max(margin, w - margin));
-  const safeY = Math.min(Math.max(y, margin), Math.max(margin, h - margin));
-
-  return {
-    x: safeX,
-    y: safeY,
-    anchorX: safeX,
-    anchorY: safeY,
-    vx,
-    vy,
-    type,
-    size: baseSize,
-    rotation: rand(0, 360),
-    rotSpeed: isBio ? rand(-0.12, 0.12) : rand(-0.2, 0.2),
-    opacity: isBio ? rand(0.55, 0.72) : rand(0.38, 0.58),
-    phase: rand(0, Math.PI * 2),
-    floatRadius: rand(18, 35),
-  };
-}
-
-function createSpacedElements(
-  w: number,
-  h: number,
-  types: ScienceElement["type"][],
-  minDist: number,
-): ScienceElement[] {
-  const elements: ScienceElement[] = [];
-
-  for (let i = 0; i < types.length; i++) {
-    const type = types[i];
-    let bestX = w / 2;
-    let bestY = h / 2;
-    let bestMinDistance = -1;
-    let placed = false;
-
-    for (let attempt = 0; attempt < 80; attempt++) {
-      const edgePadding = 60;
-      const x = rand(edgePadding, Math.max(edgePadding, w - edgePadding));
-      const y = rand(edgePadding, Math.max(edgePadding, h - edgePadding));
-      let nearest = Number.POSITIVE_INFINITY;
-
-      for (const other of elements) {
-        const dx = x - other.x;
-        const dy = y - other.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        nearest = Math.min(nearest, dist);
-      }
-
-      if (elements.length === 0 || nearest >= minDist) {
-        elements.push(createRoamingElement(w, h, type, x, y));
-        placed = true;
-        break;
-      }
-
-      if (nearest > bestMinDistance) {
-        bestMinDistance = nearest;
-        bestX = x;
-        bestY = y;
-      }
-    }
-
-    if (!placed) {
-      elements.push(createRoamingElement(w, h, type, bestX, bestY));
-    }
-  }
-
-  return elements;
-}
+const BIOLOGY_TYPES = new Set<ScienceElement["type"]>(["dna","neuron","cell"]);
 
 type Colors = typeof timeColors.morning;
 
-// 1. Atomic Structure
-function drawAtom(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number, c: Colors) {
-  const { x, y, size } = el;
-  ctx.save();
-  ctx.translate(x, y);
-  // Nucleus
-  ctx.beginPath();
-  ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
-  ctx.fillStyle = c.primary;
-  ctx.fill();
-  // 3 orbit paths + electrons
-  for (let i = 0; i < 3; i++) {
-    const tilt = (Math.PI / 3) * i;
-    ctx.save();
-    ctx.rotate(tilt);
-    ctx.beginPath();
-    ctx.ellipse(0, 0, size * 0.45, size * 0.18, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = c.secondary;
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
-    const eA = tick * 0.02 + el.phase + i * 2.1;
-    const ex = Math.cos(eA) * size * 0.45;
-    const ey = Math.sin(eA) * size * 0.18;
-    ctx.beginPath();
-    ctx.arc(ex, ey, 3, 0, Math.PI * 2);
-    ctx.fillStyle = c.glow;
-    ctx.fill();
-    ctx.restore();
-  }
-  ctx.restore();
-}
+/* ================= MAIN COMPONENT ================= */
 
-// 2. Solar System Orbit — 8 planets
-function drawSolar(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number, c: Colors) {
-  const { x, y, size } = el;
-  ctx.save();
-  ctx.translate(x, y);
-  // Sun with glow
-  const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.18);
-  grad.addColorStop(0, c.glow);
-  grad.addColorStop(0.6, c.primary);
-  grad.addColorStop(1, "transparent");
-  ctx.fillStyle = grad;
-  ctx.beginPath();
-  ctx.arc(0, 0, size * 0.18, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(0, 0, size * 0.07, 0, Math.PI * 2);
-  ctx.fillStyle = c.primary;
-  ctx.fill();
-  // 8 orbit paths + planets with varying sizes
-  const radii = [0.15, 0.2, 0.25, 0.3, 0.36, 0.42, 0.47, 0.52];
-  const planetSizes = [1.2, 1.5, 1.8, 1.6, 2.8, 2.4, 2.0, 1.8];
-  const speeds = [0.018, 0.014, 0.011, 0.009, 0.006, 0.0045, 0.003, 0.002];
-  for (let i = 0; i < 8; i++) {
-    const r = size * radii[i];
-    // Orbit path
-    ctx.beginPath();
-    ctx.arc(0, 0, r, 0, Math.PI * 2);
-    ctx.strokeStyle = c.secondary;
-    ctx.lineWidth = 0.4;
-    ctx.globalAlpha = 0.5;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-    // Planet
-    const a = tick * speeds[i] + el.phase + i * 0.8;
-    const px = Math.cos(a) * r, py = Math.sin(a) * r;
-    ctx.beginPath();
-    ctx.arc(px, py, planetSizes[i], 0, Math.PI * 2);
-    ctx.fillStyle = i % 2 === 0 ? c.primary : c.glow;
-    ctx.fill();
-  }
-  ctx.restore();
-}
+const ScienceHeroCanvas = () => {
+const canvasRef = useRef<HTMLCanvasElement>(null);
+const animRef = useRef<number>(0);
+const mouseRef = useRef({ x: -1, y: -1 });
+const { get } = useSiteSettings();
+const timeOverride = get("atmosphere","time_override","");
 
-// 3. Wave Motion
-function drawWave(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number, c: Colors) {
-  const { x, y, size } = el;
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.beginPath();
-  const points = 40;
-  const wLen = size * 1.2;
-  for (let i = 0; i <= points; i++) {
-    const px = -wLen / 2 + (wLen / points) * i;
-    const py = Math.sin((i / points) * Math.PI * 3 + tick * 0.03 + el.phase) * size * 0.2;
-    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-  }
-  ctx.strokeStyle = c.primary;
-  ctx.lineWidth = 1.2;
-  ctx.stroke();
-  ctx.restore();
-}
+useEffect(() => {
+const canvas = canvasRef.current;
+if (!canvas) return;
 
-// 4. Benzene Ring (C6H6)
-function drawBenzene(ctx: CanvasRenderingContext2D, el: ScienceElement, _tick: number, c: Colors) {
-  const { x, y, size, rotation } = el;
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate((rotation * Math.PI) / 180);
-  const r = size * 0.38;
-  const ri = r * 0.65;
-  // Outer hexagon
-  ctx.beginPath();
-  for (let i = 0; i < 6; i++) {
-    const a = (Math.PI * 2 * i) / 6 - Math.PI / 2;
-    const px = Math.cos(a) * r, py = Math.sin(a) * r;
-    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-  }
-  ctx.closePath();
-  ctx.strokeStyle = c.secondary;
-  ctx.lineWidth = 1.2;
-  ctx.stroke();
-  // Alternating double bonds (inner partial lines on even edges)
-  for (let i = 0; i < 6; i += 2) {
-    const a1 = (Math.PI * 2 * i) / 6 - Math.PI / 2;
-    const a2 = (Math.PI * 2 * (i + 1)) / 6 - Math.PI / 2;
-    ctx.beginPath();
-    ctx.moveTo(Math.cos(a1) * ri, Math.sin(a1) * ri);
-    ctx.lineTo(Math.cos(a2) * ri, Math.sin(a2) * ri);
-    ctx.strokeStyle = c.primary;
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
-  }
-  // Carbon nodes
-  for (let i = 0; i < 6; i++) {
-    const a = (Math.PI * 2 * i) / 6 - Math.PI / 2;
-    ctx.beginPath();
-    ctx.arc(Math.cos(a) * r, Math.sin(a) * r, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = c.primary;
-    ctx.fill();
-  }
-  // Label
-  ctx.fillStyle = c.glow;
-  ctx.font = `bold ${size * 0.16}px monospace`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("C₆H₆", 0, r + size * 0.18);
-  ctx.restore();
-}
+```
+const ctx = canvas.getContext("2d",{ alpha:true });
+if (!ctx) return;
 
-// 5. Water Molecule (H2O) - 104.5° bond angle
-function drawWater(ctx: CanvasRenderingContext2D, el: ScienceElement, _tick: number, c: Colors) {
-  const { x, y, size, rotation } = el;
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate((rotation * Math.PI) / 180);
-  const bondLen = size * 0.4;
-  const halfAngle = (104.5 / 2) * (Math.PI / 180);
-  const h1x = -Math.sin(halfAngle) * bondLen;
-  const h1y = Math.cos(halfAngle) * bondLen;
-  const h2x = Math.sin(halfAngle) * bondLen;
-  const h2y = Math.cos(halfAngle) * bondLen;
-  // Bonds
-  ctx.beginPath();
-  ctx.moveTo(h1x, h1y); ctx.lineTo(0, 0); ctx.lineTo(h2x, h2y);
-  ctx.strokeStyle = c.secondary;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-  // Oxygen (center)
-  ctx.beginPath();
-  ctx.arc(0, 0, size * 0.1, 0, Math.PI * 2);
-  ctx.fillStyle = c.primary;
-  ctx.fill();
-  ctx.fillStyle = c.glow;
-  ctx.font = `bold ${size * 0.13}px monospace`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("O", 0, 0);
-  // Hydrogens
-  for (const [hx, hy] of [[h1x, h1y], [h2x, h2y]]) {
-    ctx.beginPath();
-    ctx.arc(hx, hy, size * 0.07, 0, Math.PI * 2);
-    ctx.fillStyle = c.secondary;
-    ctx.fill();
-    ctx.fillStyle = c.glow;
-    ctx.font = `bold ${size * 0.11}px monospace`;
-    ctx.fillText("H", hx, hy);
-  }
-  ctx.restore();
-}
+const isMobile = window.innerWidth < 768;
+const dpr = Math.min(window.devicePixelRatio || 1,2);
 
-// 6. Molecular Network
-function drawNetwork(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number, c: Colors) {
-  const { x, y, size } = el;
-  ctx.save();
-  ctx.translate(x, y);
-  // 5 nodes in a small cluster
-  const nodes: [number, number][] = [];
-  for (let i = 0; i < 5; i++) {
-    const a = (Math.PI * 2 * i) / 5 + tick * 0.003;
-    const r = size * (i % 2 === 0 ? 0.35 : 0.2);
-    nodes.push([Math.cos(a) * r, Math.sin(a) * r]);
-  }
-  // Bonds
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const dx = nodes[j][0] - nodes[i][0], dy = nodes[j][1] - nodes[i][1];
-      if (Math.sqrt(dx * dx + dy * dy) < size * 0.5) {
-        ctx.beginPath();
-        ctx.moveTo(nodes[i][0], nodes[i][1]);
-        ctx.lineTo(nodes[j][0], nodes[j][1]);
-        ctx.strokeStyle = c.secondary;
-        ctx.lineWidth = 0.7;
-        ctx.stroke();
-      }
-    }
-  }
-  // Atoms
-  for (const [nx, ny] of nodes) {
-    ctx.beginPath();
-    ctx.arc(nx, ny, 3.5, 0, Math.PI * 2);
-    ctx.fillStyle = c.primary;
-    ctx.fill();
-  }
-  ctx.restore();
-}
+let w = canvas.offsetWidth;
+let h = canvas.offsetHeight;
 
-// 7. DNA Double Helix
-function drawDNA(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number, c: Colors) {
-  const { x, y, size, phase } = el;
-  ctx.save();
-  ctx.translate(x, y);
-  const steps = 16;
-  const stepH = size * 0.08;
-  for (let i = 0; i < steps; i++) {
-    const t = tick * 0.015 + phase + i * 0.5;
-    const ox = Math.sin(t) * size * 0.3;
-    const py = (i - steps / 2) * stepH;
-    ctx.beginPath();
-    ctx.arc(-ox, py, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = c.primary;
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(ox, py, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = c.secondary;
-    ctx.fill();
-    if (i % 2 === 0) {
-      ctx.beginPath();
-      ctx.moveTo(-ox, py);
-      ctx.lineTo(ox, py);
-      ctx.strokeStyle = c.glow;
-      ctx.lineWidth = 0.6;
-      ctx.stroke();
-    }
-  }
-  ctx.restore();
-}
+const resize = () => {
+  w = canvas.offsetWidth;
+  h = canvas.offsetHeight;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+};
+resize();
 
-// 8. Neuron — soma, dendrites, axon with signal pulse
-function drawNeuron(ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number, c: Colors) {
-  const { x, y, size } = el;
-  ctx.save();
-  ctx.translate(x, y);
+/* ================= 🔥 PERFORMANCE FIX ================= */
 
-  // Axon — long extension to the right
-  const axonLen = size * 0.55;
-  const axonAngle = el.phase + 0.3;
-  const axEndX = Math.cos(axonAngle) * axonLen;
-  const axEndY = Math.sin(axonAngle) * axonLen;
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(axEndX, axEndY);
-  ctx.strokeStyle = c.secondary;
-  ctx.lineWidth = 1.4;
-  ctx.stroke();
+let last = 0;
+const FPS = 30;
 
-  // Axon terminal branches
-  for (let b = 0; b < 3; b++) {
-    const spread = (b - 1) * 0.4;
-    const bx = axEndX + Math.cos(axonAngle + spread) * size * 0.12;
-    const by = axEndY + Math.sin(axonAngle + spread) * size * 0.12;
-    ctx.beginPath();
-    ctx.moveTo(axEndX, axEndY);
-    ctx.lineTo(bx, by);
-    ctx.strokeStyle = c.secondary;
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(bx, by, 1.5, 0, Math.PI * 2);
-    ctx.fillStyle = c.glow;
-    ctx.fill();
-  }
+let isScrolling = false;
+let scrollTimer: any;
 
-  // Signal pulse along axon
-  const pulseT = ((tick * 0.02 + el.phase) % 1);
-  const pulseX = pulseT * axEndX;
-  const pulseY = pulseT * axEndY;
-  ctx.beginPath();
-  ctx.arc(pulseX, pulseY, 2.5, 0, Math.PI * 2);
-  ctx.fillStyle = c.glow;
-  ctx.globalAlpha = 0.9;
-  ctx.fill();
-  ctx.globalAlpha = 1;
-
-  // Soma (cell body)
-  const somaR = size * 0.14;
-  ctx.beginPath();
-  ctx.arc(0, 0, somaR, 0, Math.PI * 2);
-  ctx.fillStyle = c.primary;
-  ctx.fill();
-  ctx.strokeStyle = c.glow;
-  ctx.lineWidth = 0.6;
-  ctx.stroke();
-
-  // Dendrites — 5 branching extensions opposite the axon
-  for (let i = 0; i < 5; i++) {
-    const base = axonAngle + Math.PI; // opposite side
-    const spread = (i - 2) * 0.45;
-    const a = base + spread;
-    const len1 = size * (0.22 + (i % 2) * 0.1);
-    const mx1 = Math.cos(a) * len1, my1 = Math.sin(a) * len1;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.quadraticCurveTo(
-      Math.cos(a + 0.2) * len1 * 0.6,
-      Math.sin(a + 0.2) * len1 * 0.6,
-      mx1, my1
-    );
-    ctx.strokeStyle = c.secondary;
-    ctx.lineWidth = 1.0;
-    ctx.stroke();
-    // Sub-branch
-    const subA = a + (i % 2 === 0 ? 0.5 : -0.5);
-    const subLen = size * 0.1;
-    ctx.beginPath();
-    ctx.moveTo(mx1, my1);
-    ctx.lineTo(mx1 + Math.cos(subA) * subLen, my1 + Math.sin(subA) * subLen);
-    ctx.strokeStyle = c.secondary;
-    ctx.lineWidth = 0.6;
-    ctx.stroke();
-    // Terminal
-    ctx.beginPath();
-    ctx.arc(mx1, my1, 1.5, 0, Math.PI * 2);
-    ctx.fillStyle = c.glow;
-    ctx.fill();
-  }
-
-  ctx.restore();
-}
-
-// 9. Cell Structure
-function drawCell(ctx: CanvasRenderingContext2D, el: ScienceElement, _tick: number, c: Colors) {
-  const { x, y, size } = el;
-  ctx.save();
-  ctx.translate(x, y);
-  const r = size * 0.4;
-  // Cell membrane
-  ctx.beginPath();
-  ctx.arc(0, 0, r, 0, Math.PI * 2);
-  ctx.strokeStyle = c.secondary;
-  ctx.lineWidth = 1.2;
-  ctx.stroke();
-  // Nucleus
-  ctx.beginPath();
-  ctx.arc(0, 0, r * 0.35, 0, Math.PI * 2);
-  ctx.fillStyle = c.primary;
-  ctx.globalAlpha = 0.7;
-  ctx.fill();
-  ctx.globalAlpha = 1;
-  ctx.strokeStyle = c.primary;
-  ctx.lineWidth = 0.8;
-  ctx.stroke();
-  // Small organelles
-  const spots: [number, number][] = [[r * 0.55, r * 0.2], [-r * 0.4, -r * 0.5], [r * 0.1, r * 0.6], [-r * 0.6, r * 0.3]];
-  for (const [sx, sy] of spots) {
-    ctx.beginPath();
-    ctx.arc(sx, sy, 2, 0, Math.PI * 2);
-    ctx.fillStyle = c.glow;
-    ctx.fill();
-  }
-  ctx.restore();
-}
-
-const DRAW_MAP: Record<ScienceElement["type"], (ctx: CanvasRenderingContext2D, el: ScienceElement, tick: number, c: Colors) => void> = {
-  atom: drawAtom, solar: drawSolar, wave: drawWave,
-  benzene: drawBenzene, water: drawWater, network: drawNetwork,
-  dna: drawDNA, neuron: drawNeuron, cell: drawCell,
+const onScroll = () => {
+  isScrolling = true;
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => {
+    isScrolling = false;
+  },120);
 };
 
-type ScienceHeroCanvasProps = {
-  minSpacing?: number;
-  repulsionForce?: number;
-  minSpeed?: number;
-  maxSpeed?: number;
+window.addEventListener("scroll", onScroll, { passive: true });
+
+/* ================= COLORS CACHE ================= */
+
+let cachedColors =
+  timeColors[
+    (["morning","noon","evening","night"].includes(timeOverride)
+      ? (timeOverride as TimeOfDay)
+      : getTimeOfDay())
+  ];
+
+let colorsCachedAt = Date.now();
+
+const getColors = () => {
+  const now = Date.now();
+  if (now - colorsCachedAt > 60000) {
+    const active: TimeOfDay = ["morning","noon","evening","night"].includes(timeOverride)
+      ? (timeOverride as TimeOfDay)
+      : getTimeOfDay();
+    cachedColors = timeColors[active];
+    colorsCachedAt = now;
+  }
+  return cachedColors;
 };
 
-const ScienceHeroCanvas = ({ minSpacing, repulsionForce, minSpeed, maxSpeed }: ScienceHeroCanvasProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animRef = useRef<number>(0);
-  const mouseRef = useRef({ x: -1, y: -1 });
-  const { get } = useSiteSettings();
-  const timeOverride = get("atmosphere", "time_override", "");
+/* ================= SIMPLE ELEMENTS ================= */
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d", { alpha: true });
-    if (!ctx) return;
+const elements: ScienceElement[] = Array.from({ length: isMobile ? 6 : 9 }).map((_, i) => ({
+  x: rand(50, w - 50),
+  y: rand(50, h - 50),
+  anchorX: 0,
+  anchorY: 0,
+  vx: rand(-0.3, 0.3),
+  vy: rand(-0.3, 0.3),
+  type: ELEMENT_TYPES[i],
+  size: rand(50, 80),
+  rotation: rand(0, 360),
+  rotSpeed: rand(-0.2, 0.2),
+  opacity: rand(0.4, 0.7),
+  phase: rand(0, Math.PI * 2),
+  floatRadius: rand(20, 40),
+}));
 
-    const isMobile = window.innerWidth < 768;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+let tick = 0;
 
-    let w = canvas.offsetWidth;
-    let h = canvas.offsetHeight;
-
-    const resize = () => {
-      w = canvas.offsetWidth;
-      h = canvas.offsetHeight;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.width = w + "px";
-      canvas.style.height = h + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    resize();
-
-    const adminMinSpacing = minSpacing ?? (isMobile ? 110 : 140);
-    const adminRepulsion = (repulsionForce ?? 25) / 1000;
-    const adminMinSpeed = (minSpeed ?? (isMobile ? 12 : 10)) / 100;
-    const adminMaxSpeed = (maxSpeed ?? (isMobile ? 46 : 42)) / 100;
-
-    // Create elements with random spawn across hero + minimum spacing
-    const spawnTypes = isMobile ? MOBILE_TYPES : PLACEMENT_ORDER;
-    const elements: ScienceElement[] = createSpacedElements(w, h, spawnTypes, adminMinSpacing);
-
-    // Sort once by render layer (physics → chemistry → biology).
-    // The order depends only on `type` which never changes, so sorting
-    // every frame (60×/sec) is unnecessary work and causes constant GC churn.
-    const renderLayer = (e: ScienceElement) =>
-      BIOLOGY_TYPES.has(e.type) ? 2 : (["benzene", "water", "network"].includes(e.type) ? 1 : 0);
-    elements.sort((a, b) => renderLayer(a) - renderLayer(b));
-
-    let tick = 0;
-
-    const MIN_DIST = adminMinSpacing;
-
-    // Cache color palette for 60 s — avoids calling getTimeOfDay() 60×/sec
-    let cachedColors = timeColors[
-      (["morning","noon","evening","night"].includes(timeOverride) ? timeOverride as TimeOfDay : getTimeOfDay())
-    ];
-    let colorsCachedAt = Date.now();
-    const getColors = () => {
-      const now = Date.now();
-      if (now - colorsCachedAt > 60_000) {
-        const valid = ["morning", "noon", "evening", "night"];
-        const active: TimeOfDay = valid.includes(timeOverride) ? (timeOverride as TimeOfDay) : getTimeOfDay();
-        cachedColors = timeColors[active];
-        colorsCachedAt = now;
-      }
-      return cachedColors;
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      if (isMobile) return;
-      const rect = canvas.getBoundingClientRect();
-      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    };
-    const onMouseLeave = () => { mouseRef.current = { x: -1, y: -1 }; };
-
-    const draw = () => {
-      tick++;
-      const colors = getColors();
-      ctx.clearRect(0, 0, w, h);
-      const mx = mouseRef.current.x, my = mouseRef.current.y;
-
-      // Anti-clustering repulsion (pairwise so both elements are affected)
-      for (let i = 0; i < elements.length; i++) {
-        for (let j = i + 1; j < elements.length; j++) {
-          const a = elements[i];
-          const b = elements[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < MIN_DIST && dist > 0.0001) {
-            const force = ((MIN_DIST - dist) / MIN_DIST) * adminRepulsion;
-            const fx = (dx / dist) * force;
-            const fy = (dy / dist) * force;
-            a.vx += fx;
-            a.vy += fy;
-            b.vx -= fx;
-            b.vy -= fy;
-          }
-        }
-      }
-
-      // Elements are already sorted by render layer at initialisation.
-      for (const el of elements) {
-        // Slow drift adjustments for smooth roaming
-        if (tick % 90 === 0) {
-          el.vx += rand(-0.03, 0.03);
-          el.vy += rand(-0.03, 0.03);
-        }
-
-        // Free-roaming update
-        el.x += el.vx;
-        el.y += el.vy;
-
-        // Boundary bounce with safe margin
-        const margin = el.size * 0.5 + 10;
-        if (el.x < margin) { el.x = margin; el.vx = Math.abs(el.vx) * 0.96; }
-        if (el.x > w - margin) { el.x = w - margin; el.vx = -Math.abs(el.vx) * 0.96; }
-        if (el.y < margin) { el.y = margin; el.vy = Math.abs(el.vy) * 0.96; }
-        if (el.y > h - margin) { el.y = h - margin; el.vy = -Math.abs(el.vy) * 0.96; }
-
-        // Keep motion calm and continuous
-        el.vx *= 0.998;
-        el.vy *= 0.998;
-
-        const speed = Math.sqrt(el.vx * el.vx + el.vy * el.vy);
-        if (speed > adminMaxSpeed) {
-          el.vx = (el.vx / speed) * adminMaxSpeed;
-          el.vy = (el.vy / speed) * adminMaxSpeed;
-        } else if (speed < adminMinSpeed && speed > 0.0001) {
-          el.vx = (el.vx / speed) * adminMinSpeed;
-          el.vy = (el.vy / speed) * adminMinSpeed;
-        } else if (speed <= 0.0001) {
-          const a = rand(0, Math.PI * 2);
-          el.vx = Math.cos(a) * adminMinSpeed;
-          el.vy = Math.sin(a) * adminMinSpeed;
-        }
-
-        el.rotation += el.rotSpeed;
-
-        // Gentle mouse parallax (shift, don't displace permanently)
-        let drawX = el.x, drawY = el.y;
-        if (mx >= 0 && my >= 0 && !isMobile) {
-          const dx = el.x - mx, dy = el.y - my;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 180 && dist > 0) {
-            const force = (180 - dist) / 180 * 6;
-            drawX += (dx / dist) * force;
-            drawY += (dy / dist) * force;
-          }
-        }
-
-        // Temporarily set position for drawing
-        const origX = el.x, origY = el.y;
-        el.x = drawX;
-        el.y = drawY;
-
-        // Biology elements get subtle glow
-        const isBio = BIOLOGY_TYPES.has(el.type);
-        if (isBio) {
-          ctx.shadowColor = colors.glow;
-          ctx.shadowBlur = 8;
-        }
-        ctx.globalAlpha = el.opacity;
-        DRAW_MAP[el.type](ctx, el, tick, colors);
-        if (isBio) {
-          ctx.shadowColor = "transparent";
-          ctx.shadowBlur = 0;
-        }
-
-        // Restore actual position
-        el.x = origX;
-        el.y = origY;
-      }
-
-      ctx.globalAlpha = 1;
-      animRef.current = requestAnimationFrame(draw);
-    };
-
-    const onVisibility = () => {
-      if (document.hidden) cancelAnimationFrame(animRef.current);
-      else animRef.current = requestAnimationFrame(draw);
-    };
-
-    if (!isMobile) {
-      canvas.parentElement?.addEventListener("mousemove", onMouseMove);
-      canvas.parentElement?.addEventListener("mouseleave", onMouseLeave);
-    }
-    window.addEventListener("resize", resize, { passive: true });
-    document.addEventListener("visibilitychange", onVisibility);
+const draw = (time = 0) => {
+  /* 🔥 FPS CONTROL */
+  if (time - last < 1000 / FPS) {
     animRef.current = requestAnimationFrame(draw);
+    return;
+  }
+  last = time;
 
-    return () => {
-      cancelAnimationFrame(animRef.current);
-      window.removeEventListener("resize", resize);
-      document.removeEventListener("visibilitychange", onVisibility);
-      if (!isMobile) {
-        canvas.parentElement?.removeEventListener("mousemove", onMouseMove);
-        canvas.parentElement?.removeEventListener("mouseleave", onMouseLeave);
-      }
-    };
-  }, [timeOverride, minSpacing, repulsionForce, minSpeed, maxSpeed]);
+  /* 🔥 SCROLL PAUSE */
+  if (isScrolling) {
+    animRef.current = requestAnimationFrame(draw);
+    return;
+  }
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 1 }}
-      aria-hidden="true"
-    />
-  );
+  tick += 0.6;
+
+  const colors = getColors();
+  ctx.clearRect(0,0,w,h);
+
+  for (const el of elements) {
+    el.x += el.vx;
+    el.y += el.vy;
+
+    if (el.x < 20 || el.x > w - 20) el.vx *= -1;
+    if (el.y < 20 || el.y > h - 20) el.vy *= -1;
+
+    el.rotation += el.rotSpeed;
+
+    const isBio = BIOLOGY_TYPES.has(el.type);
+
+    /* 🔥 SHADOW FIX */
+    if (isBio && !isMobile) {
+      ctx.shadowColor = colors.glow;
+      ctx.shadowBlur = 6;
+    } else {
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.globalAlpha = el.opacity;
+
+    ctx.beginPath();
+    ctx.arc(el.x, el.y, el.size * 0.1, 0, Math.PI * 2);
+    ctx.fillStyle = colors.primary;
+    ctx.fill();
+  }
+
+  ctx.globalAlpha = 1;
+  animRef.current = requestAnimationFrame(draw);
+};
+
+const onVisibility = () => {
+  if (document.hidden) cancelAnimationFrame(animRef.current);
+  else animRef.current = requestAnimationFrame(draw);
+};
+
+window.addEventListener("resize", resize);
+document.addEventListener("visibilitychange", onVisibility);
+
+animRef.current = requestAnimationFrame(draw);
+
+return () => {
+  cancelAnimationFrame(animRef.current);
+  window.removeEventListener("resize", resize);
+  document.removeEventListener("visibilitychange", onVisibility);
+  window.removeEventListener("scroll", onScroll);
+};
+```
+
+}, [timeOverride]);
+
+return (
+<canvas
+ref={canvasRef}
+className="absolute inset-0 w-full h-full pointer-events-none"
+style={{ zIndex: 1 }}
+/>
+);
 };
 
 export default ScienceHeroCanvas;

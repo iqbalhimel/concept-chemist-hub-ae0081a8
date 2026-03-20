@@ -413,7 +413,7 @@
   display: inline-block;
   white-space: nowrap;
   will-change: transform;
-  animation: announcement-slide 18s linear infinite;
+  animation: announcement-slide 30s linear infinite;
 }
 @media (hover: hover) {
   .announcement-slide:hover {
@@ -442,5 +442,36 @@ html.reduce-motion .animate-bounce {
   html.reduce-motion .atmosphere-layer,
   html.reduce-motion .parallax-effect {
     display: none !important;
+  }
+}
+
+/* 🔥 SCROLL PERFORMANCE OPTIMIZATION */
+
+/* 1. Section rendering isolation (BIGGEST gain) */
+section {
+  content-visibility: auto;
+  contain: layout paint;
+  contain-intrinsic-size: 1px 600px;
+}
+
+/* 2. Canvas GPU optimization */
+canvas {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* 3. Prevent heavy repaint on animations */
+.glass-card,
+.glass-card-hover,
+.hero-gradient,
+.bg-grid {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* 4. Reduce animation load on mobile */
+@media (max-width: 768px) {
+  .announcement-slide {
+    animation-duration: 30s !important;
   }
 }
