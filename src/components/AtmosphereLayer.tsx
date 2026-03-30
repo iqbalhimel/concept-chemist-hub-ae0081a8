@@ -26,8 +26,8 @@ const AtmosphereLayer = forwardRef<HTMLDivElement>(function AtmosphereLayer(_pro
   if (!enabled) return null;
 
   return (
-    <div ref={ref} className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden="true">
-      <div className="absolute inset-0 transition-all duration-[3000ms] ease-in-out" style={{ backgroundImage: gradient }} />
+    <div ref={ref} className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0, transform: "translateZ(0)" }} aria-hidden="true">
+      <div className="absolute inset-0" style={{ backgroundImage: gradient }} />
     </div>
   );
 });

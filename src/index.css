@@ -134,12 +134,13 @@
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: geometricPrecision;
+    text-rendering: optimizeLegibility;
   }
 
   html {
     scroll-behavior: smooth;
     overflow-x: hidden;
+    touch-action: pan-y;
   }
 
   /* Bangla text rendering improvements */
@@ -435,6 +436,34 @@ html.reduce-motion .animate-pulse,
 html.reduce-motion .animate-spin,
 html.reduce-motion .animate-bounce {
   animation: none !important;
+}
+
+/* ── Mobile Scroll Performance ─────────────────────────────────── */
+/* Non-Chrome mobile browsers (Firefox, UC, Via, etc.) run backdrop-filter
+   and smooth-scroll on the main thread, causing scroll jank. */
+@media (hover: none) and (pointer: coarse) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Remove backdrop-blur entirely on touch devices */
+  .glass-card,
+  .glass-card-hover {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background-color: hsl(var(--card) / 0.97) !important;
+  }
+
+  [data-brightness="light"] .glass-card,
+  [data-brightness="light"] .glass-card-hover {
+    background-color: hsl(var(--card)) !important;
+  }
+
+  /* GPU-promote fixed elements to their own compositor layer */
+  .fixed-layer {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
 }
 
 /* Auto reduce on mobile when setting is enabled */
